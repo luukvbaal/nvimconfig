@@ -372,8 +372,8 @@ require("packer").startup({
 					options = {
 						separator_style = "thin",
 						diagnostics = "nvim_lsp",
-						custom_filter = function(buf_number)
-							if vim.bo[buf_number].filetype ~= "nnn" then return true end
+						custom_filter = function(buf)
+							if vim.api.nvim_buf_get_option(buf, "filetype") ~= "nnn" then return true end
 						end,
 					},
 					highlights = {
@@ -479,6 +479,7 @@ require("packer").startup({
 				vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticWarn" })
 				vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
 				vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
+				vim.diagnostic.config( { virtual_text = false })
 				local function on_attach(_, bufnr)
 					local function bufmap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
 					local opts = { noremap = true, silent = true }
@@ -500,6 +501,7 @@ require("packer").startup({
 					bufmap("n", "<leader>q", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
 					bufmap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 					bufmap("v", "<leader>ca", "<cmd>lua vim.lsp.buf.range_code_action()<CR>", opts)
+					vim.cmd("autocmd CursorHold,CursorHoldI * lua vim.lsp.diagnostic.show_line_diagnostics({ focusable = false })")
 				end
 				local lspconfig = require("lspconfig")
 				local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -571,6 +573,7 @@ require("packer").startup({
 					auto_open = true,
 					auto_close = true,
 					auto_preview = false,
+					padding = false,
 					signs = {
 						error = "",
 						warning = "",
