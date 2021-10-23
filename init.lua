@@ -9,6 +9,8 @@ vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.hidden = true
 vim.opt.shortmess:append("sI")
+vim.opt.smartcase = true
+vim.opt.ignorecase = true
 vim.opt.relativenumber = true
 vim.opt.splitbelow = true
 vim.opt.splitright = true
@@ -74,6 +76,7 @@ require("packer").startup({
 				bg("PmenuSbar", colors.one_bg2)
 				bg("PmenuSel", colors.pmenu_bg)
 				bg("PmenuThumb", colors.nord_blue)
+				bg("NnnNormal", colors.darker_black)
 				fg("NvimInternalError", colors.red)
 				fg("StatusLineNC", colors.one_bg2 .. " gui=underline")
 				fg("StatusLine", colors.one_bg2 .. " gui=underline")
@@ -101,18 +104,34 @@ require("packer").startup({
 			"~/dev/nnn.nvim",
 			after = "nvim-base16.lua",
 			config = function()
+				local function open_in(files, command)
+					for i = 1, #files do
+						vim.cmd(command.." "..vim.fn.fnameescape(files[i]))
+					end
+				end
+				local function open_in_split(files) open_in(files, "split") end
+				local function open_in_vsplit(files) open_in(files, "vsplit") end
+				local function open_in_tab(files)
+					vim.cmd("tabnew")
+					open_in(files, "edit")
+					require("nnn").toggle("explorer")
+					vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n><C-w>l", true, true, true), "t", true)
+				end
+				local function deferprint(msg)
+					vim.defer_fn(function() print(msg) end, 0)
+				end
 				local function copy_to_clipboard(files)
 					files = table.concat(files, "\n")
 					vim.fn.setreg("+", files)
-					print(files:gsub("\n", ", ") .. "copied to register")
+					deferprint(files:gsub("\n", ", ").." copied to register")
 				end
 				local function cd_to_path(files)
 					local dir = files[1]:match(".*/")
 					local read = io.open(dir, "r")
 					if read ~= nil then
 						io.close(read)
-						vim.fn.execute("cd " .. dir)
-						print("working directory changed to: " .. dir)
+						vim.fn.execute("cd "..dir)
+						deferprint("working directory changed to: "..dir)
 					end
 				end
 				require("nnn").setup({
@@ -120,10 +139,11 @@ require("packer").startup({
 					picker = { cmd = "nnn", style = { border = "rounded" } },
 					replace_netrw = "picker",
 					windownav = "<C-l>",
+					tabs = true,
 					mappings = {
-						{ "<C-t>", "tabedit" },         -- open file(s) in tab
-						{ "<C-s>", "split" },           -- open file(s) in split
-						{ "<C-v>", "vsplit" },          -- open file(s) in vertical split
+						{ "<C-t>", open_in_tab },       -- open file(s) in tab
+						{ "<C-s>", open_in_split },     -- open file(s) in split
+						{ "<C-v>", open_in_vsplit },    -- open file(s) in vertical split
 						{ "<C-y>", copy_to_clipboard }, -- copy file(s) to clipboard
 						{ "<C-w>", cd_to_path },        -- cd to file directory
 					},
@@ -492,7 +512,7 @@ require("packer").startup({
 					bufmap("n", "<leader>wr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", opts)
 					bufmap("n", "<leader>wl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>", opts)
 					bufmap("n", "<leader>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
-					bufmap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
+					bufmap("n", "<leader>rn", "<cmd>lua rename()<CR>", opts)
 					bufmap("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
 					bufmap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
 					bufmap("n", "<leader>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
@@ -904,6 +924,38 @@ function _G.vimgrepprompt()
 	if pattern and pattern ~= "" then
 		local ok, _ = pcall(vim.cmd, "vimgrep /" .. pattern .. "/j %")
 		vim.schedule(function() print(ok and " " or "No results") end)
+	end
+end
+
+function _G.rename()
+	local map_opts = { noremap = true, silent = true }
+	local opts = {
+		style = 'minimal',
+		border = 'single',
+		relative = 'cursor',
+		width = 25,
+		height = 1,
+		row = 1,
+		col = 1,
+	}
+	local buf, win = vim.api.nvim_create_buf(false, true)
+	local cword = vim.fn.expand('<cword>')
+	vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
+
+	vim.api.nvim_open_win(buf, true, opts)
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, {cword})
+	vim.api.nvim_buf_set_keymap(buf, 'i', '<Esc>', '<cmd>stopinsert | q!<CR>', map_opts)
+	vim.api.nvim_buf_set_keymap(buf, 'n', '<Esc>', '<cmd>stopinsert | q!<CR>', map_opts)
+	vim.api.nvim_buf_set_keymap(buf, 'i', '<CR>', "<cmd>stopinsert | lua _rename()<CR>", map_opts)
+	vim.api.nvim_buf_set_keymap(buf, 'n', '<CR>', "<cmd>stopinsert | lua _rename()<CR>", map_opts)
+
+	function _G._rename()
+		local newName = vim.trim(vim.fn.getline('.'))
+		vim.api.nvim_win_close(win, true)
+		local currName = vim.fn.expand('<cword>')
+		if (newName and #newName > 0) and newName ~= currName then
+			vim.lsp.buf.rename(newName)
+		end
 	end
 end
 
