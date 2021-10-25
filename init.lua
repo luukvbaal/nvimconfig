@@ -135,10 +135,10 @@ require("packer").startup({
 					end
 				end
 				require("nnn").setup({
-					explorer = { cmd = "nnn", session = "shared" },
+					explorer = { cmd = "nnn", session = "shared", side = "botright" },
 					picker = { cmd = "nnn", style = { border = "rounded" } },
 					replace_netrw = "picker",
-					windownav = "<C-l>",
+					windownav = { left = "<C-h>", right = "<C-l>" },
 					tabs = true,
 					mappings = {
 						{ "<C-t>", open_in_tab },       -- open file(s) in tab
@@ -605,7 +605,6 @@ require("packer").startup({
 			end,
 		})
 		use({ "rafamadriz/friendly-snippets", event = "InsertEnter" })
-		use({ "onsails/lspkind-nvim", after = "friendly-snippets" })
 		use({
 			"hrsh7th/nvim-cmp",
 			module = "cmp",
