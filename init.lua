@@ -70,7 +70,7 @@ require("packer").startup({
 				fg_bg("CursorLinenr", colors.white, colors.black)
 				fg("LineNr", colors.grey)
 				fg("EndOfBuffer", colors.black)
-				fg("FloatBorder", colors.blue)
+				fg("FloatBorder", colors.line)
 				bg("NormalFloat", colors.black)
 				bg("Pmenu", colors.one_bg)
 				bg("PmenuSbar", colors.one_bg2)
@@ -95,9 +95,9 @@ require("packer").startup({
 				fg("DiagnosticInfo", colors.green)
 				fg("DiagnosticHint", colors.purple)
 				fg("TelescopeBorder", colors.one_bg)
-				fg_bg("TelescopePreviewTitle", colors.green, colors.one_bg)
-				fg_bg("TelescopePromptTitle", colors.blue, colors.one_bg)
-				fg_bg("TelescopeResultsTitle", colors.red, colors.one_bg)
+				fg("TelescopePreviewTitle", colors.green)
+				fg("TelescopePromptTitle", colors.blue)
+				fg("TelescopeResultsTitle", colors.red)
 				fg("TelescopePreviewBorder", colors.grey)
 				fg("TelescopePromptBorder", colors.line)
 				fg("TelescopeResultsBorder", colors.line)
@@ -464,6 +464,7 @@ require("packer").startup({
 				})
 			end,
 		})
+		use({ "folke/lua-dev.nvim" })
 		use({
 			"neovim/nvim-lspconfig",
 			after = "nvim-base16.lua",
@@ -505,20 +506,13 @@ require("packer").startup({
 				lspconfig.clangd.setup({ on_attach = on_attach, capabilities = capabilities })
 				lspconfig.pyright.setup({ on_attach = on_attach, capabilities = capabilities })
 				lspconfig.rust_analyzer.setup({ on_attach = on_attach, capabilities = capabilities })
-				local runtime_path = vim.split(package.path, ";")
-				table.insert(runtime_path, "lua/?.lua")
-				table.insert(runtime_path, "lua/?/init.lua")
-				lspconfig.sumneko_lua.setup({
-					on_attach = on_attach,
-					capabilities = capabilities,
-					cmd = { "lua-language-server" },
-					settings = {
-						Lua = {
-							runtime = { version = "LuaJIT", path = runtime_path },
-							diagnostics = { globals = { "vim" } },
-						},
-					},
-				})
+				lspconfig.sumneko_lua.setup(require("lua-dev").setup({
+					lspconfig = {
+						on_attach = on_attach,
+						capabilities = capabilities,
+						cmd = { "lua-language-server" }
+					}
+				}))
 				lspconfig.texlab.setup( { on_attach = on_attach, capabilities = capabilities })
 			end,
 			setup = function()
@@ -764,7 +758,6 @@ require("packer").startup({
 		})
 		use({
 			"nvim-telescope/telescope.nvim",
-			module = "telescope",
 			cmd = "Telescope",
 			config = function()
 				require("telescope").setup({
@@ -783,7 +776,7 @@ require("packer").startup({
 				require("telescope").load_extension("fzf")
 			end,
 		})
-		use({ "nvim-telescope/telescope-fzf-native.nvim", run = "make", before = "telescope.nvim" })
+		use({ "nvim-telescope/telescope-fzf-native.nvim", run = "make", cmd = "Telescope", before = "telescope.nvim" })
 		use({
 			"Pocco81/TrueZen.nvim",
 			cmd = { "TZAtaraxis", "TZMinimalist", "TZFocus" },
@@ -907,13 +900,17 @@ function _G.vimgrepprompt()
 end
 
 function _G.rename()
+	local fn = vim.fn
 	local cword = vim.fn.expand("<cword>")
+	print(fn.synIDattr(fn.synIDtrans(fn.synID(fn.line("."), fn.col("."), 1)), "fg"))
 	local win = require('plenary.popup').create(cword, {
 		title = "New Name",
 		style = "minimal",
 		borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
 		relative = "cursor",
 		borderhighlight = "FloatBorder",
+		titlehighlight = "TelescopePromptTitle",
+		highlight = "guifg="..fn.synIDattr(fn.synIDtrans(fn.synID(fn.line("."), fn.col("."), 1)), "fg"),
 		focusable = true,
 		width = 25,
 		height = 1,
