@@ -78,7 +78,7 @@ require("packer").startup({
 				bg("PmenuThumb", colors.nord_blue)
 				bg("NnnNormal", colors.darker_black)
 				fg("NvimInternalError", colors.red)
-				fg("StatusLineNC", colors.one_bg2 .. " gui=underline")
+				fg("StatusLineNC", colors.one_bg3 .. " gui=underline")
 				fg("StatusLine", colors.one_bg2 .. " gui=underline")
 				fg("VertSplit", colors.one_bg2)
 				fg_bg("GitSignsAdd", colors.nord_blue, "none")
@@ -94,7 +94,10 @@ require("packer").startup({
 				fg("DiagnosticWarn", colors.yellow)
 				fg("DiagnosticInfo", colors.green)
 				fg("DiagnosticHint", colors.purple)
-				fg("TelescopeBorder", colors.line)
+				fg("TelescopeBorder", colors.one_bg)
+				fg_bg("TelescopePreviewTitle", colors.green, colors.one_bg)
+				fg_bg("TelescopePromptTitle", colors.blue, colors.one_bg)
+				fg_bg("TelescopeResultsTitle", colors.red, colors.one_bg)
 				fg("TelescopePreviewBorder", colors.grey)
 				fg("TelescopePromptBorder", colors.line)
 				fg("TelescopeResultsBorder", colors.line)
@@ -104,36 +107,7 @@ require("packer").startup({
 			"~/dev/nnn.nvim",
 			after = "nvim-base16.lua",
 			config = function()
-				local function open_in(files, command)
-					for i = 1, #files do
-						vim.cmd(command.." "..vim.fn.fnameescape(files[i]))
-					end
-				end
-				local function open_in_split(files) open_in(files, "split") end
-				local function open_in_vsplit(files) open_in(files, "vsplit") end
-				local function open_in_tab(files)
-					vim.cmd("tabnew")
-					open_in(files, "edit")
-					require("nnn").toggle("explorer")
-					vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n><C-w>l", true, true, true), "t", true)
-				end
-				local function deferprint(msg)
-					vim.defer_fn(function() print(msg) end, 0)
-				end
-				local function copy_to_clipboard(files)
-					files = table.concat(files, "\n")
-					vim.fn.setreg("+", files)
-					deferprint(files:gsub("\n", ", ").." copied to register")
-				end
-				local function cd_to_path(files)
-					local dir = files[1]:match(".*/")
-					local read = io.open(dir, "r")
-					if read ~= nil then
-						io.close(read)
-						vim.fn.execute("cd "..dir)
-						deferprint("working directory changed to: "..dir)
-					end
-				end
+				local builtin = require("nnn").builtin
 				require("nnn").setup({
 					explorer = { cmd = "nnn", session = "shared", side = "botright" },
 					picker = { cmd = "nnn", style = { border = "rounded" } },
@@ -141,11 +115,12 @@ require("packer").startup({
 					windownav = { left = "<C-h>", right = "<C-l>" },
 					tabs = true,
 					mappings = {
-						{ "<C-t>", open_in_tab },       -- open file(s) in tab
-						{ "<C-s>", open_in_split },     -- open file(s) in split
-						{ "<C-v>", open_in_vsplit },    -- open file(s) in vertical split
-						{ "<C-y>", copy_to_clipboard }, -- copy file(s) to clipboard
-						{ "<C-w>", cd_to_path },        -- cd to file directory
+						{ "<C-t>", builtin.open_in_tab },       -- open file(s) in tab
+						{ "<C-s>", builtin.open_in_split },     -- open file(s) in split
+						{ "<C-v>", builtin.open_in_vsplit },    -- open file(s) in vertical split
+						{ "<C-y>", builtin.copy_to_clipboard }, -- copy file(s) to clipboard
+						{ "<C-w>", builtin.cd_to_path },        -- cd to file directory
+						{ "<C-p>", builtin.open_in_preview },   -- open file in preview split keeping nnn focused
 					},
 				})
 			end,
@@ -557,7 +532,8 @@ require("packer").startup({
 		use({
 			"https://gitlab.com/yorickpeterse/nvim-dd.git",
 			after = "nvim-lspconfig",
-			config = function() require("dd").setup({ timeout = 0 }) end })
+			config = function() require("dd").setup({ timeout = 0 }) end
+		})
 		use({
 			"ray-x/lsp_signature.nvim",
 			after = "nvim-dd.git",
@@ -592,8 +568,8 @@ require("packer").startup({
 				require("trouble").setup({
 					auto_open = true,
 					auto_close = true,
-					auto_preview = false,
 					padding = false,
+					height = 5,
 					signs = {
 						error = "",
 						warning = "",
@@ -666,41 +642,29 @@ require("packer").startup({
 						end,
 					},
 					mapping = {
-						["<C-d>"] = cmp.mapping.scroll_docs(-4),
-						["<C-f>"] = cmp.mapping.scroll_docs(4),
-						["<C-e>"] = cmp.mapping.close(),
-						["<CR>"] = cmp.mapping.confirm({
-							behavior = cmp.ConfirmBehavior.Replace,
-							select = true,
+						["<C-d>"] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
+						["<C-f>"] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
+						["<C-Space>"] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
+						["<C-y>"] = cmp.config.disable, -- If you want to remove the default `<C-y>` mapping, You can specify `cmp.config.disable` value.
+						["<C-e>"] = cmp.mapping({
+						  i = cmp.mapping.abort(),
+						  c = cmp.mapping.close(),
 						}),
-						["<A-Tab>"] = function(fallback)
-							if require("luasnip").expand_or_jumpable() then
-								vim.fn.feedkeys(vim.api.nvim_replace_termcodes(
-										                "<Plug>luasnip-expand-or-jump", true, true, true), "")
-							else
-								fallback()
-							end
-						end,
-						["<Tab>"] = function(fallback)
-							if cmp.visible() then
-								cmp.select_next_item()
-							elseif require("luasnip").expand_or_jumpable() then
-								vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-expand-or-jump", true, true, true), "")
-							else
-								fallback()
-							end
-						end,
-						["<S-Tab>"] = function(fallback)
-							if cmp.visible() then
-								cmp.select_prev_item()
-							elseif require("luasnip").jumpable(-1) then
-								vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-jump-prev", true, true, true), "")
-							else
-								fallback()
-							end
-						end,
-					},
+						["<CR>"] = cmp.mapping.confirm({ select = true }),
+					}
 				})
+			cmp.setup.cmdline('/', {
+				sources = {
+					{ name = 'buffer' }
+				}
+			})
+			cmp.setup.cmdline(':', {
+				sources = cmp.config.sources({
+					{ name = 'path' }
+				}, {
+					{ name = 'cmdline' }
+				})
+			})
 			end,
 		})
 		use({
@@ -718,7 +682,8 @@ require("packer").startup({
 		use({ "saadparwaiz1/cmp_luasnip", after = "LuaSnip" })
 		use({ "hrsh7th/cmp-nvim-lua", after = "cmp_luasnip" })
 		use({ "hrsh7th/cmp-nvim-lsp", module = "cmp_nvim_lsp", after = "nvim-lspconfig" })
-		use({ "hrsh7th/cmp-buffer", after = "cmp-nvim-lsp" })
+		use({ "hrsh7th/cmp-cmdline", after = "cmp-nvim-lsp" })
+		use({ "hrsh7th/cmp-buffer", after = "cmp-cmdline" })
 		use({ "hrsh7th/cmp-path", after = "cmp-buffer" })
 		use({ "kdheepak/cmp-latex-symbols", after = "cmp-path" })
 		use({
@@ -927,29 +892,28 @@ function _G.vimgrepprompt()
 end
 
 function _G.rename()
-	local map_opts = { noremap = true, silent = true }
-	local opts = {
-		style = 'minimal',
-		border = 'single',
-		relative = 'cursor',
+	local cword = vim.fn.expand("<cword>")
+	local win = require('plenary.popup').create(cword, {
+		title = "New Name",
+		style = "minimal",
+		borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
+		relative = "cursor",
+		borderhighlight = "FloatBorder",
+		focusable = true,
 		width = 25,
 		height = 1,
-		row = 1,
-		col = 1,
-	}
-	local buf, win = vim.api.nvim_create_buf(false, true)
-	local cword = vim.fn.expand('<cword>')
-	vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
-
-	vim.api.nvim_open_win(buf, true, opts)
-	vim.api.nvim_buf_set_lines(buf, 0, -1, false, {cword})
-	vim.api.nvim_buf_set_keymap(buf, 'i', '<Esc>', '<cmd>stopinsert | q!<CR>', map_opts)
-	vim.api.nvim_buf_set_keymap(buf, 'n', '<Esc>', '<cmd>stopinsert | q!<CR>', map_opts)
-	vim.api.nvim_buf_set_keymap(buf, 'i', '<CR>', "<cmd>stopinsert | lua _rename()<CR>", map_opts)
-	vim.api.nvim_buf_set_keymap(buf, 'n', '<CR>', "<cmd>stopinsert | lua _rename()<CR>", map_opts)
+		line = "cursor+2",
+		col = "cursor-1"
+	})
+	local map_opts = { noremap = true, silent = true }
+	vim.api.nvim_buf_set_keymap(0, 'i', '<Esc>', '<cmd>stopinsert | q!<CR>', map_opts)
+	vim.api.nvim_buf_set_keymap(0, 'n', '<Esc>', '<cmd>stopinsert | q!<CR>', map_opts)
+	vim.api.nvim_buf_set_keymap(0, 'i', '<CR>', "<cmd>stopinsert | lua _rename()<CR>", map_opts)
+	vim.api.nvim_buf_set_keymap(0, 'n', '<CR>', "<cmd>stopinsert | lua _rename()<CR>", map_opts)
 
 	function _G._rename()
 		local newName = vim.trim(vim.fn.getline('.'))
+		print(newName)
 		vim.api.nvim_win_close(win, true)
 		local currName = vim.fn.expand('<cword>')
 		if (newName and #newName > 0) and newName ~= currName then
