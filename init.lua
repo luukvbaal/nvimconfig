@@ -94,6 +94,15 @@ require("packer").startup({
 				fg("DiagnosticWarn", colors.yellow)
 				fg("DiagnosticInfo", colors.green)
 				fg("DiagnosticHint", colors.purple)
+				fg("NotifyINFOBorder", colors.line)
+				fg("NotifyINFOTitle", colors.green)
+				fg("NotifyINFOIcon", colors.green)
+				fg("NotifyWARNBorder", colors.line)
+				fg("NotifyWARNTitle", colors.yellow)
+				fg("NotifyWARNIcon", colors.yellow)
+				fg("NotifyERRORBorder", colors.line)
+				fg("NotifyERRORTitle", colors.red)
+				fg("NotifyERRORIcon", colors.red)
 				fg("TelescopeBorder", colors.one_bg)
 				fg("TelescopePreviewTitle", colors.green)
 				fg("TelescopePromptTitle", colors.blue)
@@ -131,6 +140,13 @@ require("packer").startup({
 					},
 				})
 			end,
+		})
+		use({
+			"rcarriga/nvim-notify",
+			after = "nvim-base16.lua",
+			config = function()
+				vim.notify = require("notify")
+			end
 		})
 		use({
 			"~/dev/stabilize.nvim",
@@ -928,13 +944,41 @@ function _G.rename()
 	vim.api.nvim_buf_set_keymap(0, 'i', '<CR>', "<cmd>stopinsert | lua _rename()<CR>", map_opts)
 	vim.api.nvim_buf_set_keymap(0, 'n', '<CR>', "<cmd>stopinsert | lua _rename()<CR>", map_opts)
 
+	local function handler(err, result, ctx, config)
+		local method
+		local isnew = not config or type(config) ~= "number"
+		if isnew then
+			method = ctx.method
+			result = result
+		else
+			method = result
+			result = ctx
+		end
+		if err then
+			vim.notify(("Error running lsp query '%s': %s"):format(method, err), vim.log.levels.ERROR)
+		end
+		local new = ""
+		if result and result.changes then
+			local msg = ""
+			for f, c in pairs(result.changes) do
+				new = c[1].newText
+				msg = msg..("%d changes -> %s"):format(#c, f:gsub("file://",""):gsub(vim.fn.getcwd(),".")).."\n"
+				msg = msg:sub(1, #msg - 1)
+				vim.notify(msg, vim.log.levels.INFO, { title = ("Rename: %s -> %s"):format(cword, new) })
+			end
+		end
+		vim.lsp.handlers[method](err, result, ctx, config)
+	end
+
 	function _G._rename()
 		local newName = vim.trim(vim.fn.getline('.'))
 		print(newName)
 		vim.api.nvim_win_close(win, true)
 		local currName = vim.fn.expand('<cword>')
 		if (newName and #newName > 0) and newName ~= currName then
-			vim.lsp.buf.rename(newName)
+			local params = vim.lsp.util.make_position_params()
+			params.newName = newName
+			vim.lsp.buf_request(0, "textDocument/rename", params, handler)
 		end
 	end
 end
