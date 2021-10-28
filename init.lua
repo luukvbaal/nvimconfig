@@ -113,6 +113,13 @@ require("packer").startup({
 					picker = { cmd = "nnn", style = { border = "rounded" } },
 					replace_netrw = "picker",
 					windownav = { left = "<C-h>", right = "<C-l>" },
+					auto_open = {
+						setup = "explorer",
+						tabpage = "explorer",
+						empty = true,
+						ft_ignore = { "gitcommit" }
+					},
+					auto_close = true,
 					tabs = true,
 					mappings = {
 						{ "<C-t>", builtin.open_in_tab },       -- open file(s) in tab
@@ -638,11 +645,8 @@ require("packer").startup({
 						["<C-d>"] = cmp.mapping.scroll_docs(-4),
 						["<C-f>"] = cmp.mapping.scroll_docs(4),
 						["<C-e>"] = cmp.mapping.abort(),
-						["<CR>"] = cmp.mapping.confirm({
-							behavior = cmp.ConfirmBehavior.Replace,
-							select = true,
-						}),
-						["<Tab>"] = function(fallback)
+						["<CR>"] = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true }),
+						["<Tab>"] = cmp.mapping(function(fallback)
 							if cmp.visible() then
 								cmp.select_next_item()
 							elseif require("luasnip").expand_or_jumpable() then
@@ -650,8 +654,8 @@ require("packer").startup({
 							else
 								fallback()
 							end
-						end,
-						["<S-Tab>"] = function(fallback)
+						end, { "i", "c" }),
+						["<S-Tab>"] = cmp.mapping(function(fallback)
 							if cmp.visible() then
 								cmp.select_prev_item()
 							elseif require("luasnip").jumpable(-1) then
@@ -659,9 +663,10 @@ require("packer").startup({
 							else
 								fallback()
 							end
-						end,
+						end, { "i", "c" })
 					}
 				})
+			cmp.setup.cmdline = cmp.setup.cmdline
 			cmp.setup.cmdline('/', {
 				sources = {
 					{ name = 'buffer' }
@@ -700,7 +705,7 @@ require("packer").startup({
 			after = "nvim-cmp",
 			config = function()
 				require("nvim-autopairs").setup()
-				require("nvim-autopairs.completion.cmp").setup()
+				require("cmp").event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
 			end,
 		})
 		use({
