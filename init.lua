@@ -58,15 +58,15 @@ require("packer").startup({
 				local base16 = require("base16")
 				base16(base16.themes("nord"), true)
 				local function bg(group, color)
-					vim.cmd("hi " .. group .. " guibg=" .. color)
+					vim.cmd("hi "..group.." guibg="..color)
 				end
 				local function fg(group, color)
-					vim.cmd("hi " .. group .. " guifg=" .. color)
+					vim.cmd("hi "..group.." guifg="..color)
 				end
 				local function fg_bg(group, fgcol, bgcol)
-					vim.cmd("hi " .. group .. " guifg=" .. fgcol .. " guibg=" .. bgcol)
+					vim.cmd("hi "..group.." guifg="..fgcol.." guibg="..bgcol)
 				end
-				fg("Comment", colors.grey_fg .. " gui=italic")
+				fg("Comment", colors.grey_fg.." gui=italic")
 				fg_bg("CursorLinenr", colors.white, colors.black)
 				fg("LineNr", colors.grey)
 				fg("EndOfBuffer", colors.black)
@@ -78,8 +78,8 @@ require("packer").startup({
 				bg("PmenuThumb", colors.nord_blue)
 				bg("NnnNormal", colors.darker_black)
 				fg("NvimInternalError", colors.red)
-				fg("StatusLineNC", colors.one_bg3 .. " gui=underline")
-				fg("StatusLine", colors.one_bg2 .. " gui=underline")
+				fg("StatusLineNC", colors.one_bg3.." gui=underline")
+				fg("StatusLine", colors.one_bg2.." gui=underline")
 				fg("VertSplit", colors.one_bg2)
 				fg_bg("GitSignsAdd", colors.nord_blue, "none")
 				fg_bg("GitSignsChange", colors.grey_fg, "none")
@@ -125,7 +125,7 @@ require("packer").startup({
 					auto_open = {
 						setup = "explorer",
 						tabpage = "explorer",
-						empty = false,
+						empty = true,
 						ft_ignore = { "gitcommit" }
 					},
 					auto_close = true,
@@ -187,7 +187,7 @@ require("packer").startup({
 						local extension = vim.fn.expand("%:e")
 						local icon = require("nvim-web-devicons").get_icon(filename, extension)
 						if icon == nil then return " " end
-						return " " .. icon .. " " .. filename .. " "
+						return " "..icon.." "..filename.." "
 					end,
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
 					hl = { fg = colors.white, bg = colors.lightbg },
@@ -199,7 +199,7 @@ require("packer").startup({
 				components.active[1][3] = {
 					provider = function()
 						local dir_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-						return "  " .. dir_name .. " "
+						return "  "..dir_name.." "
 					end,
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 80 end,
 					hl = { fg = colors.grey_fg2, bg = colors.lightbg2 },
@@ -211,8 +211,8 @@ require("packer").startup({
 				components.active[1][4] = {
 					provider = function() return require("nvim-gps").get_location() end,
 					enabled = function()
-						local ok, module = pcall(require, "nvim-gps")
-						return ok and module.is_available()
+						local module = vim.F.npcall(require, "nvim-gps")
+						return module and module.is_available()
 					end,
 					hl = { fg = colors.grey_fg2 },
 				}
@@ -252,11 +252,9 @@ require("packer").startup({
 							local ms = vim.loop.hrtime() / 1000000
 							local frame = math.floor(ms / 120) % 3
 							if percentage >= 70 then
-								return string.format(" %%<%s %s %s (%s%%%%) ", success_icon[frame + 1],
-										       title, msg, percentage)
+								return string.format(" %%<%s %s %s (%s%%%%) ", success_icon[frame + 1], title, msg, percentage)
 							else
-								return string.format(" %%<%s %s %s (%s%%%%) ", spinners[frame + 1],
-										       title, msg, percentage)
+								return string.format(" %%<%s %s %s (%s%%%%) ", spinners[frame + 1], title, msg, percentage)
 							end
 						end
 						return ""
@@ -297,7 +295,7 @@ require("packer").startup({
 					icon = "  ",
 				}
 				components.active[3][6] = {
-					provider = " " .. statusline_style.left,
+					provider = " "..statusline_style.left,
 					hl = { fg = colors.one_bg2, bg = colors.statusline_bg },
 				}
 				local mode_colors = {
@@ -324,23 +322,15 @@ require("packer").startup({
 				}
 				components.active[3][7] = {
 					provider = statusline_style.left,
-					hl = function()
-						return { fg = mode_colors[vim.fn.mode()][2], bg = colors.one_bg2 }
-					end,
+					hl = function() return { fg = mode_colors[vim.fn.mode()][2], bg = colors.one_bg2 } end,
 				}
 				components.active[3][8] = {
 					provider = statusline_style.vi_mode_icon,
-					hl = function()
-						return { fg = colors.statusline_bg, bg = mode_colors[vim.fn.mode()][2] }
-					end,
+					hl = function() return { fg = colors.statusline_bg, bg = mode_colors[vim.fn.mode()][2] } end,
 				}
 				components.active[3][9] = {
-					provider = function()
-						return " " .. mode_colors[vim.fn.mode()][1] .. " "
-					end,
-					hl = function()
-						return { fg = mode_colors[vim.fn.mode()][2], bg = colors.one_bg }
-					end,
+					provider = function() return " "..mode_colors[vim.fn.mode()][1].." " end,
+					hl = function() return { fg = mode_colors[vim.fn.mode()][2], bg = colors.one_bg } end,
 				}
 				components.active[3][10] = {
 					provider = statusline_style.left,
@@ -365,13 +355,11 @@ require("packer").startup({
 					provider = function()
 						local current_line = vim.fn.line(".")
 						local total_line = vim.fn.line("$")
-						if current_line == 1 then
-							return "ﬢﬢ"
-						elseif current_line == vim.fn.line("$") then
-							return "ﬠﬠﬠ"
+						if current_line == 1 then return "ﬢﬢ"
+						elseif current_line == vim.fn.line("$") then return "ﬠﬠﬠ"
 						end
 						local result, _ = math.modf((current_line / total_line) * 100)
-						return result .. "%%"
+						return result.."%%"
 					end,
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
 					hl = { fg = colors.green, bg = colors.one_bg },
@@ -441,7 +429,7 @@ require("packer").startup({
 						"TelescopeResults",
 					},
 				})
-				vim.cmd("hi IndentBlanklineChar guifg=" .. colors.line .. " gui=nocombine")
+				vim.cmd("hi IndentBlanklineChar guifg="..colors.line.." gui=nocombine")
 			end,
 		})
 		use({
@@ -488,10 +476,10 @@ require("packer").startup({
 			end,
 		})
 		use({ "nvim-treesitter/playground", after = "nvim-treesitter" })
-		use("folke/lua-dev.nvim")
+		use({ "folke/lua-dev.nvim", after = "nvim-treesitter" })
 		use({
 			"neovim/nvim-lspconfig",
-			after = "nvim-base16.lua",
+			after = "lua-dev.nvim",
 			config = function()
 				vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticError" })
 				vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticHint" })
@@ -559,9 +547,7 @@ require("packer").startup({
 		use({
 			"andymass/vim-matchup",
 			opt = true,
-			setup = function()
-				vim.defer_fn(function() require("packer").loader("vim-matchup") end, 0)
-			end,
+			setup = function() vim.defer_fn(function() require("packer").loader("vim-matchup") end, 0) end,
 		})
 		use({
 			"jose-elias-alvarez/null-ls.nvim",
@@ -587,13 +573,7 @@ require("packer").startup({
 					auto_close = true,
 					padding = false,
 					height = 5,
-					signs = {
-						error = "",
-						warning = "",
-						hint = "",
-						information = "",
-						other = "",
-					},
+					signs = { error = "", warning = "", hint = "", information = "", other = "", },
 				})
 			end,
 		})
@@ -646,7 +626,7 @@ require("packer").startup({
 					},
 					formatting = {
 						format = function(entry, item)
-							item.kind = icons[item.kind] .. " " .. item.kind
+							item.kind = icons[item.kind].." "..item.kind
 							item.menu = ({
 								buffer = "[BUF]",
 								latex_symbols = "[TEX]",
@@ -664,38 +644,24 @@ require("packer").startup({
 						["<C-e>"] = cmp.mapping.abort(),
 						["<CR>"] = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true }),
 						["<Tab>"] = cmp.mapping(function(fallback)
-							if cmp.visible() then
-								cmp.select_next_item()
+							if cmp.visible() then cmp.select_next_item()
 							elseif require("luasnip").expand_or_jumpable() then
 								vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-expand-or-jump", true, true, true), "")
-							else
-								fallback()
+							else fallback()
 							end
 						end, { "i", "c" }),
 						["<S-Tab>"] = cmp.mapping(function(fallback)
-							if cmp.visible() then
-								cmp.select_prev_item()
+							if cmp.visible() then cmp.select_prev_item()
 							elseif require("luasnip").jumpable(-1) then
 								vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-jump-prev", true, true, true), "")
-							else
-								fallback()
+							else fallback()
 							end
 						end, { "i", "c" })
 					}
 				})
-			cmp.setup.cmdline = cmp.setup.cmdline
-			cmp.setup.cmdline('/', {
-				sources = {
-					{ name = 'buffer' }
-				}
-			})
-			cmp.setup.cmdline(':', {
-				sources = cmp.config.sources({
-					{ name = 'path' }
-				}, {
-					{ name = 'cmdline' }
-				})
-			})
+				cmp.setup.cmdline = cmp.setup.cmdline
+				cmp.setup.cmdline('/', { sources = { { name = 'buffer' } } })
+				cmp.setup.cmdline(':', { sources = cmp.config.sources({ { name = 'path' } }, { { name = 'cmdline' } }) })
 			end,
 		})
 		use({
@@ -703,10 +669,7 @@ require("packer").startup({
 			wants = "friendly-snippets",
 			after = "nvim-cmp",
 			config = function()
-				require("luasnip").config.set_config({
-					history = true,
-					updateevents = "TextChanged,TextChangedI",
-				})
+				require("luasnip").config.set_config({ history = true, updateevents = "TextChanged,TextChangedI", })
 				require("luasnip/loaders/from_vscode").lazy_load()
 			end,
 		})
@@ -728,34 +691,26 @@ require("packer").startup({
 		use({
 			"blackCauldron7/surround.nvim",
 			opt = true,
-			config = function()
-				require("surround").setup({ mappings_style = "sandwich" })
-			end,
-			setup = function()
-				vim.defer_fn(function() require("packer").loader("surround.nvim") end, 0)
-			end,
+			config = function() require("surround").setup({ mappings_style = "sandwich" }) end,
+			setup = function() vim.defer_fn(function() require("packer").loader("surround.nvim") end, 0) end
 		})
 		use({
 			"lervag/vimtex",
 			ft = "tex",
-			config = function() vim.g.vimtex_view_method = "zathura" end,
+			config = function() vim.g.vimtex_view_method = "zathura" end
 		})
 		use {
 			"lewis6991/gitsigns.nvim",
 			after = "nvim-base16.lua",
-			config = function() require("gitsigns").setup() end,
+			config = function() require("gitsigns").setup() end
 		}
 		use({
 			"karb94/neoscroll.nvim",
 			opt = true,
 			config = function()
 				require("neoscroll").setup()
-				require("neoscroll.config").set_mappings({
-					["<C-u>"] = { "scroll", { "-vim.wo.scroll", "true", "150" } },
-				})
-				require("neoscroll.config").set_mappings({
-					["<C-d>"] = { "scroll", { "vim.wo.scroll", "true", "150" } },
-				})
+				require("neoscroll.config").set_mappings({ ["<C-u>"] = { "scroll", { "-vim.wo.scroll", "true", "150" } } })
+				require("neoscroll.config").set_mappings({ ["<C-d>"] = { "scroll", { "vim.wo.scroll", "true", "150" } } })
 			end,
 			setup = function()
 				vim.defer_fn(function() require("packer").loader("neoscroll.nvim") end, 0)
@@ -802,29 +757,19 @@ require("packer").startup({
 		use({
 			"Pocco81/TrueZen.nvim",
 			cmd = { "TZAtaraxis", "TZMinimalist", "TZFocus" },
-			config = function()
-				require("true-zen").setup({
-					integrations = { feline = true, nvim_bufferline = true },
-				})
-			end,
+			config = function() require("true-zen").setup({ integrations = { feline = true, nvim_bufferline = true } }) end
 		})
 		use({
 			"vimwiki/vimwiki",
 			ft = "markdown",
 			cmd = "VimwikiIndex",
-			config = function()
-				vim.g.vimwiki_list = {
-					{ path = "~/vimwiki/", syntax = "markdown", ext = ".md" },
-				}
-			end,
+			config = function() vim.g.vimwiki_list = { { path = "~/vimwiki/", syntax = "markdown", ext = ".md" } } end
 		})
 	end,
 	config = {
 		display = {
 			prompt_border = "rounded",
-			open_fn = function()
-				return require("packer.util").float({ border = "rounded" })
-			end,
+			open_fn = function() return require("packer.util").float({ border = "rounded" }) end
 		},
 	},
 })
@@ -889,34 +834,34 @@ map("n", "gR", "<cmd>TroubleToggle lsp_references<CR>")
 map("n", "<C-A-j>", "<cmd>lua require('trouble').next({skip_groups = true, jump = true})<CR>")
 map("n", "<C-A-k>", "<cmd>lua require('trouble').previous({skip_groups = true, jump = true})<CR>")
 
-vim.cmd [[
+vim.cmd([[
 	augroup MyAutoCommands
-		autocmd!
-		autocmd Filetype sh setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-		autocmd Focuslost * silent! update
-		autocmd InsertLeave,CursorHold * silent! update
-		autocmd BufWritePost init.lua source <afile> | PackerCompile
-		autocmd QuickFixCmdPost [^l]* lua TroubleQuickFixPost("quickfix")
-		autocmd QuickFixCmdPost l* lua TroubleQuickFixPost("loclist")
-		autocmd TextYankPost * silent! lua vim.highlight.on_yank({ higroup="IncSearch", timeout=1000 })
-		autocmd BufReadPost * if expand('%:p') !~# '\m/\.git/' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+	autocmd!
+	autocmd Filetype sh setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+	autocmd Focuslost * silent! update
+	autocmd InsertLeave,CursorHold * silent! update
+	autocmd BufWritePost init.lua source <afile> | PackerCompile
+	autocmd QuickFixCmdPost [^l]* lua TroubleQuickFixPost("quickfix")
+	autocmd QuickFixCmdPost l* lua TroubleQuickFixPost("loclist")
+	autocmd TextYankPost * silent! lua vim.highlight.on_yank({ higroup="IncSearch", timeout=1000 })
+	autocmd BufReadPost * if expand('%:p') !~# '\m/\.git/' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 	augroup end
-	]]
+]])
 
 function _G.inspect(...) print(vim.inspect(...)) end
 
 function _G.TroubleQuickFixPost(mode)
 	require("trouble.providers").get(vim.api.nvim_get_current_win(),
-			vim.api.nvim_get_current_buf(), function(items)
-				if #items > 0 then require("trouble").open({ mode = mode }) end
-			end, { mode = mode })
+	vim.api.nvim_get_current_buf(), function(items)
+		if #items > 0 then require("trouble").open({ mode = mode }) end
+	end, { mode = mode })
 	vim.cmd("doautocmd User StabilizeRestore")
 end
 
 function _G.vimgrepprompt()
 	local pattern = vim.fn.input("vimgrep pattern: ")
 	if pattern and pattern ~= "" then
-		local ok, _ = pcall(vim.cmd, "vimgrep /" .. pattern .. "/j %")
+		local ok = vim.F.npcall(vim.cmd, "vimgrep /"..pattern.."/j %")
 		vim.schedule(function() print(ok and " " or "No results") end)
 	end
 end
@@ -952,11 +897,9 @@ function _G.rename()
 	vim.api.nvim_buf_set_keymap(0, "n", "<CR>", "<cmd>stopinsert | lua _rename('"..currName.."')<CR>", map_opts)
 
 	local function handler(err, result, ctx, config)
-		if err then
-			vim.notify(("Error running lsp query '%s': %s"):format(rename, err), vim.log.levels.ERROR)
-		end
+		if err then vim.notify(("Error running lsp query '%s': %s"):format(rename, err), vim.log.levels.ERROR) end
 		local new
-		if result.changes then
+		if result and result.changes then
 			local msg = ""
 			for f, c in pairs(result.changes) do
 				new = c[1].newText
