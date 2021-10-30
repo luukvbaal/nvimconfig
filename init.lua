@@ -94,6 +94,14 @@ require("packer").startup({
 				fg("DiagnosticWarn", colors.yellow)
 				fg("DiagnosticInfo", colors.green)
 				fg("DiagnosticHint", colors.purple)
+				fg("NeogitNotificationError", colors.red)
+				fg("NeogitNotificationWarn", colors.yellow)
+				fg("NeogitNotificationInfo", colors.green)
+				fg_bg("NeogitDiffAddHighlight", colors.green, colors.one_bg)
+				fg_bg("NeogitDiffDeleteHighlight", colors.red, colors.one_bg)
+				fg_bg("NeogitDiffContextHighlight", colors.white, colors.one_bg)
+				fg_bg("NeogitHunkHeader", colors.red, colors.one_bg)
+				fg_bg("NeogitHunkHeaderHighlight", colors.yellow, colors.one_bg)
 				fg("NotifyINFOBorder", colors.line)
 				fg("NotifyINFOTitle", colors.green)
 				fg("NotifyINFOIcon", colors.green)
@@ -112,18 +120,31 @@ require("packer").startup({
 				fg("TelescopeResultsBorder", colors.line)
 			end,
 		})
+		use("sindrets/diffview.nvim")
+		use({
+			"TimUntersberger/neogit",
+			config = function()
+				require("neogit").setup({
+					signs = {
+						section = { "", "" },
+						item = { "", "" }
+					},
+					integrations = { diffview = true },
+				})
+			end
+		})
 		use({
 			"~/dev/nnn.nvim",
 			after = "nvim-base16.lua",
 			config = function()
 				local builtin = require("nnn").builtin
 				require("nnn").setup({
-					explorer = { cmd = "nnn", session = "shared", side = "botright" },
-					picker = { cmd = "nnn", style = { border = "rounded" } },
+					explorer = { cmd = "nnn -G", session = "shared", side = "botright" },
+					picker = { cmd = "tmux new-session nnn -GPp", style = { border = "rounded" } },
 					replace_netrw = "picker",
 					windownav = { left = "<C-h>", right = "<C-l>" },
 					auto_open = {
-						setup = "explorer",
+						setup = "picker",
 						tabpage = "explorer",
 						empty = true,
 						ft_ignore = { "gitcommit" }
@@ -476,10 +497,10 @@ require("packer").startup({
 			end,
 		})
 		use({ "nvim-treesitter/playground", after = "nvim-treesitter" })
-		use({ "folke/lua-dev.nvim", after = "nvim-treesitter" })
+		use("folke/lua-dev.nvim")
 		use({
 			"neovim/nvim-lspconfig",
-			after = "lua-dev.nvim",
+			event = "BufReadPre",
 			config = function()
 				vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticError" })
 				vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticHint" })
@@ -756,7 +777,6 @@ require("packer").startup({
 		use({ "nvim-telescope/telescope-fzf-native.nvim", run = "make", cmd = "Telescope", before = "telescope.nvim" })
 		use({
 			"Pocco81/TrueZen.nvim",
-			cmd = { "TZAtaraxis", "TZMinimalist", "TZFocus" },
 			config = function() require("true-zen").setup({ integrations = { feline = true, nvim_bufferline = true } }) end
 		})
 		use({
@@ -833,6 +853,7 @@ map("n", "<leader>xg", "<cmd>lua vimgrepprompt()<CR>")
 map("n", "gR", "<cmd>TroubleToggle lsp_references<CR>")
 map("n", "<C-A-j>", "<cmd>lua require('trouble').next({skip_groups = true, jump = true})<CR>")
 map("n", "<C-A-k>", "<cmd>lua require('trouble').previous({skip_groups = true, jump = true})<CR>")
+map("n", "<leader>gc", "<cmd>Neogit<CR>")
 
 vim.cmd([[
 	augroup MyAutoCommands
@@ -845,6 +866,7 @@ vim.cmd([[
 	autocmd QuickFixCmdPost l* lua TroubleQuickFixPost("loclist")
 	autocmd TextYankPost * silent! lua vim.highlight.on_yank({ higroup="IncSearch", timeout=1000 })
 	autocmd BufReadPost * if expand('%:p') !~# '\m/\.git/' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+	autocmd BufRead,BufWrite /run/user/1000/neomutt* lua vim.schedule(function() require("true-zen.main").main(4, "toggle") end)
 	augroup end
 ]])
 
