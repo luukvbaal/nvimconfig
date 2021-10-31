@@ -543,12 +543,6 @@ require("packer").startup({
 				}))
 				lspconfig.texlab.setup( { on_attach = on_attach, capabilities = capabilities })
 			end,
-			setup = function()
-				vim.defer_fn(function()
-					require("packer").loader("nvim-lspconfig")
-					vim.cmd("if &ft == 'packer' | echo '' | else | silent! e %")
-				end, 0)
-			end,
 		})
 		use({
 			"https://gitlab.com/yorickpeterse/nvim-dd.git",
