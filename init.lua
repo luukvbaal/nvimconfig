@@ -1,124 +1,14 @@
-vim.opt.wrap = false
-vim.opt.list = true
-vim.opt.listchars = { tab = "  ", extends = "", precedes = "" }
-vim.opt.title = true
-vim.opt.clipboard = "unnamedplus"
-vim.opt.cmdheight = 1
-vim.opt.smartindent = true
-vim.opt.tabstop = 2
-vim.opt.shiftwidth = 2
-vim.opt.hidden = true
-vim.opt.shortmess:append("sI")
-vim.opt.smartcase = true
-vim.opt.ignorecase = true
-vim.opt.relativenumber = true
-vim.opt.splitbelow = true
-vim.opt.splitright = true
-vim.opt.termguicolors = true
-vim.opt.timeoutlen = 400
-vim.opt.undofile = true
-vim.opt.updatetime = 250
-vim.opt.shell = "/bin/sh"
-vim.opt.lazyredraw = true
-vim.opt.mouse = "a"
-vim.opt.completeopt = "menu,menuone,noselect"
-
-vim.g.mapleader = " "
-vim.g.maplocalleader = ","
-vim.g.loaded_2html_plugin = 1
-vim.g.loaded_getscript = 1
-vim.g.loaded_getscriptPlugin = 1
-vim.g.loaded_gzip = 1
-vim.g.loaded_logiPat = 1
-vim.g.loaded_matchit = 1
-vim.g.loaded_matchparen = 1
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
-vim.g.loaded_netrwSettings = 1
-vim.g.loaded_netrwFileHandlers = 1
-vim.g.loaded_tar = 1
-vim.g.loaded_tarPlugin = 1
-vim.g.loaded_rrhelper = 1
-vim.g.loaded_spellfile_plugin = 1
-vim.g.loaded_tar = 1
-vim.g.loaded_tarPlugin = 1
-vim.g.loaded_vimball = 1
-vim.g.loaded_vimballPlugin = 1
-vim.g.loaded_zip = 1
-vim.g.loaded_zipPlugin = 1
-
 require("packer").startup({
 	function(use)
 		use("nvim-lua/plenary.nvim")
 		use({ "wbthomason/packer.nvim", event = "VimEnter" })
 		use({
-			"NvChad/nvim-base16.lua",
-			after = "packer.nvim",
-			config = function()
-				local base16 = require("base16")
-				base16(base16.themes("nord"), true)
-				local ns = vim.api.nvim_create_namespace("base16")
-				local function hl(name, val)
-					vim.api.nvim_set_hl(ns, name, val)
-				end
-				hl("Comment", { foreground = colors.grey_fg, italic = true })
-				hl("CursorLinenr", { foreground = colors.white, background = colors.black })
-				hl("LineNr", { foreground = colors.grey })
-				hl("EndOfBuffer", { foreground = colors.black })
-				hl("FloatBorder", { foreground = colors.line })
-				hl("NormalFloat", { foreground = colors.black })
-				hl("Pmenu", { foreground = colors.one_bg })
-				hl("PmenuSbar", { foreground = colors.one_bg2 })
-				hl("PmenuSel", { foreground = colors.pmenu_bg })
-				hl("PmenuThumb", { foreground = colors.nord_blue })
-				hl("NnnNormal", { foreground = colors.darker_black })
-				hl("NvimInternalError", { foreground = colors.red })
-				hl("StatusLineNC", { foreground = colors.one_bg3, underline = true })
-				hl("StatusLine", { foreground = colors.one_bg2, underline = true })
-				hl("VertSplit", { foreground = colors.one_bg2 })
-				hl("GitSignsAdd", { foreground = colors.nord_blue })
-				hl("GitSignsChange", { foreground = colors.grey_fg })
-				hl("GitSignsModified", { foreground = colors.nord_blue })
-				hl("MatchParen", { foreground = colors.black, background = colors.red })
-				hl("CmpItemAbbr", { foreground = colors.white })
-				hl("CmpItemAbbrMatch", { foreground = colors.white })
-				hl("CmpItemKind", { foreground = colors.white })
-				hl("CmpItemMenu", { foreground = colors.white })
-				hl("IndentBlanklineChar", { foreground = colors.line })
-				hl("DiagnosticError", { foreground = colors.red })
-				hl("DiagnosticWarn", { foreground = colors.yellow })
-				hl("DiagnosticInfo", { foreground = colors.green })
-				hl("DiagnosticHint", { foreground = colors.purple })
-				hl("NeogitNotificationError", { foreground = colors.red })
-				hl("NeogitNotificationWarn", { foreground = colors.yellow })
-				hl("NeogitNotificationInfo", { foreground = colors.green })
-				hl("NeogitDiffAddHighlight", { foreground = colors.green, background = colors.one_bg })
-				hl("NeogitDiffDeleteHighlight", { foreground = colors.red, background = colors.one_bg })
-				hl("NeogitDiffContextHighlight", { foreground = colors.white, background = colors.one_bg })
-				hl("NeogitHunkHeader", { foreground = colors.red, background = colors.one_bg })
-				hl("NeogitHunkHeaderHighlight", { foreground = colors.yellow, background = colors.one_bg })
-				hl("NotifyINFOBorder", { foreground = colors.line })
-				hl("NotifyINFOTitle", { foreground = colors.green })
-				hl("NotifyINFOIcon", { foreground = colors.green })
-				hl("NotifyWARNBorder", { foreground = colors.line })
-				hl("NotifyWARNTitle", { foreground = colors.yellow })
-				hl("NotifyWARNIcon", { foreground = colors.yellow })
-				hl("NotifyERRORBorder", { foreground = colors.line })
-				hl("NotifyERRORTitle", { foreground = colors.red })
-				hl("NotifyERRORIcon", { foreground = colors.red })
-				hl("TelescopeBorder", { foreground = colors.one_bg })
-				hl("TelescopePreviewTitle", { foreground = colors.green })
-				hl("TelescopePromptTitle", { foreground = colors.blue })
-				hl("TelescopeResultsTitle", { foreground = colors.red })
-				hl("TelescopePreviewBorder", { foreground = colors.grey })
-				hl("TelescopePromptBorder", { foreground = colors.line })
-				hl("TelescopeResultsBorder", { foreground = colors.line })
-    		vim.api.nvim__set_hl_ns(ns)
-			end,
+			"sindrets/diffview.nvim",
+			cmd = "Neogit",
 		})
-		use("sindrets/diffview.nvim")
 		use({
 			"TimUntersberger/neogit",
+			after = "diffview.nvim",
 			config = function()
 				require("neogit").setup({
 					signs = {
@@ -131,7 +21,7 @@ require("packer").startup({
 		})
 		use({
 			"~/dev/nnn.nvim",
-			after = "nvim-base16.lua",
+			cmd = { "NnnExplorer", "NnnPicker" },
 			config = function()
 				local builtin = require("nnn").builtin
 				require("nnn").setup({
@@ -140,12 +30,12 @@ require("packer").startup({
 					replace_netrw = "picker",
 					windownav = { left = "<C-h>", right = "<C-l>" },
 					auto_open = {
-						setup = "picker",
+						setup = "explorer",
 						tabpage = "explorer",
 						empty = true,
 						ft_ignore = { "gitcommit" }
 					},
-					auto_close = true,
+					auto_close = false,
 					tabs = true,
 					mappings = {
 						{ "<C-t>", builtin.open_in_tab },       -- open file(s) in tab
@@ -160,17 +50,17 @@ require("packer").startup({
 		})
 		use({
 			"rcarriga/nvim-notify",
-			after = "nvim-base16.lua",
+			after = "packer.nvim",
 			config = function()
 				vim.notify = require("notify")
 			end
 		})
 		use({
 			"~/dev/stabilize.nvim",
-			after = "nvim-base16.lua",
+			after = "packer.nvim",
 			config = function() require("stabilize").setup({ forcemark = "f" }) end,
 		})
-		use({ "kyazdani42/nvim-web-devicons", after = "nvim-base16.lua" })
+		use({ "kyazdani42/nvim-web-devicons", after = "packer.nvim" })
 		use({
 			"SmiteshP/nvim-gps",
 			after = "nvim-treesitter",
@@ -192,10 +82,10 @@ require("packer").startup({
 				for i = 1, 3 do components.active[i] = {} end
 				components.active[1][1] = {
 					provider = statusline_style.main_icon,
-					hl = { fg = colors.statusline_bg, bg = colors.nord_blue },
+					hl = { fg = colors.statusline_bg, bg = colors.blue },
 					right_sep = {
 						str = statusline_style.right,
-						hl = { fg = colors.nord_blue, bg = colors.lightbg },
+						hl = { fg = colors.blue, bg = colors.lightbg },
 					},
 				}
 				components.active[1][2] = {
@@ -219,7 +109,7 @@ require("packer").startup({
 						return "  "..dir_name.." "
 					end,
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 80 end,
-					hl = { fg = colors.grey_fg2, bg = colors.lightbg2 },
+					hl = { fg = colors.grey_fg, bg = colors.lightbg2 },
 					right_sep = {
 						str = statusline_style.right,
 						hi = { fg = colors.lightbg2, bg = colors.statusline_bg },
@@ -231,7 +121,7 @@ require("packer").startup({
 						local module = vim.F.npcall(require, "nvim-gps")
 						return module and module.is_available()
 					end,
-					hl = { fg = colors.grey_fg2 },
+					hl = { fg = colors.grey_fg },
 				}
 				components.active[1][5] = {
 					provider = "diagnostic_errors",
@@ -248,7 +138,7 @@ require("packer").startup({
 				components.active[1][7] = {
 					provider = "diagnostic_hints",
 					enabled = function() return lsp.diagnostics_exist("Hint") end,
-					hl = { fg = colors.grey_fg2 },
+					hl = { fg = colors.grey_fg },
 					icon = "  ",
 				}
 				components.active[1][8] = {
@@ -288,12 +178,12 @@ require("packer").startup({
 						end
 					end,
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
-					hl = { fg = colors.grey_fg2, bg = colors.statusline_bg },
+					hl = { fg = colors.grey_fg, bg = colors.statusline_bg },
 				}
 				components.active[3][2] = {
 					provider = "git_branch",
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
-					hl = { fg = colors.grey_fg2, bg = colors.statusline_bg },
+					hl = { fg = colors.grey_fg, bg = colors.statusline_bg },
 					icon = "  ",
 				}
 				components.active[3][3] = {
@@ -326,9 +216,9 @@ require("packer").startup({
 					[""] = { "V-BLOCK", colors.cyan },
 					["R"] = { "REPLACE", colors.orange },
 					["Rv"] = { "V-REPLACE", colors.orange },
-					["s"] = { "SELECT", colors.nord_blue },
-					["S"] = { "S-LINE", colors.nord_blue },
-					[""] = { "S-BLOCK", colors.nord_blue },
+					["s"] = { "SELECT", colors.blue },
+					["S"] = { "S-LINE", colors.blue },
+					[""] = { "S-BLOCK", colors.blue },
 					["c"] = { "COMMAND", colors.pink },
 					["cv"] = { "COMMAND", colors.pink },
 					["ce"] = { "COMMAND", colors.pink },
@@ -421,7 +311,7 @@ require("packer").startup({
 						separator_visible = { guifg = colors.black2, guibg = colors.black2 },
 						separator_selected = { guifg = colors.black2, guibg = colors.black2 },
 						tab = { guifg = colors.light_grey, guibg = colors.one_bg3 },
-						tab_selected = { guifg = colors.black2, guibg = colors.nord_blue },
+						tab_selected = { guifg = colors.black2, guibg = colors.blue },
 						tab_close = { guifg = colors.red, guibg = colors.black },
 					},
 				})
@@ -492,10 +382,13 @@ require("packer").startup({
 			end,
 		})
 		use({ "nvim-treesitter/playground", after = "nvim-treesitter" })
-		use("folke/lua-dev.nvim")
+		use({
+			"folke/lua-dev.nvim",
+			event = "BufReadPre"
+		})
 		use({
 			"neovim/nvim-lspconfig",
-			event = "BufReadPre",
+			after = "lua-dev.nvim",
 			config = function()
 				vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticError" })
 				vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticHint" })
@@ -711,7 +604,7 @@ require("packer").startup({
 		})
 		use {
 			"lewis6991/gitsigns.nvim",
-			after = "nvim-base16.lua",
+			after = "packer.nvim",
 			config = function() require("gitsigns").setup() end
 		}
 		use({
@@ -744,8 +637,13 @@ require("packer").startup({
 			config = function() require("nvim_comment").setup() end,
 		})
 		use({
-			"nvim-telescope/telescope.nvim",
+		 	"nvim-telescope/telescope-fzf-native.nvim",
 			cmd = "Telescope",
+			run = "make"
+		})
+		use({
+			"nvim-telescope/telescope.nvim",
+			after = "telescope-fzf-native.nvim",
 			config = function()
 				require("telescope").setup({
 					defaults = {
@@ -763,9 +661,9 @@ require("packer").startup({
 				require("telescope").load_extension("fzf")
 			end,
 		})
-		use({ "nvim-telescope/telescope-fzf-native.nvim", run = "make", cmd = "Telescope", before = "telescope.nvim" })
 		use({
 			"Pocco81/TrueZen.nvim",
+			cmd = "TZAtaraxis",
 			config = function() require("true-zen").setup({ integrations = { feline = true, nvim_bufferline = true } }) end
 		})
 		use({
@@ -782,6 +680,56 @@ require("packer").startup({
 		},
 	},
 })
+
+vim.opt.wrap = false
+vim.opt.list = true
+vim.opt.listchars = { tab = "  ", extends = "", precedes = "" }
+vim.opt.title = true
+vim.opt.clipboard = "unnamedplus"
+vim.opt.cmdheight = 1
+vim.opt.smartindent = true
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.hidden = true
+vim.opt.shortmess:append("sI")
+vim.opt.smartcase = true
+vim.opt.ignorecase = true
+vim.opt.relativenumber = true
+vim.opt.splitbelow = true
+vim.opt.splitright = true
+vim.opt.termguicolors = true
+vim.opt.timeoutlen = 400
+vim.opt.undofile = true
+vim.opt.updatetime = 250
+vim.opt.shell = "/bin/sh"
+vim.opt.lazyredraw = true
+vim.opt.mouse = "a"
+vim.opt.completeopt = "menu,menuone,noselect"
+vim.opt.showmode = false
+
+vim.g.mapleader = " "
+vim.g.maplocalleader = ","
+vim.g.loaded_2html_plugin = 1
+vim.g.loaded_getscript = 1
+vim.g.loaded_getscriptPlugin = 1
+vim.g.loaded_gzip = 1
+vim.g.loaded_logiPat = 1
+vim.g.loaded_matchit = 1
+vim.g.loaded_matchparen = 1
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+vim.g.loaded_netrwSettings = 1
+vim.g.loaded_netrwFileHandlers = 1
+vim.g.loaded_tar = 1
+vim.g.loaded_tarPlugin = 1
+vim.g.loaded_rrhelper = 1
+vim.g.loaded_spellfile_plugin = 1
+vim.g.loaded_tar = 1
+vim.g.loaded_tarPlugin = 1
+vim.g.loaded_vimball = 1
+vim.g.loaded_vimballPlugin = 1
+vim.g.loaded_zip = 1
+vim.g.loaded_zipPlugin = 1
 
 local function map(mode, lhs, rhs, opts)
 	local options = { noremap = true, silent = true }
@@ -934,12 +882,294 @@ function _G.rename()
 end
 
 _G.colors = {
-	red  = "#BF616A", black  = "#2E3440", pmenu_bg  = "#A3BE8C", folder_bg     = "#7797B7",
-	sun  = "#E1C181", green  = "#A3BE8C", grey_fg   = "#565C68", nord_blue     = "#81A1C1",
-	blue = "#7797B7", white  = "#ABB2BF", lightbg   = "#3F4551", light_grey    = "#646A76",
-	cyan = "#9AAFE6", black2 = "#343A46", one_bg2   = "#464C58", dark_purple   = "#B48EAD",
-	grey = "#4B515D", one_bg = "#373D49", one_bg3   = "#494F5B", darker_black  = "#2A303C",
-	line = "#3A404C", orange = "#E39A83", grey_fg2  = "#606672", statusline_bg = "#333945",
-	pink = "#D57780", purple = "#AAB1BE", lightbg2  = "#393F4B", vibrant_green = "#AFCA98",
-	teal = "#6484A4", yellow = "#EBCB8B", baby_pink = "#DE878F"
+	red  = "#BF616A", teal   = "#97B7D7", one_bg  = "#373D49", lightbg   = "#3B4252", blue    = "#81A1C1",
+	cyan = "#88c0d0", black  = "#2E3440", orange  = "#D08770", one_bg2   = "#434C5E", foreground   = "#E5E9F0",
+	grey = "#4B515D", green  = "#A3BE8C", purple  = "#8FBCBB", one_bg3   = "#4C566A", light_grey   = "#646A76",
+	line = "#3A404C", white  = "#D8DEE9", yellow  = "#EBCB8B", lightbg2  = "#393F4B", dark_purple  = "#B48EAD",
+	pink = "#D57780", black2 = "#343A46", grey_fg = "#606672", baby_pink = "#DE878F", darker_black = "#2A303C",
+	statusline_bg = "#333945",
 }
+
+vim.g.terminal_color_0  = colors.black
+vim.g.terminal_color_1  = colors.red
+vim.g.terminal_color_2  = colors.green
+vim.g.terminal_color_3  = colors.yellow
+vim.g.terminal_color_4  = colors.blue
+vim.g.terminal_color_5  = colors.dark_purple
+vim.g.terminal_color_6  = colors.cyan
+vim.g.terminal_color_7  = colors.foreground
+vim.g.terminal_color_8  = colors.one_bg3
+vim.g.terminal_color_9  = colors.red
+vim.g.terminal_color_10 = colors.green
+vim.g.terminal_color_11 = colors.yellow
+vim.g.terminal_color_12 = colors.blue
+vim.g.terminal_color_13 = colors.dark_purple
+vim.g.terminal_color_14 = colors.cyan
+vim.g.terminal_color_15 = colors.purple
+
+local ns = vim.api.nvim_create_namespace("nord")
+local function hl(name, val)
+	vim.api.nvim_set_hl(ns, name, val)
+end
+
+vim.cmd("hi Normal guifg="..colors.foreground.." guibg="..colors.black)
+hl("Bold", { bold = true })
+hl("Debug", { foreground = colors.pink })
+hl("Directory", { foreground = colors.blue })
+hl("Error", { foreground = colors.black, background = colors.pink })
+hl("ErrorMsg", { foreground = colors.pink, background = colors.black })
+hl("Exception", { foreground = colors.pink })
+hl("FoldColumn", { foreground = colors.teal, background = colors.lightbg })
+hl("Folded", { foreground = colors.one_bg3, background = colors.lightbg })
+hl("IncSearch", { foreground = colors.lightbg, background = colors.orange })
+hl("Macro", { foreground = colors.pink })
+hl("MatchParen", { background = colors.one_bg3 })
+hl("ModeMsg", { foreground = colors.green })
+hl("MoreMsg", { foreground = colors.green })
+hl("Question", { foreground = colors.blue })
+hl("Search", { foreground = colors.lightbg, background = colors.yellow })
+hl("Substitute", { foreground = colors.lightbg, background = colors.yellow })
+hl("SpecialKey", { foreground = colors.one_bg3 })
+hl("TooLong", { foreground = colors.pink })
+hl("Underlined", { foreground = colors.pink })
+hl("Visual", { background = colors.one_bg2 })
+hl("VisualNOS", { foreground = colors.pink })
+hl("WarningMsg", { foreground = colors.pink })
+hl("WildMenu", { foreground = colors.pink, background = colors.yellow })
+hl("Title", { foreground = colors.blue })
+hl("Conceal", { foreground = colors.blue, background = colors.black })
+hl("Cursor", { foreground = colors.black, background = colors.white })
+hl("NonText", { foreground = colors.one_bg3 })
+hl("LineNr", { foreground = colors.one_bg3 })
+hl("SignColumn", { foreground = colors.one_bg3 })
+hl("StatusLine", { foreground = colors.grey_fg })
+hl("StatusLineNC", { foreground = colors.one_bg3 })
+hl("VertSplit", { foreground = colors.one_bg2 })
+hl("ColorColumn", { background = colors.lightbg })
+hl("CursorColumn", { background = colors.lightbg })
+hl("CursorLine", { background = colors.lightbg })
+hl("CursorLineNr", { foreground = colors.grey_fg })
+hl("QuickFixLine", { background = colors.lightbg })
+hl("PMenu", { foreground = colors.white, background = colors.lightbg })
+hl("PMenuSel", { foreground = colors.lightbg, background = colors.white })
+hl("TabLine", { foreground = colors.one_bg3, background = colors.lightbg })
+hl("TabLineFill", { foreground = colors.one_bg3, background = colors.lightbg })
+hl("TabLineSel", { foreground = colors.green, background = colors.lightbg })
+
+-- Standard syntax highlighting
+hl("Boolean", { foreground = colors.orange })
+hl("Character", { foreground = colors.pink })
+hl("Comment", { foreground = colors.one_bg3 })
+hl("Conditional", { foreground = colors.dark_purple })
+hl("Constant", { foreground = colors.orange })
+hl("Define", { foreground = colors.dark_purple })
+hl("Delimiter", { foreground = colors.red })
+hl("Float", { foreground = colors.orange })
+hl("Function", { foreground = colors.blue })
+hl("Identifier", { foreground = colors.pink })
+hl("Include", { foreground = colors.blue })
+hl("Keyword", { foreground = colors.dark_purple })
+hl("Label", { foreground = colors.yellow })
+hl("Number", { foreground = colors.orange })
+hl("Operator", { foreground = colors.white })
+hl("PreProc", { foreground = colors.yellow })
+hl("Repeat", { foreground = colors.yellow })
+hl("Special", { foreground = colors.teal })
+hl("SpecialChar", { foreground = colors.red })
+hl("Statement", { foreground = colors.pink })
+hl("StorageClass", { foreground = colors.yellow })
+hl("String", { foreground = colors.green })
+hl("Structure", { foreground = colors.dark_purple })
+hl("Tag", { foreground = colors.yellow })
+hl("Todo", { foreground = colors.yellow, background = colors.lightbg })
+hl("Type", { foreground = colors.yellow })
+hl("Typedef", { foreground = colors.yellow })
+
+---
+-- Extra definitions
+---
+
+-- C highlighting
+hl("cOperator", { foreground = colors.teal })
+hl("cPreCondit", { foreground = colors.dark_purple })
+
+-- C# highlighting
+hl("csClass", { foreground = colors.yellow })
+hl("csAttribute", { foreground = colors.yellow })
+hl("csModifier", { foreground = colors.dark_purple })
+hl("csType", { foreground = colors.pink })
+hl("csUnspecifiedStatement", { foreground = colors.blue })
+hl("csContextualStatement", { foreground = colors.dark_purple })
+hl("csNewDecleration", { foreground = colors.pink })
+
+-- CSS highlighting
+hl("cssBraces", { foreground = colors.white })
+hl("cssClassName", { foreground = colors.dark_purple })
+hl("cssColor", { foreground = colors.teal })
+
+-- Diff highlighting
+hl("DiffAdd", { foreground = colors.green, background = colors.lightbg })
+hl("DiffChange", { foreground = colors.one_bg3, background = colors.lightbg })
+hl("DiffDelete", { foreground = colors.pink, background = colors.lightbg })
+hl("DiffText", { foreground = colors.blue, background = colors.lightbg })
+hl("DiffAdded", { foreground = colors.green, background = colors.black })
+hl("DiffFile", { foreground = colors.pink, background = colors.black })
+hl("DiffNewFile", { foreground = colors.green, background = colors.black })
+hl("DiffLine", { foreground = colors.blue, background = colors.black })
+hl("DiffRemoved", { foreground = colors.pink, background = colors.black })
+
+-- Git highlighting
+hl("gitcommitOverflow", { foreground = colors.pink })
+hl("gitcommitSummary", { foreground = colors.green })
+hl("gitcommitComment", { foreground = colors.one_bg3 })
+hl("gitcommitUntracked", { foreground = colors.one_bg3 })
+hl("gitcommitDiscarded", { foreground = colors.one_bg3 })
+hl("gitcommitSelected", { foreground = colors.one_bg3 })
+hl("gitcommitHeader", { foreground = colors.dark_purple })
+hl("gitcommitSelectedType", { foreground = colors.blue })
+hl("gitcommitUnmergedType", { foreground = colors.blue })
+hl("gitcommitDiscardedType", { foreground = colors.blue })
+hl("gitcommitBranch", { foreground = colors.orange,  bold = true })
+hl("gitcommitUntrackedFile", { foreground = colors.yellow })
+hl("gitcommitUnmergedFile", { foreground = colors.pink,  bold = true })
+hl("gitcommitDiscardedFile", { foreground = colors.pink,  bold = true })
+hl("gitcommitSelectedFile", { foreground = colors.green,  bold = true })
+
+-- HTML highlighting
+hl("htmlBold", { foreground = colors.yellow })
+hl("htmlItalic", { foreground = colors.dark_purple })
+hl("htmlEndTag", { foreground = colors.white })
+hl("htmlTag", { foreground = colors.white })
+
+-- JavaScript highlighting
+hl("javaScript", { foreground = colors.white })
+hl("javaScriptBraces", { foreground = colors.white })
+hl("javaScriptNumber", { foreground = colors.orange })
+-- pangloss/vim-javascript highlighting
+hl("jsOperator", { foreground = colors.blue })
+hl("jsStatement", { foreground = colors.dark_purple })
+hl("jsReturn", { foreground = colors.dark_purple })
+hl("jsThis", { foreground = colors.pink })
+hl("jsClassDefinition", { foreground = colors.yellow })
+hl("jsFunction", { foreground = colors.dark_purple })
+hl("jsFuncName", { foreground = colors.blue })
+hl("jsFuncCall", { foreground = colors.blue })
+hl("jsClassFuncName", { foreground = colors.blue })
+hl("jsClassMethodType", { foreground = colors.dark_purple })
+hl("jsRegexpString", { foreground = colors.teal })
+hl("jsGlobalObjects", { foreground = colors.yellow })
+hl("jsGlobalNodeObjects", { foreground = colors.yellow })
+hl("jsExceptions", { foreground = colors.yellow })
+hl("jsBuiltins", { foreground = colors.yellow })
+
+-- Mail highlighting
+hl("mailQuoted1", { foreground = colors.yellow })
+hl("mailQuoted2", { foreground = colors.green })
+hl("mailQuoted3", { foreground = colors.dark_purple })
+hl("mailQuoted4", { foreground = colors.teal })
+hl("mailQuoted5", { foreground = colors.blue })
+hl("mailQuoted6", { foreground = colors.yellow })
+hl("mailURL", { foreground = colors.blue })
+hl("mailEmail", { foreground = colors.blue })
+
+-- Markdown highlighting
+hl("markdownCode", { foreground = colors.green })
+hl("markdownError", { foreground = colors.white, background = colors.black })
+hl("markdownCodeBlock", { foreground = colors.green })
+hl("markdownHeadingDelimiter", { foreground = colors.blue })
+
+-- PHP highlighting
+hl("phpMemberSelector", { foreground = colors.white })
+hl("phpComparison", { foreground = colors.white })
+hl("phpParent", { foreground = colors.white })
+hl("phpMethodsVar", { foreground = colors.teal })
+
+-- Python highlighting
+hl("pythonOperator", { foreground = colors.dark_purple })
+hl("pythonRepeat", { foreground = colors.dark_purple })
+hl("pythonInclude", { foreground = colors.dark_purple })
+hl("pythonStatement", { foreground = colors.dark_purple })
+
+-- Ruby highlighting
+hl("rubyAttribute", { foreground = colors.blue })
+hl("rubyConstant", { foreground = colors.yellow })
+hl("rubyInterpolationDelimiter", { foreground = colors.red })
+hl("rubyRegexp", { foreground = colors.teal })
+hl("rubySymbol", { foreground = colors.green })
+hl("rubyStringDelimiter", { foreground = colors.green })
+
+-- SASS highlighting
+hl("sassidChar", { foreground = colors.pink })
+hl("sassClassChar", { foreground = colors.orange })
+hl("sassInclude", { foreground = colors.dark_purple })
+hl("sassMixing", { foreground = colors.dark_purple })
+hl("sassMixinName", { foreground = colors.blue })
+
+-- Spelling highlighting
+hl("SpellBad", { special = colors.pink, undercurl = true})
+hl("SpellLocal", { special = colors.teal, undercurl = true})
+hl("SpellCap", { special = colors.blue, undercurl = true})
+hl("SpellRare", { special = colors.dark_purple, undercurl = true })
+
+-- Java highlighting
+hl("javaOperator", { foreground = colors.blue })
+
+-- LspDiagnostic base highlight group
+hl("LspDiagnosticsDefaultError", { foreground = colors.pink })
+hl("LspDiagnosticsDefaultWarning", { foreground = colors.yellow })
+hl("LspDiagnosticsDefaultInformation", { foreground = colors.blue })
+hl("LspDiagnosticsDefaultHint", { foreground = colors.teal })
+
+hl("Comment", { foreground = colors.grey_fg, italic = true })
+hl("CursorLinenr", { foreground = colors.white, background = colors.black })
+hl("LineNr", { foreground = colors.grey })
+hl("EndOfBuffer", { foreground = colors.black })
+hl("FloatBorder", { foreground = colors.line })
+hl("NormalFloat", { foreground = colors.black })
+hl("Pmenu", { foreground = colors.one_bg })
+hl("PmenuSbar", { foreground = colors.one_bg2 })
+hl("PmenuSel", { foreground = colors.pmenu_bg })
+hl("PmenuThumb", { foreground = colors.nord_blue })
+hl("NnnNormal", { foreground = colors.darker_black })
+hl("NvimInternalError", { foreground = colors.red })
+hl("StatusLineNC", { foreground = colors.one_bg3, underline = true })
+hl("StatusLine", { foreground = colors.one_bg2, underline = true })
+hl("VertSplit", { foreground = colors.one_bg2 })
+hl("GitSignsAdd", { foreground = colors.nord_blue })
+hl("GitSignsChange", { foreground = colors.grey_fg })
+hl("GitSignsModified", { foreground = colors.nord_blue })
+hl("MatchParen", { foreground = colors.black, background = colors.red })
+hl("CmpItemAbbr", { foreground = colors.white })
+hl("CmpItemAbbrMatch", { foreground = colors.white })
+hl("CmpItemKind", { foreground = colors.white })
+hl("CmpItemMenu", { foreground = colors.white })
+hl("IndentBlanklineChar", { foreground = colors.line })
+hl("DiagnosticError", { foreground = colors.red })
+hl("DiagnosticWarn", { foreground = colors.yellow })
+hl("DiagnosticInfo", { foreground = colors.green })
+hl("DiagnosticHint", { foreground = colors.purple })
+hl("NeogitNotificationError", { foreground = colors.red })
+hl("NeogitNotificationWarn", { foreground = colors.yellow })
+hl("NeogitNotificationInfo", { foreground = colors.green })
+hl("NeogitDiffAddHighlight", { foreground = colors.green, background = colors.one_bg })
+hl("NeogitDiffDeleteHighlight", { foreground = colors.red, background = colors.one_bg })
+hl("NeogitDiffContextHighlight", { foreground = colors.white, background = colors.one_bg })
+hl("NeogitHunkHeader", { foreground = colors.red, background = colors.one_bg })
+hl("NeogitHunkHeaderHighlight", { foreground = colors.yellow, background = colors.one_bg })
+hl("NotifyINFOBorder", { foreground = colors.line })
+hl("NotifyINFOTitle", { foreground = colors.green })
+hl("NotifyINFOIcon", { foreground = colors.green })
+hl("NotifyWARNBorder", { foreground = colors.line })
+hl("NotifyWARNTitle", { foreground = colors.yellow })
+hl("NotifyWARNIcon", { foreground = colors.yellow })
+hl("NotifyERRORBorder", { foreground = colors.line })
+hl("NotifyERRORTitle", { foreground = colors.red })
+hl("NotifyERRORIcon", { foreground = colors.red })
+hl("TelescopeBorder", { foreground = colors.one_bg })
+hl("TelescopePreviewTitle", { foreground = colors.green })
+hl("TelescopePromptTitle", { foreground = colors.blue })
+hl("TelescopeResultsTitle", { foreground = colors.red })
+hl("TelescopePreviewBorder", { foreground = colors.grey })
+hl("TelescopePromptBorder", { foreground = colors.line })
+hl("TelescopeResultsBorder", { foreground = colors.line })
+vim.api.nvim__set_hl_ns(ns)
