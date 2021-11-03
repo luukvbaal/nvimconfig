@@ -288,12 +288,12 @@ require("packer").startup({
 					},
 					auto_close = true,
 					mappings = {
-						{ "<C-t>", builtin.open_in_tab },       -- open file(s) in tab
-						{ "<C-s>", builtin.open_in_split },     -- open file(s) in split
-						{ "<C-v>", builtin.open_in_vsplit },    -- open file(s) in vertical split
+						{ "<C-t>", builtin.open_in_tab },      -- open file(s) in tab
+						{ "<C-s>", builtin.open_in_split },    -- open file(s) in split
+						{ "<C-v>", builtin.open_in_vsplit },   -- open file(s) in vertical split
 						{ "<C-y>", builtin.copy_to_clipboard }, -- copy file(s) to clipboard
-						{ "<C-w>", builtin.cd_to_path },        -- cd to file directory
-						{ "<C-p>", builtin.open_in_preview },   -- open file in preview split keeping nnn focused
+						{ "<C-w>", builtin.cd_to_path },       -- cd to file directory
+						{ "<C-p>", builtin.open_in_preview },  -- open file in preview split keeping nnn focused
 					},
 				})
 			end,
@@ -442,6 +442,7 @@ require("packer").startup({
 		use({
 			"andymass/vim-matchup",
 			after = "lsp_signature.nvim",
+			config = function() vim.g.matchup_matchparen_deferred = 1 end,
 			setup = function() vim.defer_fn(function() require("packer").loader("vim-matchup") end, 0) end,
 		})
 		use({
@@ -913,11 +914,11 @@ hl("gitcommitHeader", { fg = colors.dark_purple })
 hl("gitcommitSelectedType", { fg = colors.blue })
 hl("gitcommitUnmergedType", { fg = colors.blue })
 hl("gitcommitDiscardedType", { fg = colors.blue })
-hl("gitcommitBranch", { fg = colors.orange,  bold = true })
+hl("gitcommitBranch", { fg = colors.orange, bold = true })
 hl("gitcommitUntrackedFile", { fg = colors.yellow })
-hl("gitcommitUnmergedFile", { fg = colors.pink,  bold = true })
-hl("gitcommitDiscardedFile", { fg = colors.pink,  bold = true })
-hl("gitcommitSelectedFile", { fg = colors.green,  bold = true })
+hl("gitcommitUnmergedFile", { fg = colors.pink, bold = true })
+hl("gitcommitDiscardedFile", { fg = colors.pink, bold = true })
+hl("gitcommitSelectedFile", { fg = colors.green, bold = true })
 
 -- Mail highlighting
 hl("mailQuoted1", { fg = colors.yellow })
