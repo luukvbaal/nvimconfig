@@ -262,31 +262,9 @@ require("packer").startup({
 					matchup = { enable = true },
 					highlight = { enable = true, use_languagetree = true },
 					ensure_installed = {
-						"bash",
-						"bibtex",
-						"c",
-						"cmake",
-						"cpp",
-						"css",
-						"dockerfile",
-						"go",
-						"html",
-						"java",
-						"javascript",
-						"json",
-						"latex",
-						"lua",
-						"perl",
-						"php",
-						"python",
-						"r",
-						"regex",
-						"rust",
-						"toml",
-						"typescript",
-						"verilog",
-						"vim",
-						"yaml",
+						"bash", "bibtex", "c", "cmake", "cpp", "css", "dockerfile", "go", "html", "java",
+						"javascript", "json", "latex", "lua", "perl", "php", "python", "r", "regex", "rust",
+						"toml", "typescript", "verilog", "vim", "yaml",
 					},
 				})
 			end,
@@ -814,20 +792,6 @@ function _G.vimgrepprompt()
 	end
 end
 
-vim.lsp.handlers["textDocument/rename"] = function(err, result)
-	if err then vim.notify(("Error running lsp query 'rename': "..err), vim.log.levels.ERROR) end
-	if result and result.changes then
-		local msg = ""
-		for f, c in pairs(result.changes) do
-			local new = c[1].newText
-			msg = msg..("%d changes -> %s"):format(#c, f:gsub("file://",""):gsub(vim.fn.getcwd(),".")).."\n"
-			msg = msg:sub(1, #msg - 1)
-			vim.notify(msg, vim.log.levels.INFO, { title = ("Rename: %s -> %s"):format(vim.fn.expand("<cword>"), new) })
-		end
-	end
-	vim.lsp.util.apply_workspace_edit(result)
-end
-
 function _G.rename()
 	local currName = vim.fn.expand("<cword>")
 	local tshl = require("nvim-treesitter-playground.hl-info").get_treesitter_hl()
@@ -909,13 +873,13 @@ hl("ErrorMsg", { fg = colors.pink, bg = colors.black })
 hl("Exception", { fg = colors.pink })
 hl("FoldColumn", { fg = colors.teal, bg = colors.lightbg })
 hl("Folded", { fg = colors.one_bg3, bg = colors.lightbg })
-hl("IncSearch", { fg = colors.lightbg, bg = colors.orange })
+hl("IncSearch", { fg = colors.blue })
 hl("Macro", { fg = colors.pink })
 hl("MatchParen", { bg = colors.lightbg })
 hl("ModeMsg", { fg = colors.green })
 hl("MoreMsg", { fg = colors.green })
 hl("Question", { fg = colors.blue })
-hl("Search", { fg = colors.lightbg, bg = colors.yellow })
+hl("Search", { fg = colors.blue })
 hl("Substitute", { fg = colors.lightbg, bg = colors.yellow })
 hl("SpecialKey", { fg = colors.one_bg3 })
 hl("TooLong", { fg = colors.pink })
