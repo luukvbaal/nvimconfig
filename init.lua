@@ -5,20 +5,13 @@ require("packer").startup({
 			"famiu/feline.nvim",
 			config = function()
 				local lsp = require("feline.providers.lsp")
-				local statusline_style = {
-					left = "",
-					right = " ",
-					main_icon = "  ",
-					vi_mode_icon = " ",
-					position_icon = " ",
-				}
-				local components = { active = {}, inactive = {} }
-				for i = 1, 3 do components.active[i] = {} end
+				local icons = { left = "", right = " ", main = "  ", vi_mode = " ", position = " " }
+				local components = { active = { {}, {}, {} }, inactive = { {}, {}, {} } }
 				components.active[1][1] = {
-					provider = statusline_style.main_icon,
+					provider = icons.main,
 					hl = { fg = colors.black2, bg = colors.blue },
 					right_sep = {
-						str = statusline_style.right,
+						str = icons.right,
 						hl = { fg = colors.blue, bg = colors.lightbg },
 					},
 				}
@@ -33,7 +26,7 @@ require("packer").startup({
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
 					hl = { fg = colors.white, bg = colors.lightbg },
 					right_sep = {
-						str = statusline_style.right,
+						str = icons.right,
 						hl = { fg = colors.lightbg, bg = colors.lightbg2 },
 					},
 				}
@@ -45,7 +38,7 @@ require("packer").startup({
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 80 end,
 					hl = { fg = colors.grey_fg, bg = colors.lightbg2 },
 					right_sep = {
-						str = statusline_style.right,
+						str = icons.right,
 						hi = { fg = colors.lightbg2, bg = colors.black2 },
 					},
 				}
@@ -136,7 +129,7 @@ require("packer").startup({
 					icon = "  ",
 				}
 				components.active[3][6] = {
-					provider = " "..statusline_style.left,
+					provider = " "..icons.left,
 					hl = { fg = colors.one_bg2, bg = colors.black2 },
 				}
 				local mode_colors = {
@@ -162,11 +155,11 @@ require("packer").startup({
 					["!"] = { "SHELL", colors.green },
 				}
 				components.active[3][7] = {
-					provider = statusline_style.left,
+					provider = icons.left,
 					hl = function() return { fg = mode_colors[vim.fn.mode()][2], bg = colors.one_bg2 } end,
 				}
 				components.active[3][8] = {
-					provider = statusline_style.vi_mode_icon,
+					provider = icons.vi_mode,
 					hl = function() return { fg = colors.black2, bg = mode_colors[vim.fn.mode()][2] } end,
 				}
 				components.active[3][9] = {
@@ -174,17 +167,17 @@ require("packer").startup({
 					hl = function() return { fg = mode_colors[vim.fn.mode()][2], bg = colors.one_bg } end,
 				}
 				components.active[3][10] = {
-					provider = statusline_style.left,
+					provider = icons.left,
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
 					hl = { fg = colors.grey, bg = colors.one_bg },
 				}
 				components.active[3][11] = {
-					provider = statusline_style.left,
+					provider = icons.left,
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
 					hl = { fg = colors.green, bg = colors.grey },
 				}
 				components.active[3][12] = {
-					provider = statusline_style.position_icon,
+					provider = icons.position,
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
 					hl = { fg = colors.black, bg = colors.green },
 				}
@@ -224,11 +217,7 @@ require("packer").startup({
 					},
 					highlights = {
 						background = { guifg = colors.grey_fg, guibg = colors.black2 },
-						buffer_selected = {
-							guifg = colors.white,
-							guibg = colors.black,
-							gui = "bold",
-						},
+						buffer_selected = { guifg = colors.white, guibg = colors.black, gui = "bold", },
 						buffer_visible = { guifg = colors.light_grey, guibg = colors.black2 },
 						error = { guifg = colors.light_grey, guibg = colors.black2 },
 						error_diagnostic = { guifg = colors.light_grey, guibg = colors.black2 },
@@ -295,11 +284,7 @@ require("packer").startup({
 					picker = { cmd = "tmux new-session nnn -GPp", style = { border = "rounded" } },
 					replace_netrw = "picker",
 					windownav = { left = "<C-h>", right = "<C-l>" },
-					auto_open = {
-						setup = "explorer",
-						tabpage = "explorer",
-						empty = true,
-						ft_ignore = { "gitcommit" }
+					auto_open = { setup = "explorer", tabpage = "explorer", empty = true, ft_ignore = { "gitcommit" }
 					},
 					auto_close = true,
 					mappings = {
@@ -333,7 +318,6 @@ require("packer").startup({
 				vim.lsp.handlers["textDocument/rename"] = function(err, result)
 					if err then vim.notify(("Error running lsp query 'rename': "..err), vim.log.levels.ERROR) end
 					if result and result.changes then
-						put(result)
 						local msg = ""
 						for f, c in pairs(result.changes) do
 							local new = c[1].newText
@@ -416,11 +400,7 @@ require("packer").startup({
 				lspconfig.pyright.setup({ on_attach = on_attach, capabilities = capabilities })
 				lspconfig.rust_analyzer.setup({ on_attach = on_attach, capabilities = capabilities })
 				lspconfig.sumneko_lua.setup(require("lua-dev").setup({
-					lspconfig = {
-						on_attach = on_attach,
-						capabilities = capabilities,
-						cmd = { "lua-language-server" }
-					}
+					lspconfig = { on_attach = on_attach, capabilities = capabilities, cmd = { "lua-language-server" } }
 				}))
 				lspconfig.texlab.setup( { on_attach = on_attach, capabilities = capabilities })
         vim.defer_fn(function() vim.cmd 'if &ft == "packer" | echo "" | else | silent! e %' end, 0)
@@ -442,13 +422,8 @@ require("packer").startup({
 			end,
 		})
 		use({
-			"https://gitlab.com/yorickpeterse/nvim-dd.git",
-			after = "null-ls.nvim",
-			config = function() require("dd").setup({ timeout = 0 }) end
-		})
-		use({
 			"folke/trouble.nvim",
-			after = "nvim-dd.git",
+			after = "null-ls.nvim",
 			config = function()
 				require("trouble").setup({
 					auto_open = true,
@@ -497,31 +472,11 @@ require("packer").startup({
 			after = "friendly-snippets",
 			config = function()
 				local icons = {
-					Text = "",
-					Method = "",
-					Function = "",
-					Constructor = "",
-					Field = "ﰠ",
-					Variable = "",
-					Class = "ﴯ",
-					Interface = "",
-					Module = "",
-					Property = "ﰠ",
-					Unit = "塞",
-					Value = "",
-					Enum = "",
-					Keyword = "",
-					Snippet = "",
-					Color = "",
-					File = "",
-					Reference = "",
-					Folder = "",
-					EnumMember = "",
-					Constant = "",
-					Struct = "פּ",
-					Event = "",
-					Operator = "",
-					TypeParameter = "",
+					Text = "", Method = "", Function = "", Constructor = "", Field = "ﰠ",
+					Variable = "", Class = "ﴯ", Interface = "", Module = "", Property = "ﰠ",
+					Unit = "塞", Value = "", Enum = "", Keyword = "", Snippet = "",
+					Color = "", File = "", Reference = "", Folder = "", EnumMember = "",
+					Constant = "", Struct = "פּ", Event = "", Operator = "", TypeParameter = "",
 				}
 				local cmp = require("cmp")
 				cmp.setup({
@@ -631,10 +586,7 @@ require("packer").startup({
 			config = function()
 				require("neogit").setup({
 					disable_commit_confirmation = true,
-					signs = {
-						section = { "", "" },
-						item = { "", "" }
-					},
+					signs = { section = { "", "" }, item = { "", "" } },
 					integrations = { diffview = true },
 				})
 			end
