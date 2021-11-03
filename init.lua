@@ -344,6 +344,46 @@ require("packer").startup({
 					end
 					vim.lsp.util.apply_workspace_edit(result)
 				end
+				vim.lsp.buf.rename = {
+					float = function()
+						local currName = vim.fn.expand("<cword>")
+						local tshl = require("nvim-treesitter-playground.hl-info").get_treesitter_hl()
+						if tshl and #tshl > 0 then
+							local ind = tshl[#tshl]:match("^.*()%*%*.*%*%*")
+							tshl = tshl[#tshl]:sub(ind + 2, -3)
+						end
+
+						local win = require('plenary.popup').create(currName, {
+							title = "New Name",
+							style = "minimal",
+							borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
+							relative = "cursor",
+							borderhighlight = "FloatBorder",
+							titlehighlight = "Title",
+							highlight = tshl,
+							focusable = true,
+							width = 25,
+							height = 1,
+							line = "cursor+2",
+							col = "cursor-1"
+						})
+
+						local map_opts = { noremap = true, silent = true }
+						vim.api.nvim_buf_set_keymap(0, "i", "<Esc>", "<cmd>stopinsert | q!<CR>", map_opts)
+						vim.api.nvim_buf_set_keymap(0, "n", "<Esc>", "<cmd>stopinsert | q!<CR>", map_opts)
+						vim.api.nvim_buf_set_keymap(0, "i", "<CR>", "<cmd>stopinsert | lua vim.lsp.buf.rename.apply('"..currName..","..win.."')<CR>", map_opts)
+						vim.api.nvim_buf_set_keymap(0, "n", "<CR>", "<cmd>stopinsert | lua vim.lsp.buf.rename.apply('"..currName..","..win.."')<CR>", map_opts)
+					end,
+					apply = function(curr, win)
+						local newName = vim.trim(vim.fn.getline('.'))
+						vim.api.nvim_win_close(win, true)
+						if #newName > 0 and newName ~= curr then
+							local params = vim.lsp.util.make_position_params()
+							params.newName = newName
+							vim.lsp.buf_request(0, "textDocument/rename", params)
+						end
+					end
+				}
 				vim.diagnostic.config( { virtual_text = false, float = { show_header = false, border = "rounded" } })
 				local function on_attach(_, bufnr)
 					local function bufmap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
@@ -357,7 +397,7 @@ require("packer").startup({
 					bufmap("n", "<leader>wr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", opts)
 					bufmap("n", "<leader>wl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>", opts)
 					bufmap("n", "<leader>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
-					bufmap("n", "<leader>rn", "<cmd>lua rename()<CR>", opts)
+					bufmap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename.float()<CR>", opts)
 					bufmap("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
 					bufmap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
 					bufmap("n", "<leader>e", "<cmd>lua vim.diagnostic.open_float(0, { scope = 'line' })<CR>", opts)
@@ -792,46 +832,6 @@ function _G.vimgrepprompt()
 	end
 end
 
-function _G.rename()
-	local currName = vim.fn.expand("<cword>")
-	local tshl = require("nvim-treesitter-playground.hl-info").get_treesitter_hl()
-	if tshl and #tshl > 0 then
-		local ind = tshl[#tshl]:match("^.*()%*%*.*%*%*")
-		tshl = tshl[#tshl]:sub(ind + 2, -3)
-	end
-
-	local win = require('plenary.popup').create(currName, {
-		title = "New Name",
-		style = "minimal",
-		borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
-		relative = "cursor",
-		borderhighlight = "FloatBorder",
-		titlehighlight = "Title",
-		highlight = tshl,
-		focusable = true,
-		width = 25,
-		height = 1,
-		line = "cursor+2",
-		col = "cursor-1"
-	})
-
-	local map_opts = { noremap = true, silent = true }
-	vim.api.nvim_buf_set_keymap(0, "i", "<Esc>", "<cmd>stopinsert | q!<CR>", map_opts)
-	vim.api.nvim_buf_set_keymap(0, "n", "<Esc>", "<cmd>stopinsert | q!<CR>", map_opts)
-	vim.api.nvim_buf_set_keymap(0, "i", "<CR>", "<cmd>stopinsert | lua _rename('"..currName..","..win.."')<CR>", map_opts)
-	vim.api.nvim_buf_set_keymap(0, "n", "<CR>", "<cmd>stopinsert | lua _rename('"..currName..","..win.."')<CR>", map_opts)
-end
-
-function _G._rename(curr, win)
-	local newName = vim.trim(vim.fn.getline('.'))
-	vim.api.nvim_win_close(win, true)
-	if #newName > 0 and newName ~= curr then
-		local params = vim.lsp.util.make_position_params()
-		params.newName = newName
-		vim.lsp.buf_request(0, "textDocument/rename", params)
-	end
-end
-
 _G.colors = {
 	red  = "#BF616A", teal   = "#97B7D7", one_bg  = "#373D49", lightbg   = "#3B4252", blue         = "#81A1C1",
 	cyan = "#5E81AC", black  = "#2E3440", orange  = "#D08770", one_bg2   = "#434C5E", foreground   = "#E5E9F0",
@@ -1000,15 +1000,15 @@ hl("NeogitDiffDeleteHighlight", { fg = colors.red, bg = colors.one_bg })
 hl("NeogitDiffContextHighlight", { fg = colors.white, bg = colors.one_bg })
 hl("NeogitHunkHeader", { fg = colors.red, bg = colors.one_bg })
 hl("NeogitHunkHeaderHighlight", { fg = colors.yellow, bg = colors.one_bg })
-hl("NotifyINFOBorder", { fg = colors.line })
-hl("NotifyINFOTitle", { fg = colors.green })
-hl("NotifyINFOIcon", { fg = colors.green })
-hl("NotifyWARNBorder", { fg = colors.line })
-hl("NotifyWARNTitle", { fg = colors.yellow })
-hl("NotifyWARNIcon", { fg = colors.yellow })
-hl("NotifyERRORBorder", { fg = colors.line })
-hl("NotifyERRORTitle", { fg = colors.red })
-hl("NotifyERRORIcon", { fg = colors.red })
+vim.cmd("hi NotifyINFOBorder guifg="..colors.green)
+vim.cmd("hi NotifyINFOTitle guifg="..colors.green)
+vim.cmd("hi NotifyINFOIcon guifg="..colors.green)
+vim.cmd("hi NotifyWARNBorder guifg="..colors.yellow)
+vim.cmd("hi NotifyWARNTitle guifg="..colors.yellow)
+vim.cmd("hi NotifyWARNIcon guifg="..colors.yellow)
+vim.cmd("hi NotifyERRORBorder guifg="..colors.red)
+vim.cmd("hi NotifyERRORTitle guifg="..colors.red)
+vim.cmd("hi NotifyERRORIcon guifg="..colors.red)
 hl("TelescopeBorder", { fg = colors.one_bg })
 hl("TelescopePreviewTitle", { fg = colors.green })
 hl("TelescopePromptTitle", { fg = colors.blue })
