@@ -16,7 +16,7 @@ require("packer").startup({
 				for i = 1, 3 do components.active[i] = {} end
 				components.active[1][1] = {
 					provider = statusline_style.main_icon,
-					hl = { fg = colors.statusline_bg, bg = colors.blue },
+					hl = { fg = colors.black2, bg = colors.blue },
 					right_sep = {
 						str = statusline_style.right,
 						hl = { fg = colors.blue, bg = colors.lightbg },
@@ -46,7 +46,7 @@ require("packer").startup({
 					hl = { fg = colors.grey_fg, bg = colors.lightbg2 },
 					right_sep = {
 						str = statusline_style.right,
-						hi = { fg = colors.lightbg2, bg = colors.statusline_bg },
+						hi = { fg = colors.lightbg2, bg = colors.black2 },
 					},
 				}
 				components.active[1][4] = {
@@ -112,32 +112,32 @@ require("packer").startup({
 						end
 					end,
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
-					hl = { fg = colors.grey_fg, bg = colors.statusline_bg },
+					hl = { fg = colors.grey_fg, bg = colors.black2 },
 				}
 				components.active[3][2] = {
 					provider = "git_branch",
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
-					hl = { fg = colors.grey_fg, bg = colors.statusline_bg },
+					hl = { fg = colors.grey_fg, bg = colors.black2 },
 					icon = "  ",
 				}
 				components.active[3][3] = {
 					provider = "git_diff_added",
-					hl = { fg = colors.green, bg = colors.statusline_bg },
+					hl = { fg = colors.green, bg = colors.black2 },
 					icon = "  ",
 				}
 				components.active[3][4] = {
 					provider = "git_diff_changed",
-					hl = { fg = colors.yellow, bg = colors.statusline_bg },
+					hl = { fg = colors.yellow, bg = colors.black2 },
 					icon = "  ",
 				}
 				components.active[3][5] = {
 					provider = "git_diff_removed",
-					hl = { fg = colors.baby_pink, bg = colors.statusline_bg },
+					hl = { fg = colors.baby_pink, bg = colors.black2 },
 					icon = "  ",
 				}
 				components.active[3][6] = {
 					provider = " "..statusline_style.left,
-					hl = { fg = colors.one_bg2, bg = colors.statusline_bg },
+					hl = { fg = colors.one_bg2, bg = colors.black2 },
 				}
 				local mode_colors = {
 					["n"] = { "NORMAL", colors.red },
@@ -167,7 +167,7 @@ require("packer").startup({
 				}
 				components.active[3][8] = {
 					provider = statusline_style.vi_mode_icon,
-					hl = function() return { fg = colors.statusline_bg, bg = mode_colors[vim.fn.mode()][2] } end,
+					hl = function() return { fg = colors.black2, bg = mode_colors[vim.fn.mode()][2] } end,
 				}
 				components.active[3][9] = {
 					provider = function() return " "..mode_colors[vim.fn.mode()][1].." " end,
@@ -206,7 +206,7 @@ require("packer").startup({
 					hl = { fg = colors.green, bg = colors.one_bg },
 				}
 				require("feline").setup({
-					colors = { fg = colors.grey_fg, bg = colors.statusline_bg },
+					colors = { fg = colors.grey_fg, bg = colors.black2 },
 					components = components,
 				})
 			end,
@@ -307,6 +307,34 @@ require("packer").startup({
 			"norcalli/nvim-colorizer.lua",
 			config = function() require("colorizer").setup({ "*" }, { names = false }) end,
 		})
+		-- use("mcchrish/nnn.vim")
+		use({
+			"~/dev/nnn.nvim",
+			config = function()
+				local builtin = require("nnn").builtin
+				require("nnn").setup({
+					explorer = { cmd = "nnn -G", session = "shared", side = "botright", tabs = false },
+					picker = { cmd = "tmux new-session nnn -GPp", style = { border = "rounded" } },
+					replace_netrw = "picker",
+					windownav = { left = "<C-h>", right = "<C-l>" },
+					auto_open = {
+						setup = "explorer",
+						tabpage = "explorer",
+						empty = true,
+						ft_ignore = { "gitcommit" }
+					},
+					auto_close = true,
+					mappings = {
+						{ "<C-t>", builtin.open_in_tab },       -- open file(s) in tab
+						{ "<C-s>", builtin.open_in_split },     -- open file(s) in split
+						{ "<C-v>", builtin.open_in_vsplit },    -- open file(s) in vertical split
+						{ "<C-y>", builtin.copy_to_clipboard }, -- copy file(s) to clipboard
+						{ "<C-w>", builtin.cd_to_path },        -- cd to file directory
+						{ "<C-p>", builtin.open_in_preview },   -- open file in preview split keeping nnn focused
+					},
+				})
+			end,
+		})
 		use({
 			"SmiteshP/nvim-gps",
 			event = "CursorHold",
@@ -324,6 +352,20 @@ require("packer").startup({
 				vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticWarn" })
 				vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
 				vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
+				vim.lsp.handlers["textDocument/rename"] = function(err, result)
+					if err then vim.notify(("Error running lsp query 'rename': "..err), vim.log.levels.ERROR) end
+					if result and result.changes then
+						put(result)
+						local msg = ""
+						for f, c in pairs(result.changes) do
+							local new = c[1].newText
+							msg = msg..("%d changes -> %s"):format(#c, f:gsub("file://",""):gsub(vim.fn.getcwd(),".")).."\n"
+							msg = msg:sub(1, #msg - 1)
+							vim.notify(msg, vim.log.levels.INFO, { title = ("Rename: %s -> %s"):format(vim.fn.expand("<cword>"), new) })
+						end
+					end
+					vim.lsp.util.apply_workspace_edit(result)
+				end
 				vim.diagnostic.config( { virtual_text = false })
 				local function on_attach(_, bufnr)
 					local function bufmap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
@@ -556,36 +598,6 @@ require("packer").startup({
 			end,
 		})
 		use({ "wbthomason/packer.nvim", cmd = { "PackerSync", "PackerClean" } })
-		-- use("mcchrish/nnn.vim")
-		use({
-			"~/dev/nnn.nvim",
-			cmd = { "NnnExplorer", "NnnPicker" },
-			config = function()
-				local builtin = require("nnn").builtin
-				require("nnn").setup({
-					explorer = { cmd = "nnn -G", session = "shared", side = "botright" },
-					picker = { cmd = "tmux new-session nnn -GPp", style = { border = "rounded" } },
-					replace_netrw = "picker",
-					windownav = { left = "<C-h>", right = "<C-l>" },
-					auto_open = {
-						setup = "explorer",
-						tabpage = "explorer",
-						empty = true,
-						ft_ignore = { "gitcommit" }
-					},
-					auto_close = true,
-					tabs = true,
-					mappings = {
-						{ "<C-t>", builtin.open_in_tab },       -- open file(s) in tab
-						{ "<C-s>", builtin.open_in_split },     -- open file(s) in split
-						{ "<C-v>", builtin.open_in_vsplit },    -- open file(s) in vertical split
-						{ "<C-y>", builtin.copy_to_clipboard }, -- copy file(s) to clipboard
-						{ "<C-w>", builtin.cd_to_path },        -- cd to file directory
-						{ "<C-p>", builtin.open_in_preview },   -- open file in preview split keeping nnn focused
-					},
-				})
-			end,
-		})
 		use({
 			"lervag/vimtex",
 			ft = "tex",
@@ -600,6 +612,7 @@ require("packer").startup({
 			after = "diffview.nvim",
 			config = function()
 				require("neogit").setup({
+					disable_commit_confirmation = true,
 					signs = {
 						section = { "", "" },
 						item = { "", "" }
@@ -783,7 +796,7 @@ vim.cmd([[
 	augroup end
 ]])
 
-function _G.inspect(...) print(vim.inspect(...)) end
+function _G.put(...) print(vim.inspect(...)) end
 
 function _G.TroubleQuickFixPost(mode)
 	require("trouble.providers").get(vim.api.nvim_get_current_win(),
@@ -801,8 +814,21 @@ function _G.vimgrepprompt()
 	end
 end
 
+vim.lsp.handlers["textDocument/rename"] = function(err, result)
+	if err then vim.notify(("Error running lsp query 'rename': "..err), vim.log.levels.ERROR) end
+	if result and result.changes then
+		local msg = ""
+		for f, c in pairs(result.changes) do
+			local new = c[1].newText
+			msg = msg..("%d changes -> %s"):format(#c, f:gsub("file://",""):gsub(vim.fn.getcwd(),".")).."\n"
+			msg = msg:sub(1, #msg - 1)
+			vim.notify(msg, vim.log.levels.INFO, { title = ("Rename: %s -> %s"):format(vim.fn.expand("<cword>"), new) })
+		end
+	end
+	vim.lsp.util.apply_workspace_edit(result)
+end
+
 function _G.rename()
-	local rename = "textDocument/rename"
 	local currName = vim.fn.expand("<cword>")
 	local tshl = require("nvim-treesitter-playground.hl-info").get_treesitter_hl()
 	if tshl and #tshl > 0 then
@@ -816,7 +842,7 @@ function _G.rename()
 		borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
 		relative = "cursor",
 		borderhighlight = "FloatBorder",
-		titlehighlight = "TelescopePromptTitle",
+		titlehighlight = "Title",
 		highlight = tshl,
 		focusable = true,
 		width = 25,
@@ -828,42 +854,26 @@ function _G.rename()
 	local map_opts = { noremap = true, silent = true }
 	vim.api.nvim_buf_set_keymap(0, "i", "<Esc>", "<cmd>stopinsert | q!<CR>", map_opts)
 	vim.api.nvim_buf_set_keymap(0, "n", "<Esc>", "<cmd>stopinsert | q!<CR>", map_opts)
-	vim.api.nvim_buf_set_keymap(0, "i", "<CR>", "<cmd>stopinsert | lua _rename('"..currName.."')<CR>", map_opts)
-	vim.api.nvim_buf_set_keymap(0, "n", "<CR>", "<cmd>stopinsert | lua _rename('"..currName.."')<CR>", map_opts)
+	vim.api.nvim_buf_set_keymap(0, "i", "<CR>", "<cmd>stopinsert | lua _rename('"..currName..","..win.."')<CR>", map_opts)
+	vim.api.nvim_buf_set_keymap(0, "n", "<CR>", "<cmd>stopinsert | lua _rename('"..currName..","..win.."')<CR>", map_opts)
+end
 
-	local function handler(err, result, ctx, config)
-		if err then vim.notify(("Error running lsp query '%s': %s"):format(rename, err), vim.log.levels.ERROR) end
-		local new
-		if result and result.changes then
-			local msg = ""
-			for f, c in pairs(result.changes) do
-				new = c[1].newText
-				msg = msg..("%d changes -> %s"):format(#c, f:gsub("file://",""):gsub(vim.fn.getcwd(),".")).."\n"
-				msg = msg:sub(1, #msg - 1)
-				vim.notify(msg, vim.log.levels.INFO, { title = ("Rename: %s -> %s"):format(currName, new) })
-			end
-		end
-		vim.lsp.handlers[rename](err, result, ctx, config)
-	end
-
-	function _G._rename(curr)
-		local newName = vim.trim(vim.fn.getline('.'))
-		vim.api.nvim_win_close(win, true)
-		if #newName > 0 and newName ~= curr then
-			local params = vim.lsp.util.make_position_params()
-			params.newName = newName
-			vim.lsp.buf_request(0, rename, params, handler)
-		end
+function _G._rename(curr, win)
+	local newName = vim.trim(vim.fn.getline('.'))
+	vim.api.nvim_win_close(win, true)
+	if #newName > 0 and newName ~= curr then
+		local params = vim.lsp.util.make_position_params()
+		params.newName = newName
+		vim.lsp.buf_request(0, "textDocument/rename", params)
 	end
 end
 
 _G.colors = {
 	red  = "#BF616A", teal   = "#97B7D7", one_bg  = "#373D49", lightbg   = "#3B4252", blue         = "#81A1C1",
-	cyan = "#88c0d0", black  = "#2E3440", orange  = "#D08770", one_bg2   = "#434C5E", foreground   = "#E5E9F0",
+	cyan = "#5E81AC", black  = "#2E3440", orange  = "#D08770", one_bg2   = "#434C5E", foreground   = "#E5E9F0",
 	grey = "#4B515D", green  = "#A3BE8C", purple  = "#8FBCBB", one_bg3   = "#4C566A", light_grey   = "#646A76",
 	line = "#3A404C", white  = "#D8DEE9", yellow  = "#EBCB8B", lightbg2  = "#393F4B", dark_purple  = "#B48EAD",
 	pink = "#D57780", black2 = "#343A46", grey_fg = "#606672", baby_pink = "#DE878F", darker_black = "#2A303C",
-	statusline_bg = "#333945",
 }
 
 vim.g.terminal_color_0  = colors.black
@@ -889,6 +899,8 @@ local function hl(name, val)
 end
 
 vim.cmd("hi Normal guifg="..colors.foreground.." guibg="..colors.black)
+hl("NormalFloat", { fg = colors.foreground, bg = colors.black })
+hl("FloatBorder", { fg = colors.lightbg })
 hl("Bold", { bold = true })
 hl("Debug", { fg = colors.pink })
 hl("Directory", { fg = colors.blue })
@@ -899,7 +911,7 @@ hl("FoldColumn", { fg = colors.teal, bg = colors.lightbg })
 hl("Folded", { fg = colors.one_bg3, bg = colors.lightbg })
 hl("IncSearch", { fg = colors.lightbg, bg = colors.orange })
 hl("Macro", { fg = colors.pink })
-hl("MatchParen", { fg = colors.black, bg = colors.red })
+hl("MatchParen", { bg = colors.lightbg })
 hl("ModeMsg", { fg = colors.green })
 hl("MoreMsg", { fg = colors.green })
 hl("Question", { fg = colors.blue })
@@ -939,7 +951,7 @@ hl("Boolean", { fg = colors.orange })
 hl("Character", { fg = colors.pink })
 hl("Comment", { fg = colors.grey_fg, italic = true })
 hl("Conditional", { fg = colors.green })
-hl("Constant", { fg = colors.blue })
+hl("Constant", { fg = colors.cyan })
 hl("Define", { fg = colors.dark_purple })
 hl("Delimiter", { fg = colors.dark_purple })
 hl("Float", { fg = colors.orange })
@@ -951,7 +963,7 @@ hl("Label", { fg = colors.yellow })
 hl("Number", { fg = colors.orange })
 hl("Operator", { fg = colors.white })
 hl("PreProc", { fg = colors.yellow })
-hl("Repeat", { fg = colors.yellow })
+hl("Repeat", { fg = colors.cyan })
 hl("Special", { fg = colors.orange })
 hl("SpecialChar", { fg = colors.dark_purple })
 hl("Statement", { fg = colors.green })
