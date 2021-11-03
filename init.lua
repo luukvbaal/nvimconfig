@@ -366,7 +366,7 @@ require("packer").startup({
 					end
 					vim.lsp.util.apply_workspace_edit(result)
 				end
-				vim.diagnostic.config( { virtual_text = false })
+				vim.diagnostic.config( { virtual_text = false, float = { show_header = false, border = "rounded" } })
 				local function on_attach(_, bufnr)
 					local function bufmap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
 					local opts = { noremap = true, silent = true }
@@ -382,13 +382,13 @@ require("packer").startup({
 					bufmap("n", "<leader>rn", "<cmd>lua rename()<CR>", opts)
 					bufmap("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
 					bufmap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
-					bufmap("n", "<leader>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
+					bufmap("n", "<leader>e", "<cmd>lua vim.diagnostic.open_float(0, { scope = 'line' })<CR>", opts)
 					bufmap("n", "gx", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
 					bufmap("n", "gz", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
 					bufmap("n", "<leader>q", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
 					bufmap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 					bufmap("v", "<leader>ca", "<cmd>lua vim.lsp.buf.range_code_action()<CR>", opts)
-					vim.cmd("autocmd CursorHold,CursorHoldI * lua vim.lsp.diagnostic.show_line_diagnostics({ focusable = false })")
+					vim.cmd("autocmd CursorHold,CursorHoldI * lua vim.diagnostic.open_float(0, { scope = 'line' })")
 				end
 				local lspconfig = require("lspconfig")
 				local capabilities = vim.lsp.protocol.make_client_capabilities()
