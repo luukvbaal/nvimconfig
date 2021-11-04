@@ -390,7 +390,12 @@ require("packer").startup({
 					bufmap("n", "<leader>q", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
 					bufmap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 					bufmap("v", "<leader>ca", "<cmd>lua vim.lsp.buf.range_code_action()<CR>", opts)
-					vim.cmd("autocmd CursorHold,CursorHoldI * lua vim.diagnostic.open_float(0, { scope = 'line' })")
+					vim.cmd[[
+					augroup LspFloat
+						autocmd!
+						autocmd CursorHold,CursorHoldI * lua vim.diagnostic.open_float(0, { scope = 'line' })
+					augroup end
+					]]
 				end
 				local lspconfig = require("lspconfig")
 				local capabilities = vim.lsp.protocol.make_client_capabilities()
