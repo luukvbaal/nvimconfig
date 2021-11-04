@@ -394,6 +394,9 @@ require("packer").startup({
 					augroup LspFloat
 						autocmd!
 						autocmd CursorHold,CursorHoldI * lua vim.diagnostic.open_float(0, { scope = 'line' })
+						autocmd CursorHold  <buffer> lua vim.lsp.buf.document_highlight()
+						autocmd CursorHoldI <buffer> lua vim.lsp.buf.document_highlight()
+						autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
 					augroup end
 					]]
 				end
@@ -950,6 +953,8 @@ hl("DiagnosticError", { fg = colors.red })
 hl("DiagnosticWarn", { fg = colors.yellow })
 hl("DiagnosticInfo", { fg = colors.green })
 hl("DiagnosticHint", { fg = colors.purple })
+hl("LspReferenceRead", { bg = colors.lightbg })
+hl("LspReferenceWrite", { bg = colors.lightbg })
 hl("NeogitNotificationError", { fg = colors.red })
 hl("NeogitNotificationWarn", { fg = colors.yellow })
 hl("NeogitNotificationInfo", { fg = colors.green })
