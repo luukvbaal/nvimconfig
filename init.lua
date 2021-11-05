@@ -1,5 +1,66 @@
+vim.opt.wrap = false
+vim.opt.list = true
+vim.opt.listchars = { tab = "  ", extends = "", precedes = "" }
+vim.opt.title = true
+vim.opt.clipboard = "unnamedplus"
+vim.opt.cmdheight = 1
+vim.opt.smartindent = true
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.hidden = true
+vim.opt.shortmess:append("sI")
+vim.opt.smartcase = true
+vim.opt.ignorecase = true
+vim.opt.relativenumber = true
+vim.opt.splitbelow = true
+vim.opt.splitright = true
+vim.opt.termguicolors = true
+vim.opt.timeoutlen = 400
+vim.opt.undofile = true
+vim.opt.updatetime = 250
+vim.opt.shell = "/bin/sh"
+vim.opt.lazyredraw = true
+vim.opt.mouse = "a"
+vim.opt.completeopt = "menu,menuone,noselect"
+vim.opt.showmode = false
+
+vim.g.mapleader = " "
+vim.g.maplocalleader = ","
+vim.g.loaded_2html_plugin = 1
+vim.g.loaded_getscript = 1
+vim.g.loaded_getscriptPlugin = 1
+vim.g.loaded_gzip = 1
+vim.g.loaded_logiPat = 1
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+vim.g.loaded_netrwSettings = 1
+vim.g.loaded_netrwFileHandlers = 1
+vim.g.loaded_tar = 1
+vim.g.loaded_tarPlugin = 1
+vim.g.loaded_rrhelper = 1
+vim.g.loaded_spellfile_plugin = 1
+vim.g.loaded_tar = 1
+vim.g.loaded_tarPlugin = 1
+vim.g.loaded_vimball = 1
+vim.g.loaded_vimballPlugin = 1
+vim.g.loaded_zip = 1
+vim.g.loaded_zipPlugin = 1
+
+_G.colors = {
+	red  = "#BF616A", teal   = "#97B7D7", one_bg  = "#373D49", lightbg   = "#3B4252", blue         = "#81A1C1",
+	cyan = "#5E81AC", black  = "#2E3440", orange  = "#D08770", one_bg2   = "#434C5E", foreground   = "#E5E9F0",
+	grey = "#4B515D", green  = "#A3BE8C", purple  = "#8FBCBB", one_bg3   = "#4C566A", light_grey   = "#646A76",
+	line = "#3A404C", white  = "#D8DEE9", yellow  = "#EBCB8B", lightbg2  = "#393F4B", dark_purple  = "#B48EAD",
+	pink = "#D57780", black2 = "#343A46", grey_fg = "#606672", baby_pink = "#DE878F", darker_black = "#2A303C",
+}
+
+require("impatient")
+require("packer_compiled")
 require("packer").startup({
 	function(use)
+		use("lewis6991/impatient.nvim")
+		use({ "tweekmonster/startuptime.vim", cmd = "StartupTime" })
+		use("nathom/filetype.nvim")
 		use("kyazdani42/nvim-web-devicons")
 		use({
 			"famiu/feline.nvim",
@@ -248,8 +309,7 @@ require("packer").startup({
 			"nvim-treesitter/nvim-treesitter",
 			config = function()
 				require("nvim-treesitter.configs").setup({
-					matchup = { enable = true },
-					highlight = { enable = true, use_languagetree = true },
+					highlight = { enable = true },
 					ensure_installed = {
 						"bash", "bibtex", "c", "cmake", "cpp", "css", "dockerfile", "go", "html", "java",
 						"javascript", "json", "latex", "lua", "perl", "php", "python", "r", "regex", "rust",
@@ -280,7 +340,7 @@ require("packer").startup({
 			config = function()
 				local builtin = require("nnn").builtin
 				require("nnn").setup({
-					explorer = { cmd = "nnn -G", session = "shared", side = "botright", tabs = false },
+					explorer = { cmd = "nnn -G", session = "shared", side = "botright", tabs = true },
 					picker = { cmd = "tmux new-session nnn -GPp", style = { border = "rounded" } },
 					replace_netrw = "picker",
 					windownav = { left = "<C-h>", right = "<C-l>" },
@@ -291,9 +351,10 @@ require("packer").startup({
 						{ "<C-t>", builtin.open_in_tab },      -- open file(s) in tab
 						{ "<C-s>", builtin.open_in_split },    -- open file(s) in split
 						{ "<C-v>", builtin.open_in_vsplit },   -- open file(s) in vertical split
-						{ "<C-y>", builtin.copy_to_clipboard }, -- copy file(s) to clipboard
+						{ "<C-y>", builtin.copy_to_clipboard },-- copy file(s) to clipboard
 						{ "<C-w>", builtin.cd_to_path },       -- cd to file directory
 						{ "<C-p>", builtin.open_in_preview },  -- open file in preview split keeping nnn focused
+						{ "<C-e>", builtin.populate_cmdline }, -- populate cmdline (:) with file(s)
 					},
 				})
 			end,
@@ -369,7 +430,7 @@ require("packer").startup({
 					end
 				}
 				vim.diagnostic.config( { virtual_text = false, float = { show_header = false, border = "rounded" } })
-				local function on_attach(_, bufnr)
+				local function on_attach(client, bufnr)
 					local function bufmap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
 					local opts = { noremap = true, silent = true }
 					bufmap("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
@@ -394,11 +455,9 @@ require("packer").startup({
 					augroup LspFloat
 						autocmd!
 						autocmd CursorHold,CursorHoldI * lua vim.diagnostic.open_float(0, { scope = 'line' })
-						autocmd CursorHold  <buffer> lua vim.lsp.buf.document_highlight()
-						autocmd CursorHoldI <buffer> lua vim.lsp.buf.document_highlight()
-						autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
 					augroup end
 					]]
+					require("illuminate").on_attach(client)
 				end
 				local lspconfig = require("lspconfig")
 				local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -448,14 +507,12 @@ require("packer").startup({
 			config = function() require("lsp_signature").setup({ doc_lines = 0, hint_enable = false }) end,
 		})
 		use({
-			"andymass/vim-matchup",
+			"RRethy/vim-illuminate",
 			after = "lsp_signature.nvim",
-			config = function() vim.g.matchup_matchparen_deferred = 1 end,
-			setup = function() vim.defer_fn(function() require("packer").loader("vim-matchup") end, 0) end,
 		})
 		use({
 			"karb94/neoscroll.nvim",
-			after = "vim-matchup",
+			after = "vim-illuminate",
 			config = function()
 				require("neoscroll").setup()
 				require("neoscroll.config").set_mappings({ ["<C-u>"] = { "scroll", { "-vim.wo.scroll", "true", "150" } } })
@@ -464,7 +521,7 @@ require("packer").startup({
 		})
 		use({
 			"~/dev/stabilize.nvim",
-			after = "vim-matchup",
+			after = "neoscroll.nvim",
 			config = function() require("stabilize").setup({ forcemark = "f" }) end,
 		})
 		use({ "nvim-treesitter/playground", after = "stabilize.nvim" })
@@ -571,8 +628,13 @@ require("packer").startup({
 			setup = function() vim.defer_fn(function() require("packer").loader("surround.nvim") end, 0) end
 		})
 		use({
-			"folke/which-key.nvim",
+			"numToStr/Comment.nvim",
 			after = "surround.nvim",
+			config = function() require("Comment").setup() end,
+		})
+		use({
+			"folke/which-key.nvim",
+			after = "Comment.nvim",
 			config = function()
 				local wk = require("which-key")
 				wk.setup()
@@ -599,11 +661,6 @@ require("packer").startup({
 					integrations = { diffview = true },
 				})
 			end
-		})
-		use({
-			"terrortylor/nvim-comment",
-			cmd = "CommentToggle",
-			config = function() require("nvim_comment").setup() end,
 		})
 		use({
 		 	"nvim-telescope/telescope-fzf-native.nvim",
@@ -642,62 +699,13 @@ require("packer").startup({
 		})
 	end,
 	config = {
+    compile_path = vim.fn.stdpath('config')..'/lua/packer_compiled.lua',
 		display = {
 			prompt_border = "rounded",
 			open_fn = function() return require("packer.util").float({ border = "rounded" }) end
 		},
 	},
 })
-
-vim.opt.wrap = false
-vim.opt.list = true
-vim.opt.listchars = { tab = "  ", extends = "", precedes = "" }
-vim.opt.title = true
-vim.opt.clipboard = "unnamedplus"
-vim.opt.cmdheight = 1
-vim.opt.smartindent = true
-vim.opt.tabstop = 2
-vim.opt.shiftwidth = 2
-vim.opt.hidden = true
-vim.opt.shortmess:append("sI")
-vim.opt.smartcase = true
-vim.opt.ignorecase = true
-vim.opt.relativenumber = true
-vim.opt.splitbelow = true
-vim.opt.splitright = true
-vim.opt.termguicolors = true
-vim.opt.timeoutlen = 400
-vim.opt.undofile = true
-vim.opt.updatetime = 250
-vim.opt.shell = "/bin/sh"
-vim.opt.lazyredraw = true
-vim.opt.mouse = "a"
-vim.opt.completeopt = "menu,menuone,noselect"
-vim.opt.showmode = false
-
-vim.g.mapleader = " "
-vim.g.maplocalleader = ","
-vim.g.loaded_2html_plugin = 1
-vim.g.loaded_getscript = 1
-vim.g.loaded_getscriptPlugin = 1
-vim.g.loaded_gzip = 1
-vim.g.loaded_logiPat = 1
-vim.g.loaded_matchit = 1
-vim.g.loaded_matchparen = 1
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
-vim.g.loaded_netrwSettings = 1
-vim.g.loaded_netrwFileHandlers = 1
-vim.g.loaded_tar = 1
-vim.g.loaded_tarPlugin = 1
-vim.g.loaded_rrhelper = 1
-vim.g.loaded_spellfile_plugin = 1
-vim.g.loaded_tar = 1
-vim.g.loaded_tarPlugin = 1
-vim.g.loaded_vimball = 1
-vim.g.loaded_vimballPlugin = 1
-vim.g.loaded_zip = 1
-vim.g.loaded_zipPlugin = 1
 
 local function map(mode, lhs, rhs, opts)
 	local options = { noremap = true, silent = true }
@@ -719,8 +727,6 @@ map("n", "<A-S-Tab>", "<cmd>BufferLineCyclePrev<CR>")
 map("n", "<leader>zz", "<cmd>TZAtaraxis<CR>")
 map("n", "<leader>zf", "<cmd>TZFocus<CR>")
 map("n", "<leader>zm", "<cmd>TZMinimalist<CR>")
-map("n", "<leader>/", "<cmd>CommentToggle<CR>")
-map("v", "<leader>/", ":'<,'>CommentToggle<CR>")
 map("n", "<leader>ra", ":%s//g<Left><Left>")
 map("n", "<leader>da", "ggVGd")
 map("n", "<C-a>", "GVgg")
@@ -759,6 +765,9 @@ map("n", "gR", "<cmd>TroubleToggle lsp_references<CR>")
 map("n", "<C-A-j>", "<cmd>lua require('trouble').next({skip_groups = true, jump = true})<CR>")
 map("n", "<C-A-k>", "<cmd>lua require('trouble').previous({skip_groups = true, jump = true})<CR>")
 map("n", "<leader>gc", "<cmd>Neogit<CR>")
+function _G.matchparen()
+
+end
 
 vim.cmd([[
 	augroup MyAutoCommands
@@ -792,14 +801,6 @@ function _G.vimgrepprompt()
 		vim.schedule(function() print(ok and " " or "No results") end)
 	end
 end
-
-_G.colors = {
-	red  = "#BF616A", teal   = "#97B7D7", one_bg  = "#373D49", lightbg   = "#3B4252", blue         = "#81A1C1",
-	cyan = "#5E81AC", black  = "#2E3440", orange  = "#D08770", one_bg2   = "#434C5E", foreground   = "#E5E9F0",
-	grey = "#4B515D", green  = "#A3BE8C", purple  = "#8FBCBB", one_bg3   = "#4C566A", light_grey   = "#646A76",
-	line = "#3A404C", white  = "#D8DEE9", yellow  = "#EBCB8B", lightbg2  = "#393F4B", dark_purple  = "#B48EAD",
-	pink = "#D57780", black2 = "#343A46", grey_fg = "#606672", baby_pink = "#DE878F", darker_black = "#2A303C",
-}
 
 vim.g.terminal_color_0  = colors.black
 vim.g.terminal_color_1  = colors.red
