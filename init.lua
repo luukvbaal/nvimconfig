@@ -769,9 +769,6 @@ map("n", "gR", "<cmd>TroubleToggle lsp_references<CR>")
 map("n", "<C-A-j>", "<cmd>lua require('trouble').next({skip_groups = true, jump = true})<CR>")
 map("n", "<C-A-k>", "<cmd>lua require('trouble').previous({skip_groups = true, jump = true})<CR>")
 map("n", "<leader>gc", "<cmd>Neogit<CR>")
-function _G.matchparen()
-
-end
 
 vim.cmd([[
 augroup MyAutoCommands
@@ -779,7 +776,6 @@ autocmd!
 autocmd Filetype sh setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
 autocmd Focuslost * silent! update
 autocmd InsertLeave,CursorHold * silent! update
-autocmd BufWritePost init.lua source <afile> | PackerCompile
 autocmd QuickFixCmdPost [^l]* lua TroubleQuickFixPost("quickfix")
 autocmd QuickFixCmdPost l* lua TroubleQuickFixPost("loclist")
 autocmd TextYankPost * silent! lua vim.highlight.on_yank({ higroup="IncSearch", timeout=1000 })
