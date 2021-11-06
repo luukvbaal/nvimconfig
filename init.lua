@@ -537,7 +537,7 @@ require("packer").startup({
 			vim.notify = require("notify")
 		end
 	})
-	use({ "rafamadriz/friendly-snippets", event = { "InsertEnter", "CmdwinEnter" } })
+	use({ "rafamadriz/friendly-snippets", event = { "InsertEnter", "CmdlineEnter" } })
 	use({
 		"hrsh7th/nvim-cmp",
 		after = "friendly-snippets",
