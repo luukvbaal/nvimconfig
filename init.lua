@@ -45,6 +45,7 @@ vim.g.loaded_vimball = 1
 vim.g.loaded_vimballPlugin = 1
 vim.g.loaded_zip = 1
 vim.g.loaded_zipPlugin = 1
+vim.g.vimwiki_list = { { path = "~/vimwiki/", syntax = "markdown", ext = ".md" } }
 
 _G.colors = {
 	red  = "#BF616A", teal   = "#97B7D7", one_bg  = "#373D49", lightbg   = "#3B4252", blue         = "#81A1C1",
@@ -649,6 +650,7 @@ require("packer").startup({
 	use({ "wbthomason/packer.nvim", cmd = { "PackerSync", "PackerClean" } })
 	use({
 		"lervag/vimtex",
+		cmd = "VimtexInverseSearch",
 		ft = "tex",
 		config = function() vim.g.vimtex_view_method = "zathura" end
 	})
@@ -699,8 +701,7 @@ require("packer").startup({
 	})
 	use({
 		"vimwiki/vimwiki",
-		cmd = "VimwikiIndex",
-		config = function() vim.g.vimwiki_list = { { path = "~/vimwiki/", syntax = "markdown", ext = ".md" } } end
+		cmd = "VimwikiIndex"
 	})
 end,
 config = {
@@ -791,7 +792,7 @@ function _G.TroubleQuickFixPost(mode)
 	vim.api.nvim_get_current_buf(), function(items)
 		if #items > 0 then require("trouble").open({ mode = mode }) end
 	end, { mode = mode })
-	vim.cmd("doautocmd User StabilizeRestore")
+	vim.cmd("doautocmd WinNew")
 end
 
 function _G.vimgrepprompt()
