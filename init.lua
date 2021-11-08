@@ -1,3 +1,4 @@
+#!/bin/lua
 vim.opt.wrap = false
 vim.opt.list = true
 vim.opt.listchars = { tab = "  ", extends = "", precedes = "" }
@@ -457,12 +458,6 @@ require("packer").startup({
 				bufmap("n", "<leader>q", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
 				bufmap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 				bufmap("v", "<leader>ca", "<cmd>lua vim.lsp.buf.range_code_action()<CR>", opts)
-				vim.cmd[[
-				augroup LspFloat
-				autocmd!
-				autocmd CursorHold,CursorHoldI * lua vim.diagnostic.open_float(0, { scope = 'line' })
-				augroup end
-				]]
 				require("illuminate").on_attach(client)
 			end
 			local lspconfig = require("lspconfig")
@@ -495,8 +490,15 @@ require("packer").startup({
 		end,
 	})
 	use({
-		"folke/trouble.nvim",
+		"https://gitlab.com/yorickpeterse/nvim-dd.git",
 		after = "null-ls.nvim",
+		config = function()
+			require("dd").setup({ timeout = 1 })
+		end
+	})
+	use({
+		"folke/trouble.nvim",
+		after = "nvim-dd.git",
 		config = function()
 			require("trouble").setup({
 				auto_open = true,
@@ -528,7 +530,7 @@ require("packer").startup({
 	use({
 		"~/dev/stabilize.nvim",
 		after = "neoscroll.nvim",
-		config = function() require("stabilize").setup({ forcemark = "f" }) end,
+		config = function() require("stabilize").setup({ forcemark = "f", nested = "QuickFixCmdPost,User LspDiagnosticsChanged" }) end,
 	})
 	use({ "nvim-treesitter/playground", after = "stabilize.nvim" })
 	use({
@@ -537,6 +539,10 @@ require("packer").startup({
 		config = function()
 			vim.notify = require("notify")
 		end
+	})
+	use({
+		"antoinemadec/FixCursorHold.nvim",
+		after = "nvim-notify",
 	})
 	use({ "rafamadriz/friendly-snippets", event = { "InsertEnter", "CmdlineEnter" } })
 	use({
@@ -753,7 +759,7 @@ map("i", "!", "!<C-g>u")
 map("i", "?", "?<C-g>u")
 map("n", "<C-A-n>", "<cmd>NnnExplorer %:p:h<CR>")
 map("t", "<C-A-n>", "<cmd>NnnExplorer<CR>")
-map("n", "<C-A-p>", "<cmd>NnnPicker<CR>")
+map("n", "<C-A-p>", "<cmd>NnnPicker %:p:h<CR>")
 map("t", "<C-A-p>", "<cmd>NnnPicker<CR>")
 map("n", "<leader>ff", "<cmd>Telescope find_files<CR>")
 map("n", "<leader>fgf", "<cmd>Telescope git_files<CR>")
@@ -792,7 +798,6 @@ function _G.TroubleQuickFixPost(mode)
 	vim.api.nvim_get_current_buf(), function(items)
 		if #items > 0 then require("trouble").open({ mode = mode }) end
 	end, { mode = mode })
-	vim.cmd("doautocmd WinNew")
 end
 
 function _G.vimgrepprompt()
