@@ -1,4 +1,3 @@
-#!/bin/lua
 vim.opt.wrap = false
 vim.opt.list = true
 vim.opt.listchars = { tab = "  ", extends = "", precedes = "" }
@@ -40,8 +39,6 @@ vim.g.loaded_tar = 1
 vim.g.loaded_tarPlugin = 1
 vim.g.loaded_rrhelper = 1
 vim.g.loaded_spellfile_plugin = 1
-vim.g.loaded_tar = 1
-vim.g.loaded_tarPlugin = 1
 vim.g.loaded_vimball = 1
 vim.g.loaded_vimballPlugin = 1
 vim.g.loaded_zip = 1
@@ -342,11 +339,11 @@ require("packer").startup({
 			config = function()
 				local builtin = require("nnn").builtin
 				require("nnn").setup({
-					explorer = { cmd = "nnn -G", session = "shared", side = "botright", tabs = true },
+					explorer = { cmd = "nnn -G", session = "shared", side = "topleft", tabs = true },
 					picker = { cmd = "tmux new-session nnn -GPp", style = { border = "rounded" } },
 					replace_netrw = "picker",
 					windownav = { left = "<C-h>", right = "<C-l>" },
-					auto_open = { setup = "explorer", tabpage = "explorer", empty = true, ft_ignore = { "gitcommit" }
+					auto_open = { setup = "picker", tabpage = "explorer", empty = true, ft_ignore = { "gitcommit" }
 				},
 				auto_close = true,
 				mappings = {
@@ -708,6 +705,11 @@ require("packer").startup({
 	use({
 		"vimwiki/vimwiki",
 		cmd = "VimwikiIndex"
+	})
+	use({
+		"michaelb/sniprun",
+		run = "bash ./install.sh",
+		cmd = { "SnipRun", "SnipInfo"}
 	})
 end,
 config = {
