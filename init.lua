@@ -253,7 +253,7 @@ require("packer").startup({
 						elseif current_line == vim.fn.line("$") then return "ﬠﬠﬠ"
 						end
 						local result, _ = math.modf((current_line / total_line) * 100)
-						return result.."%%"
+						return " "..result.."%%"
 					end,
 					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
 					hl = { fg = colors.green, bg = colors.one_bg },
@@ -311,7 +311,7 @@ require("packer").startup({
 					highlight = { enable = true },
 					ensure_installed = {
 						"bash", "bibtex", "c", "cmake", "cpp", "css", "dockerfile", "go", "html", "java",
-						"javascript", "json", "latex", "lua", "perl", "php", "python", "r", "regex", "rust",
+						"javascript", "json", "lua", "perl", "php", "python", "r", "regex", "rust",
 						"toml", "typescript", "verilog", "vim", "yaml",
 					},
 				})
@@ -339,7 +339,7 @@ require("packer").startup({
 			config = function()
 				local builtin = require("nnn").builtin
 				require("nnn").setup({
-					explorer = { cmd = "nnn -G", session = "shared", side = "topleft", tabs = true },
+					explorer = { cmd = "nnn -Go", session = "shared", side = "topleft", tabs = true },
 					picker = { cmd = "tmux new-session nnn -GPp", style = { border = "rounded" } },
 					replace_netrw = "picker",
 					windownav = { left = "<C-h>", right = "<C-l>" },
@@ -693,6 +693,7 @@ require("packer").startup({
 					selection_caret = "  ",
 					entry_prefix = "  ",
 				},
+				pickers = { fd = { find_command = { "fd", ".", "/home/luuk", "--type", "f", "-H" } } },
 			})
 			require("telescope").load_extension("fzf")
 		end,
@@ -763,7 +764,7 @@ map("n", "<C-A-n>", "<cmd>NnnExplorer %:p:h<CR>")
 map("t", "<C-A-n>", "<cmd>NnnExplorer<CR>")
 map("n", "<C-A-p>", "<cmd>NnnPicker %:p:h<CR>")
 map("t", "<C-A-p>", "<cmd>NnnPicker<CR>")
-map("n", "<leader>ff", "<cmd>Telescope find_files<CR>")
+map("n", "<leader>ff", "<cmd>Telescope fd<CR>")
 map("n", "<leader>fgf", "<cmd>Telescope git_files<CR>")
 map("n", "<leader>fh", "<cmd>Telescope help_tags<CR>")
 map("n", "<leader>fgb", "<cmd>Telescope git_branches<CR>")
