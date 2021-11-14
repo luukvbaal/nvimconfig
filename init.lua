@@ -43,7 +43,6 @@ vim.g.loaded_vimball = 1
 vim.g.loaded_vimballPlugin = 1
 vim.g.loaded_zip = 1
 vim.g.loaded_zipPlugin = 1
-vim.g.vimwiki_list = { { path = "~/vimwiki/", syntax = "markdown", ext = ".md" } }
 
 _G.colors = {
 	red  = "#BF616A", teal   = "#97B7D7", one_bg  = "#373D49", lightbg   = "#3B4252", blue         = "#81A1C1",
@@ -55,296 +54,282 @@ _G.colors = {
 
 require("impatient")
 require("packer_compiled")
-require("packer").startup({
-	function(use)
-		use("lewis6991/impatient.nvim")
-		use({ "tweekmonster/startuptime.vim", cmd = "StartupTime" })
-		use("nathom/filetype.nvim")
-		use("kyazdani42/nvim-web-devicons")
-		use({
-			"famiu/feline.nvim",
-			config = function()
-				local lsp = require("feline.providers.lsp")
-				local icons = { left = "", right = " ", main = "  ", vi_mode = " ", position = " " }
-				local components = { active = { {}, {}, {} }, inactive = { {}, {}, {} } }
-				components.active[1][1] = {
-					provider = icons.main,
-					hl = { fg = colors.black2, bg = colors.blue },
-					right_sep = {
-						str = icons.right,
-						hl = { fg = colors.blue, bg = colors.lightbg },
-					},
-				}
-				components.active[1][2] = {
-					provider = function()
-						local filename = vim.fn.expand("%:t")
-						local extension = vim.fn.expand("%:e")
-						local icon = require("nvim-web-devicons").get_icon(filename, extension)
-						if icon == nil then return " " end
-						return " "..icon.." "..filename.." "
-					end,
-					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
-					hl = { fg = colors.white, bg = colors.lightbg },
-					right_sep = {
-						str = icons.right,
-						hl = { fg = colors.lightbg, bg = colors.lightbg2 },
-					},
-				}
-				components.active[1][3] = {
-					provider = function()
-						local dir_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-						return "  "..dir_name.." "
-					end,
-					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 80 end,
-					hl = { fg = colors.grey_fg, bg = colors.lightbg2 },
-					right_sep = {
-						str = icons.right,
-						hi = { fg = colors.lightbg2, bg = colors.black2 },
-					},
-				}
-				components.active[1][4] = {
-					provider = function() return require("nvim-gps").get_location() end,
-					enabled = function()
-						local module = vim.F.npcall(require, "nvim-gps")
-						return module and module.is_available()
-					end,
-					hl = { fg = colors.grey_fg },
-				}
-				components.active[1][5] = {
-					provider = "diagnostic_errors",
-					enabled = function() return lsp.diagnostics_exist("Error") end,
-					hl = { fg = colors.red },
-					icon = "  ",
-				}
-				components.active[1][6] = {
-					provider = "diagnostic_warnings",
-					enabled = function() return lsp.diagnostics_exist("Warning") end,
-					hl = { fg = colors.yellow },
-					icon = "  ",
-				}
-				components.active[1][7] = {
-					provider = "diagnostic_hints",
-					enabled = function() return lsp.diagnostics_exist("Hint") end,
-					hl = { fg = colors.grey_fg },
-					icon = "  ",
-				}
-				components.active[1][8] = {
-					provider = "diagnostic_info",
-					enabled = function() return lsp.diagnostics_exist("Inormation") end,
-					hl = { fg = colors.green },
-					icon = "  ",
-				}
-				components.active[2][1] = {
-					provider = function()
-						local Lsp = vim.lsp.util.get_progress_messages()[1]
-						if Lsp then
-							local msg = Lsp.message or ""
-							local percentage = Lsp.percentage or 0
-							local title = Lsp.title or ""
-							local spinners = { "", "", "" }
-							local success_icon = { "", "", "" }
-							local ms = vim.loop.hrtime() / 1000000
-							local frame = math.floor(ms / 120) % 3
-							if percentage >= 70 then
-								return string.format(" %%<%s %s %s (%s%%%%) ", success_icon[frame + 1], title, msg, percentage)
-							else
-								return string.format(" %%<%s %s %s (%s%%%%) ", spinners[frame + 1], title, msg, percentage)
-							end
-						end
-						return ""
-					end,
-					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 80 end,
-					hl = { fg = colors.green },
-				}
-				components.active[3][1] = {
-					provider = function()
-						if next(vim.lsp.buf_get_clients()) ~= nil then
-							return "  LSP"
-						else
-							return ""
-						end
-					end,
-					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
-					hl = { fg = colors.grey_fg, bg = colors.black2 },
-				}
-				components.active[3][2] = {
-					provider = "git_branch",
-					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
-					hl = { fg = colors.grey_fg, bg = colors.black2 },
-					icon = "  ",
-				}
-				components.active[3][3] = {
-					provider = "git_diff_added",
-					hl = { fg = colors.green, bg = colors.black2 },
-					icon = "  ",
-				}
-				components.active[3][4] = {
-					provider = "git_diff_changed",
-					hl = { fg = colors.yellow, bg = colors.black2 },
-					icon = "  ",
-				}
-				components.active[3][5] = {
-					provider = "git_diff_removed",
-					hl = { fg = colors.baby_pink, bg = colors.black2 },
-					icon = "  ",
-				}
-				components.active[3][6] = {
-					provider = " "..icons.left,
-					hl = { fg = colors.one_bg2, bg = colors.black2 },
-				}
-				local mode_colors = {
-					["n"] = { "NORMAL", colors.red },
-					["no"] = { "N-PENDING", colors.red },
-					["i"] = { "INSERT", colors.darkpurple },
-					["ic"] = { "INSERT", colors.darkpurple },
-					["t"] = { "TERMINAL", colors.green },
-					["v"] = { "VISUAL", colors.cyan },
-					["V"] = { "V-LINE", colors.cyan },
-					[""] = { "V-BLOCK", colors.cyan },
-					["R"] = { "REPLACE", colors.orange },
-					["Rv"] = { "V-REPLACE", colors.orange },
-					["s"] = { "SELECT", colors.blue },
-					["S"] = { "S-LINE", colors.blue },
-					[""] = { "S-BLOCK", colors.blue },
-					["c"] = { "COMMAND", colors.pink },
-					["cv"] = { "COMMAND", colors.pink },
-					["ce"] = { "COMMAND", colors.pink },
-					["r"] = { "PROMPT", colors.teal },
-					["rm"] = { "MORE", colors.teal },
-					["r?"] = { "CONFIRM", colors.teal },
-					["!"] = { "SHELL", colors.green },
-				}
-				components.active[3][7] = {
-					provider = icons.left,
-					hl = function() return { fg = mode_colors[vim.fn.mode()][2], bg = colors.one_bg2 } end,
-				}
-				components.active[3][8] = {
-					provider = icons.vi_mode,
-					hl = function() return { fg = colors.black2, bg = mode_colors[vim.fn.mode()][2] } end,
-				}
-				components.active[3][9] = {
-					provider = function() return " "..mode_colors[vim.fn.mode()][1].." " end,
-					hl = function() return { fg = mode_colors[vim.fn.mode()][2], bg = colors.one_bg } end,
-				}
-				components.active[3][10] = {
-					provider = icons.left,
-					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
-					hl = { fg = colors.grey, bg = colors.one_bg },
-				}
-				components.active[3][11] = {
-					provider = icons.left,
-					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
-					hl = { fg = colors.green, bg = colors.grey },
-				}
-				components.active[3][12] = {
-					provider = icons.position,
-					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
-					hl = { fg = colors.black, bg = colors.green },
-				}
-				components.active[3][13] = {
-					provider = "position",
-					hl = { fg = colors.green, bg = colors.one_bg },
-				}
-				components.active[3][14] = {
-					provider = function()
-						local current_line = vim.fn.line(".")
-						local total_line = vim.fn.line("$")
-						if current_line == 1 then return "ﬢﬢ"
-						elseif current_line == vim.fn.line("$") then return "ﬠﬠﬠ"
-						end
-						local result, _ = math.modf((current_line / total_line) * 100)
-						return " "..result.."%%"
-					end,
-					enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
-					hl = { fg = colors.green, bg = colors.one_bg },
-				}
-				require("feline").setup({
-					colors = { fg = colors.grey_fg, bg = colors.black2 },
-					components = components,
-				})
-			end,
-		})
-		use({
-			"akinsho/bufferline.nvim",
-			config = function()
-				require("bufferline").setup({
-					options = {
-						separator_style = "thin",
-						diagnostics = "nvim_lsp",
-						custom_filter = function(buf)
-							if vim.api.nvim_buf_get_option(buf, "filetype") ~= "nnn" then return true end
-						end,
-					},
-					highlights = {
-						background = { guifg = colors.grey_fg, guibg = colors.black2 },
-						buffer_selected = { guifg = colors.white, guibg = colors.black, gui = "bold", },
-						buffer_visible = { guifg = colors.light_grey, guibg = colors.black2 },
-						error = { guifg = colors.light_grey, guibg = colors.black2 },
-						error_diagnostic = { guifg = colors.light_grey, guibg = colors.black2 },
-						close_button = { guifg = colors.light_grey, guibg = colors.black2 },
-						close_button_visible = { guifg = colors.light_grey, guibg = colors.black2 },
-						close_button_selected = { guifg = colors.red, guibg = colors.black },
-						fill = { guifg = colors.grey_fg, guibg = colors.black2 },
-						indicator_selected = { guifg = colors.black, guibg = colors.black },
-						modified = { guifg = colors.red, guibg = colors.black2 },
-						modified_visible = { guifg = colors.red, guibg = colors.black2 },
-						modified_selected = { guifg = colors.green, guibg = colors.black },
-						separator = { guifg = colors.black2, guibg = colors.black2 },
-						separator_visible = { guifg = colors.black2, guibg = colors.black2 },
-						separator_selected = { guifg = colors.black2, guibg = colors.black2 },
-						tab = { guifg = colors.light_grey, guibg = colors.one_bg3 },
-						tab_selected = { guifg = colors.black2, guibg = colors.blue },
-						tab_close = { guifg = colors.red, guibg = colors.black },
-					},
-				})
-			end,
-		})
-		use("nvim-lua/plenary.nvim")
-		use({
-			"lewis6991/gitsigns.nvim",
-			config = function() require("gitsigns").setup() end
-		})
-		use({
-			"nvim-treesitter/nvim-treesitter",
-			config = function()
-				require("nvim-treesitter.configs").setup({
-					highlight = { enable = true },
-					ensure_installed = {
-						"bash", "bibtex", "c", "cmake", "cpp", "css", "dockerfile", "go", "html", "java",
-						"javascript", "json", "lua", "perl", "php", "python", "r", "regex", "rust",
-						"toml", "typescript", "verilog", "vim", "yaml",
-					},
-				})
-			end,
-		})
-		use({
-			"lukas-reineke/indent-blankline.nvim",
-			config = function()
-				require("indent_blankline").setup({
-					char = "▏",
-					show_trailing_blankline_indent = false,
-					show_first_indent_level = false,
-					buftype_exclude = { "terminal" },
-					filetype_exclude = { "help", "terminal", "dashboard", "packer", "lspinfo", "TelescopePrompt", "TelescopeResults" }
-				})
-			end,
-		})
-		use({
-			"norcalli/nvim-colorizer.lua",
-			config = function() require("colorizer").setup({ "*" }, { names = false }) end,
-		})
-		-- use("mcchrish/nnn.vim")
-		use({
-			"~/dev/nnn.nvim",
-			config = function()
-				local builtin = require("nnn").builtin
-				require("nnn").setup({
-					explorer = { cmd = "nnn -Go", session = "shared", side = "topleft", tabs = true },
-					picker = { cmd = "tmux new-session nnn -GPp", style = { border = "rounded" } },
-					replace_netrw = "picker",
-					windownav = { left = "<C-h>", right = "<C-l>" },
-					auto_open = { setup = "picker", tabpage = "explorer", empty = true, ft_ignore = { "gitcommit" }
+require("packer").startup({ function(use)
+	use("lewis6991/impatient.nvim")
+	use({ "tweekmonster/startuptime.vim", cmd = "StartupTime" })
+	use("nathom/filetype.nvim")
+	use("kyazdani42/nvim-web-devicons")
+	use({
+		"famiu/feline.nvim",
+		config = function()
+			local lsp = require("feline.providers.lsp")
+			local icons = { left = "", right = " ", main = "  ", vi_mode = " ", position = " " }
+			local components = { active = { {}, {}, {} }, inactive = { {}, {}, {} } }
+			components.active[1][1] = {
+				provider = icons.main,
+				hl = { fg = colors.black2, bg = colors.blue },
+				right_sep = {
+					str = icons.right,
+					hl = { fg = colors.blue, bg = colors.lightbg },
 				},
+			}
+			components.active[1][2] = {
+				provider = function()
+					local filename = vim.fn.expand("%:t")
+					local icon = require("nvim-web-devicons").get_icon(filename, vim.fn.expand("%:e"))
+					if icon == nil then return " " end
+					return " "..icon.." "..filename.." "
+				end,
+				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
+				hl = { fg = colors.white, bg = colors.lightbg },
+				right_sep = {
+					str = icons.right,
+					hl = { fg = colors.lightbg, bg = colors.lightbg2 },
+				},
+			}
+			components.active[1][3] = {
+				provider = function() return "  "..vim.fn.fnamemodify(vim.fn.getcwd(), ":t").." " end,
+				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 80 end,
+				hl = { fg = colors.grey_fg, bg = colors.lightbg2 },
+				right_sep = {
+					str = icons.right,
+					hi = { fg = colors.lightbg2, bg = colors.black2 },
+				},
+			}
+			components.active[1][4] = {
+				provider = function() return require("nvim-gps").get_location() end,
+				enabled = function()
+					local module = vim.F.npcall(require, "nvim-gps")
+					return module and module.is_available()
+				end,
+				hl = { fg = colors.grey_fg },
+			}
+			components.active[1][5] = {
+				provider = "diagnostic_errors",
+				enabled = function() return lsp.diagnostics_exist("Error") end,
+				hl = { fg = colors.red },
+				icon = "  ",
+			}
+			components.active[1][6] = {
+				provider = "diagnostic_warnings",
+				enabled = function() return lsp.diagnostics_exist("Warning") end,
+				hl = { fg = colors.yellow },
+				icon = "  ",
+			}
+			components.active[1][7] = {
+				provider = "diagnostic_hints",
+				enabled = function() return lsp.diagnostics_exist("Hint") end,
+				hl = { fg = colors.grey_fg },
+				icon = "  ",
+			}
+			components.active[1][8] = {
+				provider = "diagnostic_info",
+				enabled = function() return lsp.diagnostics_exist("Inormation") end,
+				hl = { fg = colors.green },
+				icon = "  ",
+			}
+			components.active[2][1] = {
+				provider = function()
+					local prog = vim.lsp.util.get_progress_messages()[1]
+					if prog then
+						local msg = prog.message or ""
+						local percentage = prog.percentage or 0
+						local title = prog.title or ""
+						local spinners = { "", "", "" }
+						local success_icon = { "", "", "" }
+						local frame = math.floor(vim.loop.hrtime() / 1000000 / 120) % 3
+						if percentage >= 70 then
+							return string.format(" %%<%s %s %s (%s%%%%) ", success_icon[frame + 1], title, msg, percentage)
+						else
+							return string.format(" %%<%s %s %s (%s%%%%) ", spinners[frame + 1], title, msg, percentage)
+						end
+					end
+					return ""
+				end,
+				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 80 end,
+				hl = { fg = colors.green },
+			}
+			components.active[3][1] = {
+				provider = function() return vim.lsp.buf_get_clients()[1] and "  LSP" or "" end,
+				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
+				hl = { fg = colors.grey_fg, bg = colors.black2 },
+			}
+			components.active[3][2] = {
+				provider = "git_branch",
+				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
+				hl = { fg = colors.grey_fg, bg = colors.black2 },
+				icon = "  ",
+			}
+			components.active[3][3] = {
+				provider = "git_diff_added",
+				hl = { fg = colors.green, bg = colors.black2 },
+				icon = "  ",
+			}
+			components.active[3][4] = {
+				provider = "git_diff_changed",
+				hl = { fg = colors.yellow, bg = colors.black2 },
+				icon = "  ",
+			}
+			components.active[3][5] = {
+				provider = "git_diff_removed",
+				hl = { fg = colors.baby_pink, bg = colors.black2 },
+				icon = "  ",
+			}
+			components.active[3][6] = {
+				provider = " "..icons.left,
+				hl = { fg = colors.one_bg2, bg = colors.black2 },
+			}
+			local mode_colors = {
+				["n"] = { "NORMAL", colors.red },
+				["no"] = { "N-PENDING", colors.red },
+				["i"] = { "INSERT", colors.darkpurple },
+				["ic"] = { "INSERT", colors.darkpurple },
+				["t"] = { "TERMINAL", colors.green },
+				["v"] = { "VISUAL", colors.cyan },
+				["V"] = { "V-LINE", colors.cyan },
+				[""] = { "V-BLOCK", colors.cyan },
+				["R"] = { "REPLACE", colors.orange },
+				["Rv"] = { "V-REPLACE", colors.orange },
+				["s"] = { "SELECT", colors.blue },
+				["S"] = { "S-LINE", colors.blue },
+				[""] = { "S-BLOCK", colors.blue },
+				["c"] = { "COMMAND", colors.pink },
+				["cv"] = { "COMMAND", colors.pink },
+				["ce"] = { "COMMAND", colors.pink },
+				["r"] = { "PROMPT", colors.teal },
+				["rm"] = { "MORE", colors.teal },
+				["r?"] = { "CONFIRM", colors.teal },
+				["!"] = { "SHELL", colors.green },
+			}
+			components.active[3][7] = {
+				provider = icons.left,
+				hl = function() return { fg = mode_colors[vim.fn.mode()][2], bg = colors.one_bg2 } end,
+			}
+			components.active[3][8] = {
+				provider = icons.vi_mode,
+				hl = function() return { fg = colors.black2, bg = mode_colors[vim.fn.mode()][2] } end,
+			}
+			components.active[3][9] = {
+				provider = function() return " "..mode_colors[vim.fn.mode()][1].." " end,
+				hl = function() return { fg = mode_colors[vim.fn.mode()][2], bg = colors.one_bg } end,
+			}
+			components.active[3][10] = {
+				provider = icons.left,
+				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
+				hl = { fg = colors.grey, bg = colors.one_bg },
+			}
+			components.active[3][11] = {
+				provider = icons.left,
+				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
+				hl = { fg = colors.green, bg = colors.grey },
+			}
+			components.active[3][12] = {
+				provider = icons.position,
+				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
+				hl = { fg = colors.black, bg = colors.green },
+			}
+			components.active[3][13] = {
+				provider = "position",
+				hl = { fg = colors.green, bg = colors.one_bg },
+			}
+			components.active[3][14] = {
+				provider = function()
+					local current_line = vim.fn.line(".")
+					if current_line == 1 then return " ﬢﬢ"
+					elseif current_line == vim.fn.line("$") then return "ﬠﬠﬠ"
+					end
+					local result, _ = math.modf((current_line / vim.fn.line("$")) * 100)
+					return " "..result.."%%"
+				end,
+				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
+				hl = { fg = colors.green, bg = colors.one_bg },
+			}
+			require("feline").setup({
+				colors = { fg = colors.grey_fg, bg = colors.black2 },
+				components = components,
+			})
+		end,
+	})
+	use({
+		"akinsho/bufferline.nvim",
+		config = function()
+			require("bufferline").setup({
+				options = {
+					separator_style = "thin",
+					diagnostics = "nvim_lsp",
+					custom_filter = function(buf)
+						if vim.api.nvim_buf_get_option(buf, "filetype") ~= "nnn" then return true end
+					end,
+				},
+				highlights = {
+					background = { guifg = colors.grey_fg, guibg = colors.black2 },
+					buffer_selected = { guifg = colors.white, guibg = colors.black, gui = "bold", },
+					buffer_visible = { guifg = colors.light_grey, guibg = colors.black2 },
+					error = { guifg = colors.light_grey, guibg = colors.black2 },
+					error_diagnostic = { guifg = colors.light_grey, guibg = colors.black2 },
+					close_button = { guifg = colors.light_grey, guibg = colors.black2 },
+					close_button_visible = { guifg = colors.light_grey, guibg = colors.black2 },
+					close_button_selected = { guifg = colors.red, guibg = colors.black },
+					fill = { guifg = colors.grey_fg, guibg = colors.black2 },
+					indicator_selected = { guifg = colors.black, guibg = colors.black },
+					modified = { guifg = colors.red, guibg = colors.black2 },
+					modified_visible = { guifg = colors.red, guibg = colors.black2 },
+					modified_selected = { guifg = colors.green, guibg = colors.black },
+					separator = { guifg = colors.black2, guibg = colors.black2 },
+					separator_visible = { guifg = colors.black2, guibg = colors.black2 },
+					separator_selected = { guifg = colors.black2, guibg = colors.black2 },
+					tab = { guifg = colors.light_grey, guibg = colors.one_bg3 },
+					tab_selected = { guifg = colors.black2, guibg = colors.blue },
+					tab_close = { guifg = colors.red, guibg = colors.black },
+				},
+			})
+		end,
+	})
+	use("nvim-lua/plenary.nvim")
+	use({
+		"lewis6991/gitsigns.nvim",
+		config = function() require("gitsigns").setup() end
+	})
+	use({
+		"nvim-treesitter/nvim-treesitter",
+		config = function()
+			require("nvim-treesitter.configs").setup({
+				highlight = { enable = true },
+				ensure_installed = {
+					"bash", "bibtex", "c", "cmake", "cpp", "css", "dockerfile", "go", "html", "java",
+					"javascript", "json", "lua", "perl", "php", "python", "r", "regex", "rust",
+					"toml", "typescript", "verilog", "vim", "yaml",
+				},
+			})
+		end,
+	})
+	use({
+		"lukas-reineke/indent-blankline.nvim",
+		config = function()
+			require("indent_blankline").setup({
+				char = "▏",
+				show_trailing_blankline_indent = false,
+				show_first_indent_level = false,
+				buftype_exclude = { "terminal" },
+				filetype_exclude = { "help", "terminal", "dashboard", "packer", "lspinfo", "TelescopePrompt", "TelescopeResults" }
+			})
+		end,
+	})
+	use({
+		"norcalli/nvim-colorizer.lua",
+		config = function() require("colorizer").setup({ "*" }, { names = false }) end,
+	})
+	-- use("mcchrish/nnn.vim")
+	use({
+		"~/dev/nnn.nvim",
+		config = function()
+			local builtin = require("nnn").builtin
+			require("nnn").setup({
+				explorer = { cmd = "nnn -Go", session = "shared", side = "topleft", tabs = true },
+				picker = { cmd = "tmux new-session nnn -GPp", style = { border = "rounded" } },
+				replace_netrw = "picker",
+				windownav = { left = "<C-h>", right = "<C-l>" },
+				auto_open = { setup = "picker", tabpage = "explorer", empty = true, ft_ignore = { "gitcommit" } },
 				auto_close = true,
 				mappings = {
 					{ "<C-t>", builtin.open_in_tab },      -- open file(s) in tab
@@ -364,9 +349,9 @@ require("packer").startup({
 		config = function()
 			require("nvim-gps").setup({
 				separator = "  ",
-				icons = {["container-name"] = " "}
+				icons = { ["container-name"] = " " }
 			})
-			end,
+		end,
 	})
 	use({ "folke/lua-dev.nvim", after = "nvim-gps" })
 	use({ "hrsh7th/cmp-nvim-lsp", after = "lua-dev.nvim" })
@@ -705,7 +690,8 @@ require("packer").startup({
 	})
 	use({
 		"vimwiki/vimwiki",
-		cmd = "VimwikiIndex"
+		cmd = "VimwikiIndex",
+		setup = function() vim.g.vimwiki_list = { { path = "~/vimwiki/", syntax = "markdown", ext = ".md" } } end
 	})
 	use({
 		"michaelb/sniprun",
@@ -790,7 +776,7 @@ autocmd QuickFixCmdPost [^l]* lua TroubleQuickFixPost("quickfix")
 autocmd QuickFixCmdPost l* lua TroubleQuickFixPost("loclist")
 autocmd TextYankPost * silent! lua vim.highlight.on_yank({ higroup="IncSearch", timeout=1000 })
 autocmd BufReadPost * if expand('%:p') !~# '\m/\.git/' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-autocmd BufRead,BufWrite /run/user/1000/neomutt* lua vim.schedule(function() require("true-zen.main").main(4, "toggle") end)
+autocmd BufRead,BufWrite /run/user/1000/neomutt* lua vim.schedule(function() vim.cmd("TZAtaraxis") end)
 augroup end
 ]])
 
