@@ -11,6 +11,7 @@ vim.opt.hidden = true
 vim.opt.shortmess:append("sI")
 vim.opt.smartcase = true
 vim.opt.ignorecase = true
+vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.splitbelow = true
 vim.opt.splitright = true
@@ -501,17 +502,8 @@ require("packer").startup({ function(use)
 		after = "lsp_signature.nvim",
 	})
 	use({
-		"karb94/neoscroll.nvim",
-		after = "vim-illuminate",
-		config = function()
-			require("neoscroll").setup()
-			require("neoscroll.config").set_mappings({ ["<C-u>"] = { "scroll", { "-vim.wo.scroll", "true", "150" } } })
-			require("neoscroll.config").set_mappings({ ["<C-d>"] = { "scroll", { "vim.wo.scroll", "true", "150" } } })
-		end,
-	})
-	use({
 		"~/dev/stabilize.nvim",
-		after = "neoscroll.nvim",
+		after = "vim-illuminate",
 		config = function() require("stabilize").setup({ forcemark = "f", nested = "QuickFixCmdPost,User LspDiagnosticsChanged" }) end,
 	})
 	use({ "nvim-treesitter/playground", after = "stabilize.nvim" })
