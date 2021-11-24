@@ -188,12 +188,12 @@ require("packer").startup({ function(use)
 				["t"] = { "TERMINAL", colors.green },
 				["v"] = { "VISUAL", colors.cyan },
 				["V"] = { "V-LINE", colors.cyan },
-				[""] = { "V-BLOCK", colors.cyan },
+				["^V"] = { "V-BLOCK", colors.cyan },
 				["R"] = { "REPLACE", colors.orange },
 				["Rv"] = { "V-REPLACE", colors.orange },
 				["s"] = { "SELECT", colors.blue },
 				["S"] = { "S-LINE", colors.blue },
-				[""] = { "S-BLOCK", colors.blue },
+				["^S"] = { "S-BLOCK", colors.blue },
 				["c"] = { "COMMAND", colors.pink },
 				["cv"] = { "COMMAND", colors.pink },
 				["ce"] = { "COMMAND", colors.pink },
@@ -324,22 +324,22 @@ require("packer").startup({ function(use)
 	use({
 		"~/dev/nnn.nvim",
 		config = function()
-			local builtin = require("nnn").builtin
-			require("nnn").setup({
+			local nnn = require("nnn")
+			nnn.setup({
 				explorer = { cmd = "nnn -Go", session = "shared", side = "topleft", tabs = true },
 				picker = { cmd = "tmux new-session nnn -GPp", style = { border = "rounded" } },
 				replace_netrw = "picker",
 				windownav = { left = "<C-h>", right = "<C-l>" },
-				auto_open = { setup = "picker", tabpage = "explorer", empty = true, ft_ignore = { "gitcommit" } },
+				auto_open = { setup = "picker", tabpage = "explorer", empty = true },
 				auto_close = true,
 				mappings = {
-					{ "<C-t>", builtin.open_in_tab },      -- open file(s) in tab
-					{ "<C-s>", builtin.open_in_split },    -- open file(s) in split
-					{ "<C-v>", builtin.open_in_vsplit },   -- open file(s) in vertical split
-					{ "<C-y>", builtin.copy_to_clipboard },-- copy file(s) to clipboard
-					{ "<C-w>", builtin.cd_to_path },       -- cd to file directory
-					{ "<C-p>", builtin.open_in_preview },  -- open file in preview split keeping nnn focused
-					{ "<C-e>", builtin.populate_cmdline }, -- populate cmdline (:) with file(s)
+					{ "<C-t>", nnn.builtin.open_in_tab },      -- open file(s) in tab
+					{ "<C-s>", nnn.builtin.open_in_split },    -- open file(s) in split
+					{ "<C-v>", nnn.builtin.open_in_vsplit },   -- open file(s) in vertical split
+					{ "<C-y>", nnn.builtin.copy_to_clipboard },-- copy file(s) to clipboard
+					{ "<C-w>", nnn.builtin.cd_to_path },       -- cd to file directory
+					{ "<C-p>", nnn.builtin.open_in_preview },  -- open file in preview split keeping nnn focused
+					{ "<C-e>", nnn.builtin.populate_cmdline }, -- populate cmdline (:) with file(s)
 				},
 			})
 		end,
