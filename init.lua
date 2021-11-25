@@ -57,7 +57,6 @@ require("impatient")
 require("packer_compiled")
 require("packer").startup({ function(use)
 	use("lewis6991/impatient.nvim")
-	use({ "tweekmonster/startuptime.vim", cmd = "StartupTime" })
 	use("nathom/filetype.nvim")
 	use("kyazdani42/nvim-web-devicons")
 	use({
@@ -344,6 +343,7 @@ require("packer").startup({ function(use)
 			})
 		end,
 	})
+	use("wbthomason/packer.nvim")
 	use({
 		"SmiteshP/nvim-gps",
 		event = "CursorHold",
@@ -386,6 +386,10 @@ require("packer").startup({ function(use)
 					if tshl and #tshl > 0 then
 						local ind = tshl[#tshl]:match("^.*()%*%*.*%*%*")
 						tshl = tshl[#tshl]:sub(ind + 2, -3)
+						local allowed = { "TSVariable", "TSFuncBuiltin", "TSFunction", "TSField", "TSProperty" }
+						if not vim.tbl_contains(allowed, tshl) then return end
+					else
+						return
 					end
 
 					local win = require('plenary.popup').create(currName, {
@@ -627,7 +631,7 @@ require("packer").startup({ function(use)
 			wk.register({}, {})
 		end,
 	})
-	use({ "wbthomason/packer.nvim", cmd = { "PackerSync", "PackerClean" } })
+	use({ "tweekmonster/startuptime.vim", cmd = "StartupTime" })
 	use({
 		"lervag/vimtex",
 		cmd = "VimtexInverseSearch",
