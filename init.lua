@@ -187,12 +187,12 @@ require("packer").startup({ function(use)
 				["t"] = { "TERMINAL", colors.green },
 				["v"] = { "VISUAL", colors.cyan },
 				["V"] = { "V-LINE", colors.cyan },
-				["^V"] = { "V-BLOCK", colors.cyan },
+				['\22'] = { "V-BLOCK", colors.cyan },
 				["R"] = { "REPLACE", colors.orange },
 				["Rv"] = { "V-REPLACE", colors.orange },
 				["s"] = { "SELECT", colors.blue },
 				["S"] = { "S-LINE", colors.blue },
-				["^S"] = { "S-BLOCK", colors.blue },
+				['\19'] = { "S-BLOCK", colors.blue },
 				["c"] = { "COMMAND", colors.pink },
 				["cv"] = { "COMMAND", colors.pink },
 				["ce"] = { "COMMAND", colors.pink },
@@ -203,15 +203,15 @@ require("packer").startup({ function(use)
 			}
 			components.active[3][7] = {
 				provider = icons.left,
-				hl = function() return { fg = mode_colors[vim.fn.mode()][2], bg = colors.one_bg2 } end,
+				hl = function() return { fg = mode_colors[vim.api.nvim_get_mode().mode][2], bg = colors.one_bg2 } end,
 			}
 			components.active[3][8] = {
 				provider = icons.vi_mode,
-				hl = function() return { fg = colors.black2, bg = mode_colors[vim.fn.mode()][2] } end,
+				hl = function() return { fg = colors.black2, bg = mode_colors[vim.api.nvim_get_mode().mode][2] } end,
 			}
 			components.active[3][9] = {
-				provider = function() return " "..mode_colors[vim.fn.mode()][1].." " end,
-				hl = function() return { fg = mode_colors[vim.fn.mode()][2], bg = colors.one_bg } end,
+				provider = function() return " "..mode_colors[vim.api.nvim_get_mode().mode][1].." " end,
+				hl = function() return { fg = mode_colors[vim.api.nvim_get_mode().mode][2], bg = colors.one_bg } end,
 			}
 			components.active[3][10] = {
 				provider = icons.left,
