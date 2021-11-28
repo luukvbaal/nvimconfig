@@ -549,18 +549,11 @@ require("packer").startup({ function(use)
 					expand = function(args) require("luasnip").lsp_expand(args.body) end,
 				},
 				formatting = {
-					format = function(entry, item)
-						item.kind = icons[item.kind].." "..item.kind
-						item.menu = ({
-							buffer = "[BUF]",
-							latex_symbols = "[TEX]",
-							luasnip = "[SNIP]",
-							nvim_lsp = "[LSP]",
-							nvim_lua = "[LUA]",
-							path = "",
-						})[entry.source.name]
+					format = function(_, item)
+						item.kind = icons[item.kind]
 						return item
 					end,
+					fields = { 'kind', 'abbr', 'menu' }
 				},
 				mapping = {
 					["<C-d>"] = cmp.mapping.scroll_docs(-4),
@@ -938,8 +931,33 @@ hl("GitSignsChange", { fg = colors.grey_fg })
 hl("GitSignsModified", { fg = colors.blue })
 hl("CmpItemAbbr", { fg = colors.white })
 hl("CmpItemAbbrMatch", { fg = colors.white })
-hl("CmpItemKind", { fg = colors.white })
 hl("CmpItemMenu", { fg = colors.white })
+hl("CmpItemKind", { fg = colors.teal })
+hl("CmpItemKindText", { fg = colors.teal })
+hl("CmpItemKindMethod", { fg = colors.teal })
+hl("CmpItemKindFunction", { fg = colors.teal })
+hl("CmpItemKindConstructor", { fg = colors.teal })
+hl("CmpItemKindField", { fg = colors.teal })
+hl("CmpItemKindVariable", { fg = colors.teal })
+hl("CmpItemKindClass", { fg = colors.teal })
+hl("CmpItemKindInterface", { fg = colors.teal })
+hl("CmpItemKindModule", { fg = colors.teal })
+hl("CmpItemKindProperty", { fg = colors.teal })
+hl("CmpItemKindUnit", { fg = colors.teal })
+hl("CmpItemKindValue", { fg = colors.teal })
+hl("CmpItemKindEnum", { fg = colors.teal })
+hl("CmpItemKindKeyword", { fg = colors.teal })
+hl("CmpItemKindSnippet", { fg = colors.teal })
+hl("CmpItemKindColor", { fg = colors.teal })
+hl("CmpItemKindFile", { fg = colors.teal })
+hl("CmpItemKindReference", { fg = colors.teal })
+hl("CmpItemKindFolder", { fg = colors.teal })
+hl("CmpItemKindEnumMember", { fg = colors.teal })
+hl("CmpItemKindConstant", { fg = colors.teal })
+hl("CmpItemKindStruct", { fg = colors.teal })
+hl("CmpItemKindEvent", { fg = colors.teal })
+hl("CmpItemKindOperator", { fg = colors.teal })
+hl("CmpItemKindTypeParameter", { fg = colors.teal })
 hl("IndentBlanklineChar", { fg = colors.line })
 hl("DiagnosticError", { fg = colors.red })
 hl("DiagnosticWarn", { fg = colors.yellow })
