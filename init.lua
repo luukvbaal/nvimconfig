@@ -769,7 +769,11 @@ autocmd BufRead,BufWrite /run/user/1000/neomutt* lua vim.schedule(function() vim
 augroup end
 ]])
 
-function _G.put(...) print(vim.inspect(...)) end
+function _G.put(...)
+	for _, chunk in ipairs({...}) do
+		print(vim.inspect(chunk))
+	end
+end
 
 function _G.TroubleQuickFixPost(mode)
 	require("trouble.providers").get(vim.api.nvim_get_current_win(),
@@ -809,7 +813,7 @@ local function hl(name, val)
 end
 
 vim.cmd("hi Normal guifg="..colors.foreground.." guibg="..colors.black)
-hl("NormalFloat", { fg = colors.foreground, bg = colors.black })
+hl("NormalFloat", { fg = colors.foreground, bg = colors.black2 })
 hl("FloatBorder", { fg = colors.lightbg })
 hl("Bold", { bold = true })
 hl("Debug", { fg = colors.pink })
@@ -990,4 +994,5 @@ hl("TelescopeResultsTitle", { fg = colors.red })
 hl("TelescopePreviewBorder", { fg = colors.grey })
 hl("TelescopePromptBorder", { fg = colors.line })
 hl("TelescopeResultsBorder", { fg = colors.line })
+hl("WhichKeyValue", { fg = colors.purple })
 vim.api.nvim__set_hl_ns(ns)
