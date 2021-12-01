@@ -7,7 +7,6 @@ vim.opt.cmdheight = 1
 vim.opt.smartindent = true
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
-vim.opt.hidden = true
 vim.opt.shortmess:append("sI")
 vim.opt.smartcase = true
 vim.opt.ignorecase = true
@@ -470,7 +469,7 @@ require("packer").startup({ function(use)
 				ls.builtins.formatting.shfmt,
 				ls.builtins.formatting.lua_format,
 				ls.builtins.diagnostics.shellcheck,
-				ls.builtins.diagnostics.vale,
+				ls.builtins.diagnostics.vale.with({ args = '--config="$XDG_CONFIG_HOME/vale/vale.ini"' }),
 			}
 			ls.config({ sources = sources })
 			require("lspconfig")["null-ls"].setup({})
