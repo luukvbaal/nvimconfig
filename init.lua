@@ -23,6 +23,7 @@ vim.opt.lazyredraw = true
 vim.opt.mouse = "a"
 vim.opt.completeopt = "menu,menuone,noselect"
 vim.opt.showmode = false
+vim.opt.confirm = true
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
@@ -439,9 +440,9 @@ require("packer").startup({ function(use)
 				bufmap("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
 				bufmap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
 				bufmap("n", "<leader>e", "<cmd>lua vim.diagnostic.open_float(0, { scope = 'line' })<CR>", opts)
-				bufmap("n", "gx", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
-				bufmap("n", "gz", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
-				bufmap("n", "<leader>q", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
+				bufmap("n", "gx", "<cmd>lua vim.diagnostic.goto_prev()<CR>", opts)
+				bufmap("n", "gz", "<cmd>lua vim.diagnostic.goto_next()<CR>", opts)
+				bufmap("n", "<leader>q", "<cmd>lua vim.diagnostic.setloclist()<CR>", opts)
 				bufmap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 				bufmap("v", "<leader>ca", "<cmd>lua vim.lsp.buf.range_code_action()<CR>", opts)
 				require("illuminate").on_attach(client)
@@ -507,7 +508,7 @@ require("packer").startup({ function(use)
 	use({
 		"~/dev/stabilize.nvim",
 		after = "vim-illuminate",
-		config = function() require("stabilize").setup({ forcemark = "f", nested = "QuickFixCmdPost,User LspDiagnosticsChanged" }) end,
+		config = function() require("stabilize").setup({ forcemark = "f", nested = "QuickFixCmdPost,DiagnosticChanged *" }) end,
 	})
 	use({ "nvim-treesitter/playground", after = "stabilize.nvim" })
 	use({
