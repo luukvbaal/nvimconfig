@@ -247,6 +247,7 @@ require("packer").startup({ function(use)
 			require("feline").setup({
 				colors = { fg = colors.grey_fg, bg = colors.black2 },
 				components = components,
+				force_inactive = { buftypes = { "^terminal$", "^nofile$", "^prompt$" } }
 			})
 		end,
 	})
@@ -258,7 +259,8 @@ require("packer").startup({ function(use)
 					separator_style = "thin",
 					diagnostics = "nvim_lsp",
 					custom_filter = function(buf)
-						if vim.api.nvim_buf_get_option(buf, "filetype") ~= "nnn" then return true end
+						local ignored = { "nnn", "dap-repl" }
+						if not vim.tbl_contains(ignored, vim.api.nvim_buf_get_option(buf, "filetype")) then return true end
 					end,
 				},
 				highlights = {
@@ -472,8 +474,7 @@ require("packer").startup({ function(use)
 				ls.builtins.diagnostics.shellcheck,
 				ls.builtins.diagnostics.vale.with({ args = '--config="$XDG_CONFIG_HOME/vale/vale.ini"' }),
 			}
-			ls.config({ sources = sources })
-			require("lspconfig")["null-ls"].setup({})
+			ls.setup({ sources = sources })
 		end,
 	})
 	use({
@@ -626,6 +627,67 @@ require("packer").startup({ function(use)
 	})
 	use({ "tweekmonster/startuptime.vim", cmd = "StartupTime" })
 	use({
+		"mfussenegger/nvim-dap",
+		module = "dap",
+		config = function()
+			local dap = require("dap")
+			dap.configurations.python = { {
+				type = "python",
+				request = "launch",
+				name = "Launch file",
+				program = "${file}",
+				pythonPath = function()
+					return "/usr/bin/python"
+				end
+			}}
+			dap.adapters.lldb = {
+			  type = 'executable',
+			  command = '/usr/bin/lldb-vscode',
+			  name = "lldb"
+			}
+			dap.configurations.c = {
+			  {
+			    name = "Launch",
+			    type = "lldb",
+			    request = "launch",
+			    program = function() return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file') end,
+			    cwd = '${workspaceFolder}',
+			    stopOnEntry = false,
+			    args = {},
+			    runInTerminal = false,
+			  },
+			  {
+			    name = "Attach",
+			    type = "lldb",
+			    request = "attach",
+					pid = require("dap.utils").pick_process,
+					args = {},
+			  },
+			}
+			vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DiagnosticError", linehl = "", numhl = "" })
+			vim.fn.sign_define("DapBreakpointCondition", { text = "", texthl = "DiagnosticError", linehl = "", numhl = "" })
+			vim.fn.sign_define("DapBreakpointRejected", { text = "", texthl = "DiagnosticError", linehl = "", numhl = "" })
+			vim.fn.sign_define("DapLogPoint", { text = "", texthl = "DiagnosticHint", linehl = "", numhl = "" })
+			vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticInfo", linehl = "", numhl = "" })
+		end
+	})
+	use {
+		"rcarriga/nvim-dap-ui",
+		config = function()
+			require("dapui").setup({
+				sidebar = {
+					elements = {
+						{ id = "scopes", size = 0.52 },
+						{ id = "breakpoints", size = 0.16 },
+						{ id = "stacks", size = 0.16 },
+						{ id = "watches", size = 0.16 },
+					},
+				}
+			})
+		end,
+		module = "dapui"
+	}
+	use({
 		"lervag/vimtex",
 		cmd = "VimtexInverseSearch",
 		ft = "tex",
@@ -725,12 +787,12 @@ map("n", "N", "Nzzzv")
 map("n", "J", "mzJ`z")
 map("n", "k", "(v:count > 5 ? (\"m'\" . v:count1) : \"\") . (v:count || mode(1)[0:1] == \"no\" ? \"\" : \"g\") . \"k\"", { expr = true })
 map("n", "j", "(v:count > 5 ? (\"m'\" .v:count1) : \"\") . (v:count || mode(1)[0:1] == \"no\" ? \"\" : \"g\") . \"j\"", { expr = true })
-map("n", "<leader>k", "<cmd>m .-2<CR>==")
-map("n", "<leader>j", "<cmd>m .+1<CR>==")
-map("v", "K", "<cmd>m '<-2<CR>gv=gv")
-map("v", "J", "<cmd>m '>+1<CR>gv=gv")
-map("i", "<C-k>", "<Esc><cmd>m .-2<CR>==")
-map("i", "<C-j>", "<Esc><cmd>m .+1<CR>==")
+map("n", "<leader>k", ":m .-2<CR>==")
+map("n", "<leader>j", ":m .+1<CR>==")
+map("v", "K", ":m '<-2<CR>gv=gv")
+map("v", "J", ":m '>+1<CR>gv=gv")
+map("i", "<C-k>", "<Esc>:m .-2<CR>==")
+map("i", "<C-j>", "<Esc>:m .+1<CR>==")
 map("i", ",", ",<C-g>u")
 map("i", ".", ".<C-g>u")
 map("i", "!", "!<C-g>u")
@@ -754,19 +816,31 @@ map("n", "gR", "<cmd>TroubleToggle lsp_references<CR>")
 map("n", "<C-A-j>", "<cmd>lua require('trouble').next({skip_groups = true, jump = true})<CR>")
 map("n", "<C-A-k>", "<cmd>lua require('trouble').previous({skip_groups = true, jump = true})<CR>")
 map("n", "<leader>gc", "<cmd>Neogit<CR>")
+map("n", "<F5>", "<cmd>lua require('dap').continue() require('dapui').open()<CR>")
+map("n", "<F6>", "<cmd>lua require('dapui').toggle()<CR>")
+map("n", "<F10>", "<cmd>lua require('dap').step_over()<CR>")
+map("n", "<F11>", "<cmd>lua require('dap').step_into()<CR>")
+map("n", "<F12>", "<cmd>lua require('dap').step_out()<CR>")
+map("n", "<leader>b", "<cmd>lua require('dap').toggle_breakpoint()<CR>")
+map("n", "<leader>B", "<cmd>lua require('dap').set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>")
+map("n", "<leader>lp", "<cmd>lua require('dap').set_breakpoint(nil, nil, vim.fn.input('Log point message: '))<CR>")
+map("n", "<leader>dr", "<cmd>lua require('dap').repl.open()<CR>")
+map("n", "<leader>dl", "<cmd>lua require('dap').run_last()<CR>")
+map("n", "<leader>dl", "<cmd>lua require('dap').run_last()<CR>")
 
 vim.cmd([[
-augroup MyAutoCommands
-autocmd!
-autocmd Filetype sh setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-autocmd Focuslost * silent! update
-autocmd InsertLeave,CursorHold * silent! update
-autocmd QuickFixCmdPost [^l]* lua TroubleQuickFixPost("quickfix")
-autocmd QuickFixCmdPost l* lua TroubleQuickFixPost("loclist")
-autocmd TextYankPost * silent! lua vim.highlight.on_yank({ higroup="IncSearch", timeout=1000 })
-autocmd BufReadPost * if expand('%:p') !~# '\m/\.git/' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-autocmd BufRead,BufWrite /run/user/1000/neomutt* lua vim.schedule(function() vim.cmd("TZAtaraxis") end)
-augroup end
+	augroup MyAutoCommands
+	autocmd!
+	autocmd VimEnter * :silent exec "!kill -s WINCH $PPID"
+	autocmd Filetype sh setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+	autocmd Focuslost * silent! update
+	autocmd InsertLeave,CursorHold * silent! update
+	autocmd QuickFixCmdPost [^l]* lua TroubleQuickFixPost("quickfix")
+	autocmd QuickFixCmdPost l* lua TroubleQuickFixPost("loclist")
+	autocmd TextYankPost * silent! lua vim.highlight.on_yank({ higroup="IncSearch", timeout=1000 })
+	autocmd BufReadPost * if expand('%:p') !~# '\m/\.git/' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+	autocmd BufRead,BufWrite /run/user/1000/neomutt* lua vim.schedule(function() vim.cmd("TZAtaraxis") end)
+	augroup end
 ]])
 
 function _G.put(...)
@@ -995,4 +1069,23 @@ hl("TelescopePreviewBorder", { fg = colors.grey })
 hl("TelescopePromptBorder", { fg = colors.line })
 hl("TelescopeResultsBorder", { fg = colors.line })
 hl("WhichKeyValue", { fg = colors.purple })
+hl("DapUIVariable", { fg = colors.foreground })
+hl("DapUIScope", { fg = colors.purple })
+hl("DapUIType", { fg = colors.dark_purple  })
+hl("DapUIValue", { fg = colors.foreground })
+hl("DapUIModifiedValue", { fg = colors.purple, bold = true })
+hl("DapUIDecoration", { fg = colors.purple })
+hl("DapUIThread", { fg = colors.green })
+hl("DapUIStoppedThread", { fg = colors.purple })
+hl("DapUIFrameName", { fg = colors.foreground })
+hl("DapUISource", { fg = colors.dark_purple })
+hl("DapUILineNumber", { fg = colors.purple })
+hl("DapUIFloatBorder", { fg = colors.purple })
+hl("DapUIWatchesEmpty", { fg = colors.red })
+hl("DapUIWatchesValue", { fg = colors.green })
+hl("DapUIWatchesError", { fg = colors.red })
+hl("DapUIBreakpointsPath", { fg = colors.purple })
+hl("DapUIBreakpointsInfo", { fg = colors.green })
+hl("DapUIBreakpointsCurrentLine", { fg = colors.green, bold = true })
+hl("DapUIBreakpointsLine", { fg = colors.purple })
 vim.api.nvim__set_hl_ns(ns)
