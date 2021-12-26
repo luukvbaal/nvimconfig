@@ -60,9 +60,10 @@ require("packer").startup({ function(use)
 	use("nathom/filetype.nvim")
 	use("kyazdani42/nvim-web-devicons")
 	use({
-		"famiu/feline.nvim",
+		"feline-nvim/feline.nvim",
 		config = function()
 			local lsp = require("feline.providers.lsp")
+			local lsp_severity = vim.diagnostic.severity
 			local icons = { left = "", right = " ", main = "  ", vi_mode = " ", position = " " }
 			local components = { active = { {}, {}, {} }, inactive = { {}, {}, {} } }
 			components.active[1][1] = {
@@ -106,25 +107,25 @@ require("packer").startup({ function(use)
 			}
 			components.active[1][5] = {
 				provider = "diagnostic_errors",
-				enabled = function() return lsp.diagnostics_exist("Error") end,
+				enabled = function() return lsp.diagnostics_exist(lsp_severity.ERROR) end,
 				hl = { fg = colors.red },
 				icon = "  ",
 			}
 			components.active[1][6] = {
 				provider = "diagnostic_warnings",
-				enabled = function() return lsp.diagnostics_exist("Warning") end,
+				enabled = function() return lsp.diagnostics_exist(lsp_severity.WARN) end,
 				hl = { fg = colors.yellow },
 				icon = "  ",
 			}
 			components.active[1][7] = {
 				provider = "diagnostic_hints",
-				enabled = function() return lsp.diagnostics_exist("Hint") end,
+				enabled = function() return lsp.diagnostics_exist(lsp_severity.HINT) end,
 				hl = { fg = colors.grey_fg },
 				icon = "  ",
 			}
 			components.active[1][8] = {
 				provider = "diagnostic_info",
-				enabled = function() return lsp.diagnostics_exist("Inormation") end,
+				enabled = function() return lsp.diagnostics_exist(lsp_severity.INFO) end,
 				hl = { fg = colors.green },
 				icon = "  ",
 			}
@@ -142,7 +143,7 @@ require("packer").startup({ function(use)
 							return string.format(" %%<%s %s %s (%s%%%%) ", success_icon[frame + 1], title, msg, percentage)
 						else
 							return string.format(" %%<%s %s %s (%s%%%%) ", spinners[frame + 1], title, msg, percentage)
-						end
+				end
 					end
 					return ""
 				end,
@@ -245,7 +246,7 @@ require("packer").startup({ function(use)
 				hl = { fg = colors.green, bg = colors.one_bg },
 			}
 			require("feline").setup({
-				colors = { fg = colors.grey_fg, bg = colors.black2 },
+				theme = { fg = colors.grey_fg, bg = colors.black2 },
 				components = components,
 				force_inactive = { buftypes = { "^terminal$", "^nofile$", "^prompt$" } }
 			})
@@ -329,7 +330,7 @@ require("packer").startup({ function(use)
 			nnn.setup({
 				explorer = { cmd = "nnn -Go", session = "shared", side = "topleft", tabs = true },
 				picker = { cmd = "tmux new-session nnn -GPp", style = { border = "rounded" } },
-				replace_netrw = "picker",
+				replace_netrw = "explorer",
 				windownav = { left = "<C-h>", right = "<C-l>" },
 				auto_open = { setup = "picker", tabpage = "explorer", empty = true },
 				auto_close = true,
@@ -782,6 +783,7 @@ map("n", "<leader>zm", "<cmd>TZMinimalist<CR>")
 map("n", "<leader>ra", ":%s//g<Left><Left>")
 map("n", "<leader>da", "ggVGd")
 map("n", "<C-a>", "GVgg")
+map("n", "gx", "<cmd>silent !xdg-open <cfile><CR>")
 map("n", "n", "nzzzv")
 map("n", "N", "Nzzzv")
 map("n", "J", "mzJ`z")
