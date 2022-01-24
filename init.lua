@@ -578,7 +578,6 @@ require("packer").startup({ function(use)
 					end, { "i", "c" })
 				}
 			})
-			cmp.setup.cmdline = cmp.setup.cmdline
 			cmp.setup.cmdline('/', { sources = { { name = 'buffer' } } })
 			cmp.setup.cmdline(':', { sources = cmp.config.sources({ { name = 'path' } }, { { name = 'cmdline' } }) })
 		end,
