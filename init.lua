@@ -24,6 +24,10 @@ vim.opt.mouse = "a"
 vim.opt.completeopt = "menu,menuone,noselect"
 vim.opt.showmode = false
 vim.opt.confirm = true
+vim.schedule(function()
+   vim.opt.shadafile = os.getenv("XDG_DATA_HOME").."/nvim/shada/main.shada"
+   vim.cmd("rshada")
+end)
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
@@ -81,7 +85,7 @@ require("packer").startup({ function(use)
 					if icon == nil then return " " end
 					return " "..icon.." "..filename.." "
 				end,
-				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
+				enabled = function() return vim.api.nvim_win_get_width(0) > 70 end,
 				hl = { fg = colors.white, bg = colors.lightbg },
 				right_sep = {
 					str = icons.right,
@@ -90,7 +94,7 @@ require("packer").startup({ function(use)
 			}
 			components.active[1][3] = {
 				provider = function() return "  "..vim.fn.fnamemodify(vim.fn.getcwd(), ":t").." " end,
-				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 80 end,
+				enabled = function() return vim.api.nvim_win_get_width(0) > 80 end,
 				hl = { fg = colors.grey_fg, bg = colors.lightbg2 },
 				right_sep = {
 					str = icons.right,
@@ -129,35 +133,14 @@ require("packer").startup({ function(use)
 				hl = { fg = colors.green },
 				icon = "  ",
 			}
-			components.active[2][1] = {
-				provider = function()
-					local prog = vim.lsp.util.get_progress_messages()[1]
-					if prog then
-						local msg = prog.message or ""
-						local percentage = prog.percentage or 0
-						local title = prog.title or ""
-						local spinners = { "", "", "" }
-						local success_icon = { "", "", "" }
-						local frame = math.floor(vim.loop.hrtime() / 1000000 / 120) % 3
-						if percentage >= 70 then
-							return string.format(" %%<%s %s %s (%s%%%%) ", success_icon[frame + 1], title, msg, percentage)
-						else
-							return string.format(" %%<%s %s %s (%s%%%%) ", spinners[frame + 1], title, msg, percentage)
-				end
-					end
-					return ""
-				end,
-				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 80 end,
-				hl = { fg = colors.green },
-			}
 			components.active[3][1] = {
 				provider = function() return vim.lsp.buf_get_clients()[1] and "  LSP" or "" end,
-				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
+				enabled = function() return vim.api.nvim_win_get_width(0) > 70 end,
 				hl = { fg = colors.grey_fg, bg = colors.black2 },
 			}
 			components.active[3][2] = {
 				provider = "git_branch",
-				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 70 end,
+				enabled = function() return vim.api.nvim_win_get_width(0) > 70 end,
 				hl = { fg = colors.grey_fg, bg = colors.black2 },
 				icon = "  ",
 			}
@@ -216,17 +199,17 @@ require("packer").startup({ function(use)
 			}
 			components.active[3][10] = {
 				provider = icons.left,
-				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
+				enabled = function() return vim.api.nvim_win_get_width(0) > 90 end,
 				hl = { fg = colors.grey, bg = colors.one_bg },
 			}
 			components.active[3][11] = {
 				provider = icons.left,
-				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
+				enabled = function() return vim.api.nvim_win_get_width(0) > 90 end,
 				hl = { fg = colors.green, bg = colors.grey },
 			}
 			components.active[3][12] = {
 				provider = icons.position,
-				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
+				enabled = function() return vim.api.nvim_win_get_width(0) > 90 end,
 				hl = { fg = colors.black, bg = colors.green },
 			}
 			components.active[3][13] = {
@@ -242,7 +225,7 @@ require("packer").startup({ function(use)
 					local result, _ = math.modf((current_line / vim.fn.line("$")) * 100)
 					return " "..result.."%%"
 				end,
-				enabled = function(winid) return vim.api.nvim_win_get_width(winid) > 90 end,
+				enabled = function() return vim.api.nvim_win_get_width(0) > 90 end,
 				hl = { fg = colors.green, bg = colors.one_bg },
 			}
 			require("feline").setup({
@@ -503,10 +486,11 @@ require("packer").startup({ function(use)
 		after = "trouble.nvim",
 		config = function() require("lsp_signature").setup({ doc_lines = 0, hint_enable = false }) end,
 	})
-	use({
-		"RRethy/vim-illuminate",
+	use({ "j-hui/fidget.nvim",
 		after = "lsp_signature.nvim",
+		config = function() require("fidget").setup() end
 	})
+	use({ "RRethy/vim-illuminate", after = "fidget.nvim" })
 	use({
 		"~/dev/stabilize.nvim",
 		after = "vim-illuminate",
@@ -687,6 +671,10 @@ require("packer").startup({ function(use)
 		end,
 		module = "dapui"
 	}
+	use({
+		"theHamsta/nvim-dap-virtual-text",
+		config = function() require("nvim-dap-virtual-text").setup() end
+	})
 	use({
 		"lervag/vimtex",
 		cmd = "VimtexInverseSearch",
@@ -882,211 +870,206 @@ vim.g.terminal_color_13 = colors.dark_purple
 vim.g.terminal_color_14 = colors.cyan
 vim.g.terminal_color_15 = colors.purple
 
-local ns = vim.api.nvim_create_namespace("nord")
-local function hl(name, val)
-	vim.api.nvim_set_hl(ns, name, val)
-end
-
-vim.cmd("hi Normal guifg="..colors.foreground.." guibg="..colors.black)
-hl("NormalFloat", { fg = colors.foreground, bg = colors.black2 })
-hl("FloatBorder", { fg = colors.lightbg })
-hl("Bold", { bold = true })
-hl("Debug", { fg = colors.pink })
-hl("Directory", { fg = colors.blue })
-hl("Error", { fg = colors.black, bg = colors.pink })
-hl("ErrorMsg", { fg = colors.pink, bg = colors.black })
-hl("Exception", { fg = colors.pink })
-hl("FoldColumn", { fg = colors.teal, bg = colors.lightbg })
-hl("Folded", { fg = colors.one_bg3, bg = colors.lightbg })
-hl("IncSearch", { fg = colors.dark_purple })
-hl("Macro", { fg = colors.pink })
-hl("MatchParen", { bg = colors.lightbg })
-hl("ModeMsg", { fg = colors.green })
-hl("MoreMsg", { fg = colors.green })
-hl("Question", { fg = colors.blue })
-hl("Search", { fg = colors.dark_purple })
-hl("Substitute", { fg = colors.lightbg, bg = colors.yellow })
-hl("SpecialKey", { fg = colors.one_bg3 })
-hl("TooLong", { fg = colors.pink })
-hl("Underlined", { fg = colors.pink })
-hl("Visual", { bg = colors.one_bg2 })
-hl("VisualNOS", { fg = colors.pink })
-hl("WarningMsg", { fg = colors.pink })
-hl("WildMenu", { fg = colors.pink, bg = colors.yellow })
-hl("Title", { fg = colors.blue })
-hl("Conceal", { fg = colors.blue, bg = colors.black })
-hl("Cursor", { fg = colors.black, bg = colors.white })
-hl("NonText", { fg = colors.one_bg3 })
-hl("LineNr", { fg = colors.grey })
-hl("SignColumn", { fg = colors.one_bg3 })
-hl("StatusLineNC", { fg = colors.one_bg3, underline = true })
-hl("StatusLine", { fg = colors.one_bg2, underline = true })
-hl("VertSplit", { fg = colors.one_bg2 })
-hl("ColorColumn", { bg = colors.lightbg })
-hl("CursorColumn", { bg = colors.lightbg })
-hl("CursorLine", { bg = colors.lightbg })
-hl("CursorLinenr", { fg = colors.white, bg = colors.black })
-hl("QuickFixLine", { bg = colors.lightbg })
-hl("Pmenu", { fg = colors.one_bg, bg = colors.black2 })
-hl("PmenuSbar", { fg = colors.one_bg2 })
-hl("PmenuSel", { fg = colors.teal, bg = colors.lightbg })
-hl("PmenuThumb", { fg = colors.blue })
-hl("TabLine", { fg = colors.one_bg3, bg = colors.lightbg })
-hl("TabLineFill", { fg = colors.one_bg3, bg = colors.lightbg })
-hl("TabLineSel", { fg = colors.green, bg = colors.lightbg })
+local hl = vim.api.nvim_set_hl
+hl(0, "Normal", { fg = colors.foreground, bg= colors.black })
+hl(0, "NormalFloat", { fg = colors.foreground, bg = colors.black2 })
+hl(0, "FloatBorder", { fg = colors.lightbg })
+hl(0, "Bold", { bold = true })
+hl(0, "Debug", { fg = colors.pink })
+hl(0, "Directory", { fg = colors.blue })
+hl(0, "Error", { fg = colors.black, bg = colors.pink })
+hl(0, "ErrorMsg", { fg = colors.pink, bg = colors.black })
+hl(0, "Exception", { fg = colors.pink })
+hl(0, "FoldColumn", { fg = colors.teal, bg = colors.lightbg })
+hl(0, "Folded", { fg = colors.one_bg3, bg = colors.lightbg })
+hl(0, "IncSearch", { fg = colors.dark_purple })
+hl(0, "Macro", { fg = colors.pink })
+hl(0, "MatchParen", { bg = colors.lightbg })
+hl(0, "ModeMsg", { fg = colors.green })
+hl(0, "MoreMsg", { fg = colors.green })
+hl(0, "Question", { fg = colors.blue })
+hl(0, "Search", { fg = colors.dark_purple })
+hl(0, "Substitute", { fg = colors.lightbg, bg = colors.yellow })
+hl(0, "SpecialKey", { fg = colors.one_bg3 })
+hl(0, "TooLong", { fg = colors.pink })
+hl(0, "Underlined", { fg = colors.pink })
+hl(0, "Visual", { bg = colors.one_bg2 })
+hl(0, "VisualNOS", { fg = colors.pink })
+hl(0, "WarningMsg", { fg = colors.pink })
+hl(0, "WildMenu", { fg = colors.pink, bg = colors.yellow })
+hl(0, "Title", { fg = colors.blue })
+hl(0, "Conceal", { fg = colors.blue, bg = colors.black })
+hl(0, "Cursor", { fg = colors.black, bg = colors.white })
+hl(0, "NonText", { fg = colors.one_bg3 })
+hl(0, "LineNr", { fg = colors.grey })
+hl(0, "SignColumn", { fg = colors.one_bg3 })
+hl(0, "StatusLineNC", { fg = colors.one_bg3, underline = true })
+hl(0, "StatusLine", { fg = colors.one_bg2, underline = true })
+hl(0, "VertSplit", { fg = colors.one_bg2 })
+hl(0, "ColorColumn", { bg = colors.lightbg })
+hl(0, "CursorColumn", { bg = colors.lightbg })
+hl(0, "CursorLine", { bg = colors.lightbg })
+hl(0, "CursorLinenr", { fg = colors.white, bg = colors.black })
+hl(0, "QuickFixLine", { bg = colors.lightbg })
+hl(0, "Pmenu", { fg = colors.one_bg, bg = colors.black2 })
+hl(0, "PmenuSbar", { fg = colors.one_bg2 })
+hl(0, "PmenuSel", { fg = colors.teal, bg = colors.lightbg })
+hl(0, "PmenuThumb", { fg = colors.blue })
+hl(0, "TabLine", { fg = colors.one_bg3, bg = colors.lightbg })
+hl(0, "TabLineFill", { fg = colors.one_bg3, bg = colors.lightbg })
+hl(0, "TabLineSel", { fg = colors.green, bg = colors.lightbg })
 
 -- Standard syntax highlighting
-hl("Boolean", { fg = colors.orange })
-hl("Character", { fg = colors.pink })
-hl("Comment", { fg = colors.grey_fg, italic = true })
-hl("Conditional", { fg = colors.green })
-hl("Constant", { fg = colors.cyan })
-hl("Define", { fg = colors.dark_purple })
-hl("Delimiter", { fg = colors.dark_purple })
-hl("Float", { fg = colors.orange })
-hl("Function", { fg = colors.yellow })
-hl("Identifier", { fg = colors.teal })
-hl("Include", { fg = colors.blue })
-hl("Keyword", { fg = colors.green })
-hl("Label", { fg = colors.yellow })
-hl("Number", { fg = colors.orange })
-hl("Operator", { fg = colors.white })
-hl("PreProc", { fg = colors.yellow })
-hl("Repeat", { fg = colors.cyan })
-hl("Special", { fg = colors.orange })
-hl("SpecialChar", { fg = colors.dark_purple })
-hl("Statement", { fg = colors.green })
-hl("StorageClass", { fg = colors.yellow })
-hl("String", { fg = colors.pink })
-hl("Structure", { fg = colors.dark_purple })
-hl("Tag", { fg = colors.yellow })
-hl("Todo", { fg = colors.yellow, bg = colors.lightbg })
-hl("Type", { fg = colors.yellow })
-hl("Typedef", { fg = colors.yellow })
+hl(0, "Boolean", { fg = colors.orange })
+hl(0, "Character", { fg = colors.pink })
+hl(0, "Comment", { fg = colors.grey_fg, italic = true })
+hl(0, "Conditional", { fg = colors.green })
+hl(0, "Constant", { fg = colors.cyan })
+hl(0, "Define", { fg = colors.dark_purple })
+hl(0, "Delimiter", { fg = colors.dark_purple })
+hl(0, "Float", { fg = colors.orange })
+hl(0, "Function", { fg = colors.yellow })
+hl(0, "Identifier", { fg = colors.teal })
+hl(0, "Include", { fg = colors.blue })
+hl(0, "Keyword", { fg = colors.green })
+hl(0, "Label", { fg = colors.yellow })
+hl(0, "Number", { fg = colors.orange })
+hl(0, "Operator", { fg = colors.white })
+hl(0, "PreProc", { fg = colors.yellow })
+hl(0, "Repeat", { fg = colors.cyan })
+hl(0, "Special", { fg = colors.orange })
+hl(0, "SpecialChar", { fg = colors.dark_purple })
+hl(0, "Statement", { fg = colors.green })
+hl(0, "StorageClass", { fg = colors.yellow })
+hl(0, "String", { fg = colors.pink })
+hl(0, "Structure", { fg = colors.dark_purple })
+hl(0, "Tag", { fg = colors.yellow })
+hl(0, "Todo", { fg = colors.yellow, bg = colors.lightbg })
+hl(0, "Type", { fg = colors.yellow })
+hl(0, "Typedef", { fg = colors.yellow })
 
 -- Diff highlighting
-hl("DiffAdd", { fg = colors.green, bg = colors.lightbg })
-hl("DiffChange", { fg = colors.one_bg3, bg = colors.lightbg })
-hl("DiffDelete", { fg = colors.pink, bg = colors.lightbg })
-hl("DiffText", { fg = colors.blue, bg = colors.lightbg })
-hl("DiffAdded", { fg = colors.green, bg = colors.black })
-hl("DiffFile", { fg = colors.pink, bg = colors.black })
-hl("DiffNewFile", { fg = colors.green, bg = colors.black })
-hl("DiffLine", { fg = colors.blue, bg = colors.black })
-hl("DiffRemoved", { fg = colors.pink, bg = colors.black })
+hl(0, "DiffAdd", { fg = colors.green, bg = colors.lightbg })
+hl(0, "DiffChange", { fg = colors.one_bg3, bg = colors.lightbg })
+hl(0, "DiffDelete", { fg = colors.pink, bg = colors.lightbg })
+hl(0, "DiffText", { fg = colors.blue, bg = colors.lightbg })
+hl(0, "DiffAdded", { fg = colors.green, bg = colors.black })
+hl(0, "DiffFile", { fg = colors.pink, bg = colors.black })
+hl(0, "DiffNewFile", { fg = colors.green, bg = colors.black })
+hl(0, "DiffLine", { fg = colors.blue, bg = colors.black })
+hl(0, "DiffRemoved", { fg = colors.pink, bg = colors.black })
 
 -- Git highlighting
-hl("gitcommitOverflow", { fg = colors.pink })
-hl("gitcommitSummary", { fg = colors.green })
-hl("gitcommitComment", { fg = colors.one_bg3 })
-hl("gitcommitUntracked", { fg = colors.one_bg3 })
-hl("gitcommitDiscarded", { fg = colors.one_bg3 })
-hl("gitcommitSelected", { fg = colors.one_bg3 })
-hl("gitcommitHeader", { fg = colors.dark_purple })
-hl("gitcommitSelectedType", { fg = colors.blue })
-hl("gitcommitUnmergedType", { fg = colors.blue })
-hl("gitcommitDiscardedType", { fg = colors.blue })
-hl("gitcommitBranch", { fg = colors.orange, bold = true })
-hl("gitcommitUntrackedFile", { fg = colors.yellow })
-hl("gitcommitUnmergedFile", { fg = colors.pink, bold = true })
-hl("gitcommitDiscardedFile", { fg = colors.pink, bold = true })
-hl("gitcommitSelectedFile", { fg = colors.green, bold = true })
+hl(0, "gitcommitOverflow", { fg = colors.pink })
+hl(0, "gitcommitSummary", { fg = colors.green })
+hl(0, "gitcommitComment", { fg = colors.one_bg3 })
+hl(0, "gitcommitUntracked", { fg = colors.one_bg3 })
+hl(0, "gitcommitDiscarded", { fg = colors.one_bg3 })
+hl(0, "gitcommitSelected", { fg = colors.one_bg3 })
+hl(0, "gitcommitHeader", { fg = colors.dark_purple })
+hl(0, "gitcommitSelectedType", { fg = colors.blue })
+hl(0, "gitcommitUnmergedType", { fg = colors.blue })
+hl(0, "gitcommitDiscardedType", { fg = colors.blue })
+hl(0, "gitcommitBranch", { fg = colors.orange, bold = true })
+hl(0, "gitcommitUntrackedFile", { fg = colors.yellow })
+hl(0, "gitcommitUnmergedFile", { fg = colors.pink, bold = true })
+hl(0, "gitcommitDiscardedFile", { fg = colors.pink, bold = true })
+hl(0, "gitcommitSelectedFile", { fg = colors.green, bold = true })
 
 -- Mail highlighting
-hl("mailQuoted1", { fg = colors.yellow })
-hl("mailQuoted2", { fg = colors.green })
-hl("mailQuoted3", { fg = colors.dark_purple })
-hl("mailQuoted4", { fg = colors.teal })
-hl("mailQuoted5", { fg = colors.blue })
-hl("mailQuoted6", { fg = colors.yellow })
-hl("mailURL", { fg = colors.blue })
-hl("mailEmail", { fg = colors.blue })
+hl(0, "mailQuoted1", { fg = colors.yellow })
+hl(0, "mailQuoted2", { fg = colors.green })
+hl(0, "mailQuoted3", { fg = colors.dark_purple })
+hl(0, "mailQuoted4", { fg = colors.teal })
+hl(0, "mailQuoted5", { fg = colors.blue })
+hl(0, "mailQuoted6", { fg = colors.yellow })
+hl(0, "mailURL", { fg = colors.blue })
+hl(0, "mailEmail", { fg = colors.blue })
 
-hl("EndOfBuffer", { fg = colors.black })
-hl("NnnNormal", { bg = colors.darker_black })
-hl("NvimInternalError", { fg = colors.red })
-hl("GitSignsAdd", { fg = colors.blue })
-hl("GitSignsChange", { fg = colors.grey_fg })
-hl("GitSignsModified", { fg = colors.blue })
-hl("CmpItemAbbr", { fg = colors.white })
-hl("CmpItemAbbrMatch", { fg = colors.teal })
-hl("CmpItemAbbrMatchFuzzy", { fg = colors.teal })
-hl("CmpItemMenu", { fg = colors.white })
-hl("CmpItemKind", { fg = colors.teal })
-hl("CmpItemKindText", { fg = colors.teal })
-hl("CmpItemKindMethod", { fg = colors.teal })
-hl("CmpItemKindFunction", { fg = colors.teal })
-hl("CmpItemKindConstructor", { fg = colors.teal })
-hl("CmpItemKindField", { fg = colors.teal })
-hl("CmpItemKindVariable", { fg = colors.teal })
-hl("CmpItemKindClass", { fg = colors.teal })
-hl("CmpItemKindInterface", { fg = colors.teal })
-hl("CmpItemKindModule", { fg = colors.teal })
-hl("CmpItemKindProperty", { fg = colors.teal })
-hl("CmpItemKindUnit", { fg = colors.teal })
-hl("CmpItemKindValue", { fg = colors.teal })
-hl("CmpItemKindEnum", { fg = colors.teal })
-hl("CmpItemKindKeyword", { fg = colors.teal })
-hl("CmpItemKindSnippet", { fg = colors.teal })
-hl("CmpItemKindColor", { fg = colors.teal })
-hl("CmpItemKindFile", { fg = colors.teal })
-hl("CmpItemKindReference", { fg = colors.teal })
-hl("CmpItemKindFolder", { fg = colors.teal })
-hl("CmpItemKindEnumMember", { fg = colors.teal })
-hl("CmpItemKindConstant", { fg = colors.teal })
-hl("CmpItemKindStruct", { fg = colors.teal })
-hl("CmpItemKindEvent", { fg = colors.teal })
-hl("CmpItemKindOperator", { fg = colors.teal })
-hl("CmpItemKindTypeParameter", { fg = colors.teal })
-hl("IndentBlanklineChar", { fg = colors.line })
-hl("DiagnosticError", { fg = colors.red })
-hl("DiagnosticWarn", { fg = colors.yellow })
-hl("DiagnosticInfo", { fg = colors.green })
-hl("DiagnosticHint", { fg = colors.purple })
-hl("LspReferenceRead", { bg = colors.lightbg })
-hl("LspReferenceWrite", { bg = colors.lightbg })
-hl("NeogitNotificationError", { fg = colors.red })
-hl("NeogitNotificationWarn", { fg = colors.yellow })
-hl("NeogitNotificationInfo", { fg = colors.green })
-hl("NeogitDiffAddHighlight", { fg = colors.green, bg = colors.one_bg })
-hl("NeogitDiffDeleteHighlight", { fg = colors.red, bg = colors.one_bg })
-hl("NeogitDiffContextHighlight", { fg = colors.white, bg = colors.one_bg })
-hl("NeogitHunkHeader", { fg = colors.red, bg = colors.one_bg })
-hl("NeogitHunkHeaderHighlight", { fg = colors.yellow, bg = colors.one_bg })
-vim.cmd("hi NotifyINFOBorder guifg="..colors.green)
-vim.cmd("hi NotifyINFOTitle guifg="..colors.green)
-vim.cmd("hi NotifyINFOIcon guifg="..colors.green)
-vim.cmd("hi NotifyWARNBorder guifg="..colors.yellow)
-vim.cmd("hi NotifyWARNTitle guifg="..colors.yellow)
-vim.cmd("hi NotifyWARNIcon guifg="..colors.yellow)
-vim.cmd("hi NotifyERRORBorder guifg="..colors.red)
-vim.cmd("hi NotifyERRORTitle guifg="..colors.red)
-vim.cmd("hi NotifyERRORIcon guifg="..colors.red)
-hl("TelescopeBorder", { fg = colors.one_bg })
-hl("TelescopePreviewTitle", { fg = colors.green })
-hl("TelescopePromptTitle", { fg = colors.blue })
-hl("TelescopeResultsTitle", { fg = colors.red })
-hl("TelescopePreviewBorder", { fg = colors.grey })
-hl("TelescopePromptBorder", { fg = colors.line })
-hl("TelescopeResultsBorder", { fg = colors.line })
-hl("WhichKeyValue", { fg = colors.purple })
-hl("DapUIVariable", { fg = colors.foreground })
-hl("DapUIScope", { fg = colors.purple })
-hl("DapUIType", { fg = colors.dark_purple  })
-hl("DapUIValue", { fg = colors.foreground })
-hl("DapUIModifiedValue", { fg = colors.purple, bold = true })
-hl("DapUIDecoration", { fg = colors.purple })
-hl("DapUIThread", { fg = colors.green })
-hl("DapUIStoppedThread", { fg = colors.purple })
-hl("DapUIFrameName", { fg = colors.foreground })
-hl("DapUISource", { fg = colors.dark_purple })
-hl("DapUILineNumber", { fg = colors.purple })
-hl("DapUIFloatBorder", { fg = colors.purple })
-hl("DapUIWatchesEmpty", { fg = colors.red })
-hl("DapUIWatchesValue", { fg = colors.green })
-hl("DapUIWatchesError", { fg = colors.red })
-hl("DapUIBreakpointsPath", { fg = colors.purple })
-hl("DapUIBreakpointsInfo", { fg = colors.green })
-hl("DapUIBreakpointsCurrentLine", { fg = colors.green, bold = true })
-hl("DapUIBreakpointsLine", { fg = colors.purple })
-vim.api.nvim__set_hl_ns(ns)
+hl(0, "EndOfBuffer", { fg = colors.black })
+hl(0, "NnnNormal", { bg = colors.darker_black })
+hl(0, "NvimInternalError", { fg = colors.red })
+hl(0, "GitSignsAdd", { fg = colors.blue })
+hl(0, "GitSignsChange", { fg = colors.grey_fg })
+hl(0, "GitSignsModified", { fg = colors.blue })
+hl(0, "CmpItemAbbr", { fg = colors.white })
+hl(0, "CmpItemAbbrMatch", { fg = colors.teal })
+hl(0, "CmpItemAbbrMatchFuzzy", { fg = colors.teal })
+hl(0, "CmpItemMenu", { fg = colors.white })
+hl(0, "CmpItemKind", { fg = colors.teal })
+hl(0, "CmpItemKindText", { fg = colors.teal })
+hl(0, "CmpItemKindMethod", { fg = colors.teal })
+hl(0, "CmpItemKindFunction", { fg = colors.teal })
+hl(0, "CmpItemKindConstructor", { fg = colors.teal })
+hl(0, "CmpItemKindField", { fg = colors.teal })
+hl(0, "CmpItemKindVariable", { fg = colors.teal })
+hl(0, "CmpItemKindClass", { fg = colors.teal })
+hl(0, "CmpItemKindInterface", { fg = colors.teal })
+hl(0, "CmpItemKindModule", { fg = colors.teal })
+hl(0, "CmpItemKindProperty", { fg = colors.teal })
+hl(0, "CmpItemKindUnit", { fg = colors.teal })
+hl(0, "CmpItemKindValue", { fg = colors.teal })
+hl(0, "CmpItemKindEnum", { fg = colors.teal })
+hl(0, "CmpItemKindKeyword", { fg = colors.teal })
+hl(0, "CmpItemKindSnippet", { fg = colors.teal })
+hl(0, "CmpItemKindColor", { fg = colors.teal })
+hl(0, "CmpItemKindFile", { fg = colors.teal })
+hl(0, "CmpItemKindReference", { fg = colors.teal })
+hl(0, "CmpItemKindFolder", { fg = colors.teal })
+hl(0, "CmpItemKindEnumMember", { fg = colors.teal })
+hl(0, "CmpItemKindConstant", { fg = colors.teal })
+hl(0, "CmpItemKindStruct", { fg = colors.teal })
+hl(0, "CmpItemKindEvent", { fg = colors.teal })
+hl(0, "CmpItemKindOperator", { fg = colors.teal })
+hl(0, "CmpItemKindTypeParameter", { fg = colors.teal })
+hl(0, "IndentBlanklineChar", { fg = colors.line })
+hl(0, "DiagnosticError", { fg = colors.red })
+hl(0, "DiagnosticWarn", { fg = colors.yellow })
+hl(0, "DiagnosticInfo", { fg = colors.green })
+hl(0, "DiagnosticHint", { fg = colors.purple })
+hl(0, "LspReferenceRead", { bg = colors.lightbg })
+hl(0, "LspReferenceWrite", { bg = colors.lightbg })
+hl(0, "NeogitNotificationError", { fg = colors.red })
+hl(0, "NeogitNotificationWarn", { fg = colors.yellow })
+hl(0, "NeogitNotificationInfo", { fg = colors.green })
+hl(0, "NeogitDiffAddHighlight", { fg = colors.green, bg = colors.one_bg })
+hl(0, "NeogitDiffDeleteHighlight", { fg = colors.red, bg = colors.one_bg })
+hl(0, "NeogitDiffContextHighlight", { fg = colors.white, bg = colors.one_bg })
+hl(0, "NeogitHunkHeader", { fg = colors.red, bg = colors.one_bg })
+hl(0, "NeogitHunkHeaderHighlight", { fg = colors.yellow, bg = colors.one_bg })
+hl(0, "NotifyINFOBorder", { fg = colors.green })
+hl(0, "NotifyINFOTitle", { fg = colors.green })
+hl(0, "NotifyINFOIcon", { fg = colors.green })
+hl(0, "NotifyWARNBorder", { fg = colors.yellow })
+hl(0, "NotifyWARNTitle", { fg = colors.yellow })
+hl(0, "NotifyWARNIcon", { fg = colors.yellow })
+hl(0, "NotifyERRORBorder", { fg = colors.red })
+hl(0, "NotifyERRORTitle", { fg = colors.red })
+hl(0, "NotifyERRORIcon", { fg = colors.red })
+hl(0, "TelescopeBorder", { fg = colors.one_bg })
+hl(0, "TelescopePreviewTitle", { fg = colors.green })
+hl(0, "TelescopePromptTitle", { fg = colors.blue })
+hl(0, "TelescopeResultsTitle", { fg = colors.red })
+hl(0, "TelescopePreviewBorder", { fg = colors.grey })
+hl(0, "TelescopePromptBorder", { fg = colors.line })
+hl(0, "TelescopeResultsBorder", { fg = colors.line })
+hl(0, "WhichKeyValue", { fg = colors.purple })
+hl(0, "DapUIVariable", { fg = colors.foreground })
+hl(0, "DapUIScope", { fg = colors.purple })
+hl(0, "DapUIType", { fg = colors.dark_purple  })
+hl(0, "DapUIValue", { fg = colors.foreground })
+hl(0, "DapUIModifiedValue", { fg = colors.purple, bold = true })
+hl(0, "DapUIDecoration", { fg = colors.purple })
+hl(0, "DapUIThread", { fg = colors.green })
+hl(0, "DapUIStoppedThread", { fg = colors.purple })
+hl(0, "DapUIFrameName", { fg = colors.foreground })
+hl(0, "DapUISource", { fg = colors.dark_purple })
+hl(0, "DapUILineNumber", { fg = colors.purple })
+hl(0, "DapUIFloatBorder", { fg = colors.purple })
+hl(0, "DapUIWatchesEmpty", { fg = colors.red })
+hl(0, "DapUIWatchesValue", { fg = colors.green })
+hl(0, "DapUIWatchesError", { fg = colors.red })
+hl(0, "DapUIBreakpointsPath", { fg = colors.purple })
+hl(0, "DapUIBreakpointsInfo", { fg = colors.green })
+hl(0, "DapUIBreakpointsCurrentLine", { fg = colors.green, bold = true })
+hl(0, "DapUIBreakpointsLine", { fg = colors.purple })
