@@ -24,6 +24,7 @@ vim.opt.mouse = "a"
 vim.opt.completeopt = "menu,menuone,noselect"
 vim.opt.showmode = false
 vim.opt.confirm = true
+vim.opt.shadafile = "NONE"
 vim.schedule(function()
    vim.opt.shadafile = os.getenv("XDG_DATA_HOME").."/nvim/shada/main.shada"
    vim.cmd("rshada")
@@ -501,6 +502,7 @@ require("packer").startup({ function(use)
 		"rcarriga/nvim-notify",
 		after = "playground",
 		config = function()
+			require("notify").setup({ max_width = 40 })
 			vim.notify = require("notify")
 		end
 	})
