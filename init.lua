@@ -26,10 +26,9 @@ vim.opt.showmode = false
 vim.opt.confirm = true
 vim.opt.shadafile = "NONE"
 vim.schedule(function()
-   vim.opt.shadafile = os.getenv("XDG_DATA_HOME").."/nvim/shada/main.shada"
+   vim.opt.shadafile = "/home/luuk/.local/share/nvim/shada/main.shada"
    vim.cmd("rshada")
 end)
-
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
 vim.g.loaded_2html_plugin = 1
@@ -49,6 +48,8 @@ vim.g.loaded_vimball = 1
 vim.g.loaded_vimballPlugin = 1
 vim.g.loaded_zip = 1
 vim.g.loaded_zipPlugin = 1
+vim.g.do_filetype_lua = 1
+vim.g.did_load_filetypes = 0
 
 _G.colors = {
 	red  = "#BF616A", teal   = "#97B7D7", one_bg  = "#373D49", lightbg   = "#3B4252", blue         = "#81A1C1",
@@ -62,7 +63,6 @@ require("impatient")
 require("packer_compiled")
 require("packer").startup({ function(use)
 	use("lewis6991/impatient.nvim")
-	use("nathom/filetype.nvim")
 	use("kyazdani42/nvim-web-devicons")
 	use({
 		"feline-nvim/feline.nvim",
@@ -513,6 +513,7 @@ require("packer").startup({ function(use)
 	use({ "rafamadriz/friendly-snippets", event = { "InsertEnter", "CmdlineEnter" } })
 	use({
 		"hrsh7th/nvim-cmp",
+		branch = "dev",
 		after = "friendly-snippets",
 		config = function()
 			local icons = {
@@ -524,6 +525,16 @@ require("packer").startup({ function(use)
 			}
 			local cmp = require("cmp")
 			cmp.setup({
+				window = {
+					completion = {
+						border = "rounded",
+						scrollbar = "║",
+					},
+					documentation = {
+						border = "rounded",
+						scrollbar = "║",
+					}
+				},
 				sources = {
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
@@ -592,14 +603,13 @@ require("packer").startup({ function(use)
 		end,
 	})
 	use({
-		"blackCauldron7/surround.nvim",
+		"echasnovski/mini.nvim",
 		after = "nvim-autopairs",
-		config = function() require("surround").setup({ mappings_style = "sandwich" }) end,
-		setup = function() vim.defer_fn(function() require("packer").loader("surround.nvim") end, 0) end
+		config = function() require("mini.surround").setup() end,
 	})
 	use({
 		"numToStr/Comment.nvim",
-		after = "surround.nvim",
+		after = "mini.nvim",
 		config = function() require("Comment").setup() end,
 	})
 	use({
@@ -829,7 +839,6 @@ vim.cmd([[
 	autocmd QuickFixCmdPost [^l]* lua TroubleQuickFixPost("quickfix")
 	autocmd QuickFixCmdPost l* lua TroubleQuickFixPost("loclist")
 	autocmd TextYankPost * silent! lua vim.highlight.on_yank({ higroup="IncSearch", timeout=1000 })
-	autocmd BufReadPost * if expand('%:p') !~# '\m/\.git/' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 	autocmd BufRead,BufWrite /run/user/1000/neomutt* lua vim.schedule(function() vim.cmd("TZAtaraxis") end)
 	augroup end
 ]])
@@ -1024,6 +1033,8 @@ hl(0, "CmpItemKindStruct", { fg = colors.teal })
 hl(0, "CmpItemKindEvent", { fg = colors.teal })
 hl(0, "CmpItemKindOperator", { fg = colors.teal })
 hl(0, "CmpItemKindTypeParameter", { fg = colors.teal })
+hl(0, "CmpCompletionWindow", { bg = colors.black })
+hl(0, "CmpDocumentationWindow", { bg = colors.black })
 hl(0, "IndentBlanklineChar", { fg = colors.line })
 hl(0, "DiagnosticError", { fg = colors.red })
 hl(0, "DiagnosticWarn", { fg = colors.yellow })
