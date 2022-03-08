@@ -829,19 +829,21 @@ map("n", "<leader>dr", "<cmd>lua require('dap').repl.open()<CR>")
 map("n", "<leader>dl", "<cmd>lua require('dap').run_last()<CR>")
 map("n", "<leader>dl", "<cmd>lua require('dap').run_last()<CR>")
 
-vim.cmd([[
-	augroup MyAutoCommands
-	autocmd!
-	autocmd VimEnter * :silent exec "!kill -s WINCH $PPID"
-	autocmd Filetype sh setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-	autocmd Focuslost * silent! update
-	autocmd InsertLeave,CursorHold * silent! update
-	autocmd QuickFixCmdPost [^l]* lua TroubleQuickFixPost("quickfix")
-	autocmd QuickFixCmdPost l* lua TroubleQuickFixPost("loclist")
-	autocmd TextYankPost * silent! lua vim.highlight.on_yank({ higroup="IncSearch", timeout=1000 })
-	autocmd BufRead,BufWrite /run/user/1000/neomutt* lua vim.schedule(function() vim.cmd("TZAtaraxis") end)
-	augroup end
-]])
+local group = vim.api.nvim_create_augroup("AutoCommands", { clear = true })
+vim.api.nvim_create_autocmd("VimEnter", { group = group,
+	command = 'silent exec "!kill -s WINCH $PPID"' })
+vim.api.nvim_create_autocmd("Filetype", { pattern = "sh", group = group,
+	command = "setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4" })
+vim.api.nvim_create_autocmd("FocusLost,InsertLeave,CursorHold", { group = group,
+	command = "silent! update" })
+vim.api.nvim_create_autocmd("QuickFixCmdPost", { pattern = "[^l]*", group = group,
+	callback = function() TroubleQuickFixPost("quickfix") end })
+vim.api.nvim_create_autocmd("QuickFixCmdPost", { pattern = "l*", group = group,
+	callback = function() TroubleQuickFixPost("loclist") end })
+vim.api.nvim_create_autocmd("TextYankPost", { group = group,
+	callback = function() vim.highlight.on_yank({ higroup="IncSearch", timeout=1000 }) end })
+vim.api.nvim_create_autocmd("BufRead,BufWrite", { pattern = "/run/user/1000/neomutt*", group = group,
+	callback = function() vim.schedule(function() vim.cmd("TZAtaraxis") end) end })
 
 function _G.put(...)
 	for _, chunk in ipairs({...}) do
