@@ -1,3 +1,8 @@
+vim.opt.shadafile = "NONE"
+vim.schedule(function()
+   vim.opt.shadafile = "/home/luuk/.local/share/nvim/shada/main.shada"
+   vim.cmd("rshada")
+end)
 vim.opt.wrap = false
 vim.opt.list = true
 vim.opt.listchars = { tab = "  ", extends = "", precedes = "" }
@@ -24,11 +29,7 @@ vim.opt.mouse = "a"
 vim.opt.completeopt = "menu,menuone,noselect"
 vim.opt.showmode = false
 vim.opt.confirm = true
-vim.opt.shadafile = "NONE"
-vim.schedule(function()
-   vim.opt.shadafile = "/home/luuk/.local/share/nvim/shada/main.shada"
-   vim.cmd("rshada")
-end)
+
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
 vim.g.loaded_2html_plugin = 1
@@ -236,6 +237,7 @@ require("packer").startup({ function(use)
 			})
 		end,
 	})
+	use({ "junegunn/fzf.vim" })
 	use({
 		"akinsho/bufferline.nvim",
 		config = function()
@@ -695,6 +697,7 @@ require("packer").startup({ function(use)
 	})
 	use({
 		"sindrets/diffview.nvim",
+		module = "neogit",
 		cmd = "Neogit",
 	})
 	use({
@@ -816,7 +819,7 @@ map("n", "<leader>xg", "<cmd>lua vimgrepprompt()<CR>")
 map("n", "gR", "<cmd>TroubleToggle lsp_references<CR>")
 map("n", "<C-A-j>", "<cmd>lua require('trouble').next({skip_groups = true, jump = true})<CR>")
 map("n", "<C-A-k>", "<cmd>lua require('trouble').previous({skip_groups = true, jump = true})<CR>")
-map("n", "<leader>gc", "<cmd>Neogit<CR>")
+map("n", "<leader>gc", "<cmd>lua require('neogit').open({ cwd = vim.fn.expand('%:h') })<CR>")
 map("n", "<F5>", "<cmd>lua require('dap').continue() require('dapui').open()<CR>")
 map("n", "<F6>", "<cmd>lua require('dapui').toggle()<CR>")
 map("n", "<F10>", "<cmd>lua require('dap').step_over()<CR>")
