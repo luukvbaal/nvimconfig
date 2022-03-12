@@ -888,7 +888,7 @@ vim.g.terminal_color_15 = colors.purple
 
 local hl = vim.api.nvim_set_hl
 hl(0, "Normal", { fg = colors.foreground, bg= colors.black })
-hl(0, "NormalFloat", { fg = colors.foreground, bg = colors.black2 })
+hl(0, "NormalFloat", { fg = colors.foreground, bg = colors.black })
 hl(0, "FloatBorder", { fg = colors.lightbg })
 hl(0, "Bold", { bold = true })
 hl(0, "Debug", { fg = colors.pink })
@@ -1003,7 +1003,7 @@ hl(0, "mailURL", { fg = colors.blue })
 hl(0, "mailEmail", { fg = colors.blue })
 
 hl(0, "EndOfBuffer", { fg = colors.black })
-hl(0, "NnnNormal", { bg = colors.darker_black })
+hl(0, "NnnNormal", { bg = colors.black })
 hl(0, "NvimInternalError", { fg = colors.red })
 hl(0, "GitSignsAdd", { fg = colors.blue })
 hl(0, "GitSignsChange", { fg = colors.grey_fg })
