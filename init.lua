@@ -1,7 +1,10 @@
 vim.opt.shadafile = "NONE"
 vim.schedule(function()
-   vim.opt.shadafile = "/home/luuk/.local/share/nvim/shada/main.shada"
-   vim.cmd("rshada")
+	vim.opt.shadafile = "/home/luuk/.local/share/nvim/shada/main.shada"
+	vim.cmd[[
+		rshada
+		source /home/luuk/.config/nvim/shortcuts.vim
+	]]
 end)
 vim.opt.wrap = false
 vim.opt.list = true
@@ -29,6 +32,7 @@ vim.opt.mouse = "a"
 vim.opt.completeopt = "menu,menuone,noselect"
 vim.opt.showmode = false
 vim.opt.confirm = true
+vim.opt.laststatus = 3
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
@@ -171,6 +175,7 @@ require("packer").startup({ function(use)
 				["i"] = { "INSERT", colors.darkpurple },
 				["ic"] = { "INSERT", colors.darkpurple },
 				["t"] = { "TERMINAL", colors.green },
+				["nt"] = { "T-PENDING", colors.green },
 				["v"] = { "VISUAL", colors.cyan },
 				["V"] = { "V-LINE", colors.cyan },
 				['\22'] = { "V-BLOCK", colors.cyan },
@@ -233,7 +238,7 @@ require("packer").startup({ function(use)
 			require("feline").setup({
 				theme = { fg = colors.grey_fg, bg = colors.black2 },
 				components = components,
-				force_inactive = { buftypes = { "^terminal$", "^nofile$", "^prompt$" } }
+				force_inactive = {}
 			})
 		end,
 	})
@@ -427,13 +432,13 @@ require("packer").startup({ function(use)
 				bufmap("n", "<leader>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
 				bufmap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename.float()<CR>", opts)
 				bufmap("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
+				bufmap("v", "<leader>ca", "<cmd>lua vim.lsp.buf.range_code_action()<CR>", opts)
 				bufmap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
 				bufmap("n", "<leader>e", "<cmd>lua vim.diagnostic.open_float(0, { scope = 'line' })<CR>", opts)
 				bufmap("n", "gx", "<cmd>lua vim.diagnostic.goto_prev()<CR>", opts)
 				bufmap("n", "gz", "<cmd>lua vim.diagnostic.goto_next()<CR>", opts)
 				bufmap("n", "<leader>q", "<cmd>lua vim.diagnostic.setloclist()<CR>", opts)
 				bufmap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-				bufmap("v", "<leader>ca", "<cmd>lua vim.lsp.buf.range_code_action()<CR>", opts)
 				require("illuminate").on_attach(client)
 			end
 			local lspconfig = require("lspconfig")
@@ -515,7 +520,6 @@ require("packer").startup({ function(use)
 	use({ "rafamadriz/friendly-snippets", event = { "InsertEnter", "CmdlineEnter" } })
 	use({
 		"hrsh7th/nvim-cmp",
-		branch = "dev",
 		after = "friendly-snippets",
 		config = function()
 			local icons = {
@@ -530,11 +534,11 @@ require("packer").startup({ function(use)
 				window = {
 					completion = {
 						border = "rounded",
-						scrollbar = "║",
+						winhighlight = "Normal:Normal"
 					},
 					documentation = {
 						border = "rounded",
-						scrollbar = "║",
+						winhighlight = "Normal:Normal"
 					}
 				},
 				sources = {
@@ -887,7 +891,7 @@ vim.g.terminal_color_14 = colors.cyan
 vim.g.terminal_color_15 = colors.purple
 
 local hl = vim.api.nvim_set_hl
-hl(0, "Normal", { fg = colors.foreground, bg= colors.black })
+hl(0, "Normal", { fg = colors.foreground, bg = colors.black })
 hl(0, "NormalFloat", { fg = colors.foreground, bg = colors.black })
 hl(0, "FloatBorder", { fg = colors.lightbg })
 hl(0, "Bold", { bold = true })
@@ -1038,8 +1042,6 @@ hl(0, "CmpItemKindStruct", { fg = colors.teal })
 hl(0, "CmpItemKindEvent", { fg = colors.teal })
 hl(0, "CmpItemKindOperator", { fg = colors.teal })
 hl(0, "CmpItemKindTypeParameter", { fg = colors.teal })
-hl(0, "CmpCompletionWindow", { bg = colors.black })
-hl(0, "CmpDocumentationWindow", { bg = colors.black })
 hl(0, "IndentBlanklineChar", { fg = colors.line })
 hl(0, "DiagnosticError", { fg = colors.red })
 hl(0, "DiagnosticWarn", { fg = colors.yellow })
