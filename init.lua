@@ -64,8 +64,8 @@ _G.colors = {
 	pink = "#D57780", black2 = "#343A46", grey_fg = "#606672", baby_pink = "#DE878F", darker_black = "#2A303C",
 }
 
-require("impatient")
-require("packer_compiled")
+pcall(require, "impatient")
+pcall(require, "packer_compiled")
 require("packer").startup({ function(use)
 	use("lewis6991/impatient.nvim")
 	use("kyazdani42/nvim-web-devicons")
@@ -251,7 +251,7 @@ require("packer").startup({ function(use)
 					separator_style = "thin",
 					diagnostics = "nvim_lsp",
 					custom_filter = function(buf)
-						local ignored = { "nnn", "dap-repl" }
+						local ignored = { "dap-repl" }
 						if not vim.tbl_contains(ignored, vim.api.nvim_buf_get_option(buf, "filetype")) then return true end
 					end,
 				},
@@ -532,14 +532,8 @@ require("packer").startup({ function(use)
 			local cmp = require("cmp")
 			cmp.setup({
 				window = {
-					completion = {
-						border = "rounded",
-						winhighlight = "Normal:Normal"
-					},
-					documentation = {
-						border = "rounded",
-						winhighlight = "Normal:Normal"
-					}
+					completion = cmp.config.window.bordered({ winhighlight = "" }),
+					documentation = cmp.config.window.bordered({ winhighlight = "" }),
 				},
 				sources = {
 					{ name = "nvim_lsp" },
@@ -601,17 +595,12 @@ require("packer").startup({ function(use)
 	use({ "hrsh7th/cmp-path", after = "cmp-buffer" })
 	use({ "kdheepak/cmp-latex-symbols", after = "cmp-path" })
 	use({
-		"windwp/nvim-autopairs",
+		"echasnovski/mini.nvim",
 		after = "cmp-latex-symbols",
 		config = function()
-			require("nvim-autopairs").setup()
-			require("cmp").event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
+			require("mini.surround").setup({ search_method = "cover_or_nearest" })
+			require("mini.pairs").setup()
 		end,
-	})
-	use({
-		"echasnovski/mini.nvim",
-		after = "nvim-autopairs",
-		config = function() require("mini.surround").setup() end,
 	})
 	use({
 		"numToStr/Comment.nvim",
@@ -837,8 +826,6 @@ map("n", "<leader>dl", "<cmd>lua require('dap').run_last()<CR>")
 map("n", "<leader>dl", "<cmd>lua require('dap').run_last()<CR>")
 
 local group = vim.api.nvim_create_augroup("AutoCommands", { clear = true })
-vim.api.nvim_create_autocmd("VimEnter", { group = group,
-	command = 'silent exec "!kill -s WINCH $PPID"' })
 vim.api.nvim_create_autocmd("Filetype", { pattern = "sh", group = group,
 	command = "setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4" })
 vim.api.nvim_create_autocmd("FocusLost,InsertLeave,CursorHold", { group = group,
