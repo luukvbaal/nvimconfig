@@ -453,6 +453,13 @@ require("packer").startup({ function(use)
 			}))
 			lspconfig.texlab.setup( { on_attach = on_attach, capabilities = capabilities })
 			vim.defer_fn(function() vim.cmd 'if &ft == "packer" | echo "" | else | silent! e %' end, 0)
+			local win = require("lspconfig.ui.windows")
+			local _default_opts = win.default_opts
+			win.default_opts = function(options)
+			   local opts = _default_opts(options)
+			   opts.border = "rounded"
+			   return opts
+			end
 		end,
 	})
 	use({
@@ -839,11 +846,7 @@ vim.api.nvim_create_autocmd("TextYankPost", { group = group,
 vim.api.nvim_create_autocmd("BufRead,BufWrite", { pattern = "/run/user/1000/neomutt*", group = group,
 	callback = function() vim.schedule(function() vim.cmd("TZAtaraxis") end) end })
 
-function _G.put(...)
-	for _, chunk in ipairs({...}) do
-		print(vim.inspect(chunk))
-	end
-end
+_G.P = vim.pretty_print
 
 function _G.TroubleQuickFixPost(mode)
 	require("trouble.providers").get(vim.api.nvim_get_current_win(),
