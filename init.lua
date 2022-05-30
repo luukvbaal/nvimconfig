@@ -1,6 +1,6 @@
 vim.opt.shadafile = "NONE"
 vim.schedule(function()
-	vim.opt.shadafile = "/home/luuk/.local/share/nvim/shada/main.shada"
+	vim.opt.shadafile = "/home/luuk/.local/state/nvim/shada/main.shada"
 	vim.cmd[[
 		rshada
 		source /home/luuk/.config/nvim/shortcuts.vim
@@ -240,6 +240,7 @@ require("packer").startup({ function(use)
 				components = components,
 				force_inactive = {}
 			})
+			require("feline").winbar.setup()
 		end,
 	})
 	use({ "junegunn/fzf.vim" })
