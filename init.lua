@@ -449,7 +449,18 @@ require("packer").startup({ function(use)
 			lspconfig.pyright.setup({ on_attach = on_attach, capabilities = capabilities })
 			lspconfig.rust_analyzer.setup({ on_attach = on_attach, capabilities = capabilities })
 			lspconfig.sumneko_lua.setup(require("lua-dev").setup({
-				lspconfig = { on_attach = on_attach, capabilities = capabilities, cmd = { "lua-language-server" } }
+				lspconfig = {
+					on_attach = on_attach,
+					capabilities = capabilities,
+					cmd = { "lua-language-server" },
+					settings = {
+						Lua = {
+							diagnostics = {
+								disable = { "missing-parameter" }
+							}
+						}
+					}
+				}
 			}))
 			lspconfig.texlab.setup( { on_attach = on_attach, capabilities = capabilities })
 			vim.defer_fn(function() vim.cmd 'if &ft == "packer" | echo "" | else | silent! e %' end, 0)
