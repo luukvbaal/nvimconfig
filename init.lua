@@ -240,7 +240,6 @@ require("packer").startup({ function(use)
 				components = components,
 				force_inactive = {}
 			})
-			require("feline").winbar.setup()
 		end,
 	})
 	use({ "junegunn/fzf.vim" })
@@ -314,7 +313,6 @@ require("packer").startup({ function(use)
 		"norcalli/nvim-colorizer.lua",
 		config = function() require("colorizer").setup({ "*" }, { names = false }) end,
 	})
-	-- use("mcchrish/nnn.vim")
 	use({
 		"~/dev/nnn.nvim",
 		config = function()
@@ -322,7 +320,7 @@ require("packer").startup({ function(use)
 			nnn.setup({
 				explorer = { cmd = "nnn -Go", session = "shared", side = "topleft", tabs = true },
 				picker = { cmd = "tmux new-session nnn -GPp", style = { border = "rounded" } },
-				replace_netrw = "explorer",
+				replace_netrw = "picker",
 				windownav = { left = "<C-h>", right = "<C-l>" },
 				auto_open = { setup = "picker", tabpage = "explorer", empty = true },
 				auto_close = true,
@@ -463,7 +461,6 @@ require("packer").startup({ function(use)
 				}
 			}))
 			lspconfig.texlab.setup( { on_attach = on_attach, capabilities = capabilities })
-			vim.defer_fn(function() vim.cmd 'if &ft == "packer" | echo "" | else | silent! e %' end, 0)
 			local win = require("lspconfig.ui.windows")
 			local _default_opts = win.default_opts
 			win.default_opts = function(options)
@@ -495,7 +492,7 @@ require("packer").startup({ function(use)
 		end
 	})
 	use({
-		"folke/trouble.nvim",
+		"bellini666/trouble.nvim",
 		after = "nvim-dd.git",
 		config = function()
 			require("trouble").setup({
@@ -504,6 +501,7 @@ require("packer").startup({ function(use)
 				padding = false,
 				height = 5,
 				signs = { error = "", warning = "", hint = "", information = "", other = "", },
+				track_cursor = true,
 			})
 		end,
 	})
@@ -630,7 +628,7 @@ require("packer").startup({ function(use)
 		after = "Comment.nvim",
 		config = function()
 			local wk = require("which-key")
-			wk.setup()
+			wk.setup({ icons = { separator = "➡" } })
 			wk.register({}, {})
 		end,
 	})
