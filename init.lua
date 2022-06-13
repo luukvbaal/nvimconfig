@@ -33,6 +33,7 @@ vim.opt.completeopt = "menu,menuone,noselect"
 vim.opt.showmode = false
 vim.opt.confirm = true
 vim.opt.laststatus = 3
+vim.opt.cmdheight = 0
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
