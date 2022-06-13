@@ -3,7 +3,9 @@ vim.schedule(function()
 	vim.opt.shadafile = "/home/luuk/.local/state/nvim/shada/main.shada"
 	vim.cmd[[
 		rshada
-		source /home/luuk/.config/nvim/shortcuts.vim
+		if filereadable("/home/luuk/.config/nvim/shortcuts.vim")
+			source /home/luuk/.config/nvim/shortcuts.vim
+		endif
 	]]
 end)
 vim.opt.wrap = false
