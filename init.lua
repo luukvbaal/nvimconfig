@@ -1,13 +1,4 @@
 vim.opt.shadafile = "NONE"
-vim.schedule(function()
-	vim.opt.shadafile = "/home/luuk/.local/state/nvim/shada/main.shada"
-	vim.cmd[[
-		rshada
-		if filereadable("/home/luuk/.config/nvim/shortcuts.vim")
-			source /home/luuk/.config/nvim/shortcuts.vim
-		endif
-	]]
-end)
 vim.opt.wrap = false
 vim.opt.list = true
 vim.opt.listchars = { tab = "  ", extends = "", precedes = "" }
@@ -67,9 +58,10 @@ _G.colors = {
 	pink = "#D57780", black2 = "#343A46", grey_fg = "#606672", baby_pink = "#DE878F", darker_black = "#2A303C",
 }
 
-local install_path = vim.fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
-if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-  Packer_bootstrap = vim.fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
+local fn = vim.fn
+local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+if fn.empty(fn.glob(install_path)) > 0 then
+  Packer_bootstrap = fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
 end
 
 pcall(require, "impatient")
@@ -774,7 +766,7 @@ require("packer").startup({ function(use)
   end
 end,
 config = {
-	compile_path = vim.fn.stdpath('config')..'/lua/packer_compiled.lua',
+	compile_path = fn.stdpath('config')..'/lua/packer_compiled.lua',
 	display = {
 		prompt_border = "rounded",
 		open_fn = function() return require("packer.util").float({ border = "rounded" }) end
@@ -876,7 +868,7 @@ function _G.TroubleQuickFixPost(mode)
 end
 
 function _G.vimgrepprompt()
-	local pattern = vim.fn.input("vimgrep pattern: ")
+	local pattern = fn.input("vimgrep pattern: ")
 	if pattern and pattern ~= "" then
 		local ok = vim.F.npcall(vim.cmd, "vimgrep /"..pattern.."/j %")
 		vim.schedule(function() print(ok and " " or "No results") end)
@@ -1103,3 +1095,16 @@ hl(0, "DapUIBreakpointsPath", { fg = colors.purple })
 hl(0, "DapUIBreakpointsInfo", { fg = colors.green })
 hl(0, "DapUIBreakpointsCurrentLine", { fg = colors.green, bold = true })
 hl(0, "DapUIBreakpointsLine", { fg = colors.purple })
+
+vim.schedule(function()
+	local home = os.getenv("HOME")
+	local shada = home.."/.local/state/nvim/shada/main.shada"
+	vim.opt.shadafile = shada
+	if vim.loop.fs_stat(shada) then
+		vim.cmd("rshada")
+	end
+	local shortcuts = home..".config/nvim/shortcuts.vim"
+	if vim.loop.fs_stat(shortcuts) then
+		vim.cmd("source "..shortcuts)
+	end
+end)
