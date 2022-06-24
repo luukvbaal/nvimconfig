@@ -59,9 +59,16 @@ _G.colors = {
 }
 
 local fn = vim.fn
-local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
-if fn.empty(fn.glob(install_path)) > 0 then
-  Packer_bootstrap = fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
+local home = os.getenv("HOME")
+local function stat(name, type)
+    local stats = vim.loop.fs_stat(name)
+    return stats and stats.type == type
+end
+
+local install_path = fn.stdpath("data").."/site/pack/packer/start/packer.nvim"
+if not stat(install_path, "directory") then
+	print("Cloning packer...")
+  Packer_bootstrap = fn.system({"git", "clone", "--depth", "1", "https://github.com/wbthomason/packer.nvim", install_path})
 end
 
 pcall(require, "impatient")
@@ -313,8 +320,9 @@ require("packer").startup({ function(use)
 		"norcalli/nvim-colorizer.lua",
 		config = function() require("colorizer").setup({ "*" }, { names = false }) end,
 	})
+	local reponame = stat(home.."/dev/nnn.nvim", "directory") and home.."/dev/nnn.nvim" or "luukvbaal/nnn.nvim"
 	use({
-		"~/dev/nnn.nvim",
+		reponame,
 		config = function()
 			local nnn = require("nnn")
 			nnn.setup({
@@ -443,7 +451,6 @@ require("packer").startup({ function(use)
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 			capabilities = require("cmp_nvim_lsp").update_capabilities(capabilities)
 			lspconfig.bashls.setup({ on_attach = on_attach, capabilities = capabilities })
-			lspconfig.clangd.setup({ on_attach = on_attach, capabilities = capabilities })
 			lspconfig.pyright.setup({ on_attach = on_attach, capabilities = capabilities })
 			lspconfig.rust_analyzer.setup({ on_attach = on_attach, capabilities = capabilities })
 			lspconfig.sumneko_lua.setup(require("lua-dev").setup({
@@ -461,6 +468,8 @@ require("packer").startup({ function(use)
 				}
 			}))
 			lspconfig.texlab.setup( { on_attach = on_attach, capabilities = capabilities })
+			capabilities.offsetEncoding = { "utf-16" }
+			lspconfig.clangd.setup({ on_attach = on_attach, capabilities = capabilities })
 			local win = require("lspconfig.ui.windows")
 			local _default_opts = win.default_opts
 			win.default_opts = function(options)
@@ -515,8 +524,9 @@ require("packer").startup({ function(use)
 		config = function() require("fidget").setup() end
 	})
 	use({ "RRethy/vim-illuminate", after = "fidget.nvim" })
+	reponame = stat(home.."/dev/stabilize.nvim", "directory") and home.."/dev/stabilize.nvim" or "luukvbaal/stabilize.nvim"
 	use({
-		"~/dev/stabilize.nvim",
+		reponame,
 		after = "vim-illuminate",
 		config = function() require("stabilize").setup({ forcemark = "f", nested = "QuickFixCmdPost,DiagnosticChanged *" }) end,
 	})
@@ -559,7 +569,6 @@ require("packer").startup({ function(use)
 					{ name = "path" },
 					{ name = "latex_symbols" },
 				},
-				experimental = { ghost_text = true },
 				snippet = {
 					expand = function(args) require("luasnip").lsp_expand(args.body) end,
 				},
@@ -589,10 +598,20 @@ require("packer").startup({ function(use)
 						else fallback()
 						end
 					end, { "i", "c" })
+					,
+					["<C-o>"] = cmp.mapping(function(fallback)
+						local fallback_key = vim.api.nvim_replace_termcodes("<Tab>", true, true, true)
+						local resolved_key = vim.fn["copilot#Accept"](fallback)
+						if fallback_key == resolved_key then
+							cmp.confirm({ select = true })
+						else
+							vim.api.nvim_feedkeys(resolved_key, "n", true)
+						end
+					end),
 				}
 			})
-			cmp.setup.cmdline('/', { sources = { { name = 'buffer' } } })
-			cmp.setup.cmdline(':', { sources = cmp.config.sources({ { name = 'path' } }, { { name = 'cmdline' } }) })
+			cmp.setup.cmdline("/", { sources = { { name = "buffer" } } })
+			cmp.setup.cmdline(":", { sources = cmp.config.sources({ { name = "path" } }, { { name = "cmdline" } }) })
 		end,
 	})
 	use({
@@ -632,6 +651,7 @@ require("packer").startup({ function(use)
 			wk.register({}, {})
 		end,
 	})
+	use({ "github/copilot.vim", cmd = "Copilot" })
 	use({ "tweekmonster/startuptime.vim", cmd = "StartupTime" })
 	use({
 		"mfussenegger/nvim-dap",
@@ -741,7 +761,7 @@ require("packer").startup({ function(use)
 					selection_caret = "  ",
 					entry_prefix = "  ",
 				},
-				pickers = { fd = { find_command = { "fd", ".", "/home/luuk", "--type", "f", "-H" } } },
+				pickers = { fd = { find_command = { "fd", ".", "~", "--type", "f", "-H" } } },
 			})
 			require("telescope").load_extension("fzf")
 		end,
@@ -1097,14 +1117,9 @@ hl(0, "DapUIBreakpointsCurrentLine", { fg = colors.green, bold = true })
 hl(0, "DapUIBreakpointsLine", { fg = colors.purple })
 
 vim.schedule(function()
-	local home = os.getenv("HOME")
 	local shada = home.."/.local/state/nvim/shada/main.shada"
 	vim.opt.shadafile = shada
-	if vim.loop.fs_stat(shada) then
-		vim.cmd("rshada")
-	end
-	local shortcuts = home..".config/nvim/shortcuts.vim"
-	if vim.loop.fs_stat(shortcuts) then
-		vim.cmd("source "..shortcuts)
-	end
+	if stat(shada, "file") then vim.cmd("rshada") end
+	local shortcuts = home.."/.config/nvim/shortcuts.vim"
+	if stat(shortcuts, "file") then vim.cmd("source "..shortcuts) end
 end)
