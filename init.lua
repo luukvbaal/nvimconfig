@@ -656,6 +656,11 @@ require("packer").startup({ function(use)
 			wk.register({}, {})
 		end,
 	})
+	use({
+		"petertriho/nvim-scrollbar",
+		after = "which-key.nvim",
+		config = function() require("scrollbar").setup() end
+	})
 	use({ "github/copilot.vim", cmd = "Copilot" })
 	use({ "tweekmonster/startuptime.vim", cmd = "StartupTime" })
 	use({
