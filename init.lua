@@ -337,6 +337,7 @@ require("packer").startup({ function(use)
 				windownav = { left = "<C-h>", right = "<C-l>" },
 				auto_open = { setup = "picker", tabpage = "explorer", empty = true },
 				auto_close = true,
+				offset = true,
 				mappings = {
 					{ "<C-t>", nnn.builtin.open_in_tab },      -- open file(s) in tab
 					{ "<C-s>", nnn.builtin.open_in_split },    -- open file(s) in split
