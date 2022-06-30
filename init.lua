@@ -301,19 +301,17 @@ require("packer").startup({ function(use)
 		config = function()
 			require("nvim-treesitter.configs").setup({
 				highlight = { enable = true },
-				ensure_installed = {
-					"bash", "bibtex", "c", "cmake", "cpp", "css", "dockerfile", "go", "html", "java",
-					"javascript", "json", "lua", "perl", "php", "python", "r", "regex", "rust",
-					"toml", "typescript", "verilog", "vim", "yaml",
-				},
+				ensure_installed = "all",
 			})
 		end,
+		run = ':TSUpdate'
 	})
 	use({
 		"lukas-reineke/indent-blankline.nvim",
 		config = function()
 			require("indent_blankline").setup({
 				char = "▏",
+				show_current_context = true,
 				show_trailing_blankline_indent = false,
 				show_first_indent_level = false,
 				buftype_exclude = { "terminal" },
@@ -1074,6 +1072,7 @@ hl(0, "CmpItemKindEvent", { fg = colors.teal })
 hl(0, "CmpItemKindOperator", { fg = colors.teal })
 hl(0, "CmpItemKindTypeParameter", { fg = colors.teal })
 hl(0, "IndentBlanklineChar", { fg = colors.line })
+hl(0, "IndentBlanklineContextChar", { fg = colors.one_bg3 })
 hl(0, "DiagnosticError", { fg = colors.red })
 hl(0, "DiagnosticWarn", { fg = colors.yellow })
 hl(0, "DiagnosticInfo", { fg = colors.green })
