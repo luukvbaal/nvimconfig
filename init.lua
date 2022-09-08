@@ -1,12 +1,8 @@
-	-- use({
-	-- 	"lewis6991/satellite.nvim",
-	-- 	after = "which-key.nvim",
-	-- 	config = function() require("satellite").setup() end
-	-- })
-	-- use({
-	-- 	"lewis6991/spellsitter.nvim",
-	-- 	config = function() require("spellsitter").setup() end
-	-- })
+-- use({
+--      "lewis6991/satellite.nvim",
+-- 	after = "which-key.nvim",
+-- 	config = function() require("satellite").setup() end
+-- })
 _G.a   = vim.api
 _G.c   = vim.cmd
 _G.d   = vim.diagnostic
@@ -42,7 +38,8 @@ o.termguicolors = true
 o.timeoutlen = 400
 o.undofile = true
 o.updatetime = 250
-o.spell = false
+o.spell = true
+o.spelloptions = "camel"
 o.shell = "/bin/sh"
 o.signcolumn = "auto:2"
 o.completeopt = "menu,menuone,noselect"
@@ -919,7 +916,12 @@ require("packer").startup({ function(use)
 		config = function() require("fidget").setup() end
 	})
 	use({ "RRethy/vim-illuminate", after = "fidget.nvim" })
-	use({ "nvim-treesitter/playground", after = "vim-illuminate"})
+	use({
+		"andymass/vim-matchup",
+		after = "vim-illuminate",
+		config = function() require("nvim-treesitter.configs").setup({ matchup = { enable = true }}) end
+	})
+	use({ "nvim-treesitter/playground", after = "vim-matchup"})
 	use({
 		"rcarriga/nvim-notify",
 		after = "playground",
