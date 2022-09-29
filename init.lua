@@ -46,7 +46,6 @@ o.completeopt = "menu,menuone,noselect"
 o.showmode = false
 o.confirm = true
 o.laststatus = 3
-o.cmdheight = 0
 
 g.mapleader = " "
 g.maplocalleader = ","
@@ -365,7 +364,7 @@ map("n", "<A-S-Tab>", "<cmd>BufferLineCyclePrev<CR>")
 map("n", "<leader>zz", "<cmd>TZAtaraxis<CR>")
 map("n", "<leader>zf", "<cmd>TZFocus<CR>")
 map("n", "<leader>zm", "<cmd>TZMinimalist<CR>")
-map("n", "<leader>ra", ":%s//g<Left><Left>")
+map("n", "<leader>ra", ":%s//g<Left><Left><C-r><C-w>/", { desc = "Replace pattern" })
 map("n", "<leader>da", "ggVGd")
 map("n", "<C-a>", "GVgg")
 map("n", "gx", "<cmd>silent !xdg-open <cfile><CR>")
@@ -386,9 +385,9 @@ map("i", "!", "!<C-g>u")
 map("i", "?", "?<C-g>u")
 map("v", ">", ">gv")
 map("v", "<", "<gv")
-map("n", "<C-A-n>", "<cmd>NnnExplorer %:p:h<CR>")
+map("n", "<C-A-n>", "<cmd>execute 'PackerLoad! nnn.nvim' | NnnExplorer %:p:h<CR>")
 map("t", "<C-A-n>", "<cmd>NnnExplorer<CR>")
-map("n", "<C-A-p>", "<cmd>NnnPicker %:p:h<CR>")
+map("n", "<C-A-p>", "<cmd>execute 'PackerLoad! nnn.nvim' | NnnPicker %:p:h<CR>")
 map("t", "<C-A-p>", "<cmd>NnnPicker<CR>")
 map("n", "<leader>ff", "<cmd>Telescope fd<CR>")
 map("n", "<leader>fgf", "<cmd>Telescope git_files<CR>")
@@ -439,6 +438,8 @@ a.nvim_create_autocmd("QuickFixCmdPost", { pattern = "l*", group = group,
 	callback = function() TroubleQuickFixPost("loclist") end })
 a.nvim_create_autocmd("TextYankPost", { group = group,
 	callback = function() vim.highlight.on_yank({ higroup="IncSearch", timeout=1000 }) end })
+a.nvim_create_autocmd("BufReadPost", { group = group,
+	callback = function() o.formatoptions:remove("r") o.formatoptions:remove("o") end })
 
 require("packer").startup({ function(use)
 	use("lewis6991/impatient.nvim")
@@ -732,7 +733,11 @@ require("packer").startup({ function(use)
 			})
 		end,
 	})
-	use({ "folke/lua-dev.nvim", after = "nvim-navic" })
+	use({
+		"folke/lua-dev.nvim",
+		after = "nvim-navic",
+		config = function() require("lua-dev").setup() end
+		})
 	use({ "hrsh7th/cmp-nvim-lsp", after = "lua-dev.nvim" })
 	use({
 		"neovim/nvim-lspconfig",
@@ -747,11 +752,10 @@ require("packer").startup({ function(use)
 			l.buf.rename = {
 				float = function()
 					local currName = f.expand("<cword>")
-					local tshl = require("nvim-treesitter-playground.hl-info").get_treesitter_hl()
+					local tshl = vim.treesitter.get_captures_at_cursor(0)
 					if tshl and #tshl > 0 then
-						local ind = tshl[#tshl]:match("^.*()%*%*.*%*%*")
-						tshl = tshl[#tshl]:sub(ind + 2, -3)
-						local allowed = { "TSVariable", "TSFuncBuiltin", "TSFunction", "TSField", "TSProperty" }
+						tshl = "@"..tshl[#tshl]
+						local allowed = { "@variable", "@function.builtin", "@function.call", "@function", "@field", "@property" }
 						if not tc(allowed, tshl) then return end
 					else return end
 
@@ -835,7 +839,6 @@ require("packer").startup({ function(use)
 					callback = function() d.setloclist() end }, 0)
 				map("n", "<leader>f", "", { desc = "Format",
 					callback = function() l.buf.formatting() end }, 0)
-				require("illuminate").on_attach(client)
 				require("nvim-navic").attach(client, bufnr)
 			end
 			local lspconfig = require("lspconfig")
@@ -844,21 +847,15 @@ require("packer").startup({ function(use)
 			lspconfig.bashls.setup({ on_attach = on_attach, capabilities = capabilities })
 			lspconfig.pyright.setup({ on_attach = on_attach, capabilities = capabilities })
 			lspconfig.rust_analyzer.setup({ on_attach = on_attach, capabilities = capabilities })
-			lspconfig.sumneko_lua.setup(require("lua-dev").setup({
-				lspconfig = {
-					on_attach = on_attach,
-					capabilities = capabilities,
-					cmd = { "lua-language-server" },
-					settings = {
-						Lua = {
-							diagnostics = {
-								disable = { "missing-parameter", "param-type-mismatch", "assign-type-mismatch", "cast-local-type" },
-								globals = { "P" }
-							}
-						}
+			lspconfig.sumneko_lua.setup({ on_attach = on_attach, capabilities = capabilities,
+				settings = {
+					Lua = {
+						runtime = { version = "LuaJIT" },
+						diagnostics = { disable = { "missing-parameter", "param-type-mismatch", "cast-local-type" }},
+						telemetry = { enable = false },
 					}
 				}
-			}))
+			})
 			lspconfig.texlab.setup( { on_attach = on_attach, capabilities = capabilities })
 			capabilities.offsetEncoding = { "utf-16" }
 			lspconfig.clangd.setup({ on_attach = on_attach, capabilities = capabilities })
@@ -911,28 +908,18 @@ require("packer").startup({ function(use)
 		after = "trouble.nvim",
 		config = function() require("lsp_signature").setup({ doc_lines = 0, hint_enable = false }) end,
 	})
-	use({ "j-hui/fidget.nvim",
+	use({
+		"j-hui/fidget.nvim",
 		after = "lsp_signature.nvim",
 		config = function() require("fidget").setup() end
 	})
-	use({ "RRethy/vim-illuminate", after = "fidget.nvim" })
-	use({
-		"andymass/vim-matchup",
-		after = "vim-illuminate",
-		config = function() require("nvim-treesitter.configs").setup({ matchup = { enable = true }}) end
-	})
-	use({ "nvim-treesitter/playground", after = "vim-matchup"})
 	use({
 		"rcarriga/nvim-notify",
-		after = "playground",
+		after = "fidget.nvim",
 		config = function()
 			require("notify").setup({ max_width = 40 })
 			vim.notify = require("notify")
 		end
-	})
-	use({
-		"antoinemadec/FixCursorHold.nvim",
-		after = "nvim-notify",
 	})
 	use({ "rafamadriz/friendly-snippets", event = { "CursorHold" } })
 	use({
@@ -948,27 +935,12 @@ require("packer").startup({ function(use)
 			}
 			local cmp = require("cmp")
 			cmp.setup({
-				window = {
-					completion = cmp.config.window.bordered({ winhighlight = "" }),
-					documentation = cmp.config.window.bordered({ winhighlight = "" }),
-				},
-				sources = {
-					{ name = "nvim_lsp" },
-					{ name = "luasnip" },
-					{ name = "nvim_lua" },
-					{ name = "buffer", keyword_length = 5 },
-					{ name = "path" },
-					{ name = "latex_symbols" },
-				},
 				snippet = {
 					expand = function(args) require("luasnip").lsp_expand(args.body) end,
 				},
-				formatting = {
-					format = function(_, item)
-						item.kind = icons[item.kind]
-						return item
-					end,
-					fields = { 'kind', 'abbr', 'menu' }
+				window = {
+					completion = cmp.config.window.bordered({ winhighlight = "" }),
+					documentation = cmp.config.window.bordered({ winhighlight = "" }),
 				},
 				mapping = {
 					["<C-d>"] = cmp.mapping.scroll_docs(-4),
@@ -999,9 +971,24 @@ require("packer").startup({ function(use)
 							a.nvim_feedkeys(resolved_key, "n", true)
 						end
 					end),
+				},
+				sources = {
+					{ name = "nvim_lsp" },
+					{ name = "luasnip" },
+					{ name = "nvim_lua" },
+					{ name = "buffer", keyword_length = 5 },
+					{ name = "path" },
+					{ name = "latex_symbols" },
+				},
+				formatting = {
+					format = function(_, item)
+						item.kind = icons[item.kind]
+						return item
+					end,
+					fields = { 'kind', 'abbr', 'menu' }
 				}
 			})
-			cmp.setup.cmdline("/", { sources = { { name = "buffer" } } })
+			cmp.setup.cmdline({ "/", "?" }, { sources = { { name = "buffer" } } })
 			cmp.setup.cmdline(":", { sources = cmp.config.sources({ { name = "path" } }, { { name = "cmdline" } }) })
 			cmp.event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
 		end,
@@ -1032,8 +1019,16 @@ require("packer").startup({ function(use)
 		config = function() require("nvim-surround").setup() end
 	})
 	use({
-		"numToStr/Comment.nvim",
+		"andymass/vim-matchup",
 		after = "nvim-surround",
+		config = function()
+			g.matchup_matchparen_offscreen = { method = "popup" }
+			require("nvim-treesitter.configs").setup({ matchup = { enable = true }})
+		end
+	})
+	use({
+		"numToStr/Comment.nvim",
+		after = "vim-matchup",
 		config = function() require("Comment").setup() end,
 	})
 	use({
@@ -1126,7 +1121,7 @@ require("packer").startup({ function(use)
 					elements = { "repl", "console" },
 					size = 10,
 					position = "bottom"
-				} }
+				}},
 			})
 		end,
 		module = "dapui"
