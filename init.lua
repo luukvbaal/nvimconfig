@@ -10,7 +10,8 @@ _G.f   = vim.fn
 _G.g   = vim.g
 _G.l   = vim.lsp
 _G.npc = vim.F.npcall
-_G.o   = vim.opt
+_G.o   = vim.o
+_G.O   = vim.opt
 _G.P   = vim.pretty_print
 _G.S   = vim.schedule
 _G.tc  = vim.tbl_contains
@@ -19,21 +20,21 @@ _G.te  = vim.tbl_extend
 o.shadafile = "NONE"
 o.wrap = false
 o.list = true
-o.listchars = { tab = "  ", extends = "", precedes = "" }
+O.listchars = { tab = "  ", extends = "", precedes = "" }
 o.title = true
 o.clipboard = "unnamedplus"
-o.cmdheight = 1
+o.cmdheight = 0
 o.smartindent = true
 o.tabstop = 2
 o.shiftwidth = 2
-o.shortmess:append("sI")
+O.shortmess:append("sI")
 o.smartcase = true
 o.ignorecase = true
 o.number = true
 o.relativenumber = true
 o.splitbelow = true
 o.splitright = true
-npc(function() o.splitscroll = false end)
+npc(function() o.splitkeep = "screen" end)
 o.termguicolors = true
 o.timeoutlen = 400
 o.undofile = true
@@ -46,6 +47,7 @@ o.completeopt = "menu,menuone,noselect"
 o.showmode = false
 o.confirm = true
 o.laststatus = 3
+o.pumheight = math.floor(o.lines / 2)
 
 g.mapleader = " "
 g.maplocalleader = ","
@@ -360,7 +362,7 @@ map("n", "<A-a>", "<C-a>")
 map("n", "<S-t", "<cmd>enew<CR>")
 map("n", "<C-t>b", "<cmd>tabnew<CR>")
 map("n", "<A-Tab>", "<cmd>BufferLineCycleNext<CR>")
-map("n", "<A-S-Tab>", "<cmd>BufferLineCyclePrev<CR>")
+map("n", "<S-Tab>", "<cmd>BufferLineCyclePrev<CR>")
 map("n", "<leader>zz", "<cmd>TZAtaraxis<CR>")
 map("n", "<leader>zf", "<cmd>TZFocus<CR>")
 map("n", "<leader>zm", "<cmd>TZMinimalist<CR>")
@@ -428,6 +430,8 @@ map("n", "<leader>sf", "", { desc = "Source file",
 	callback = function() c.source(f.expand("%:p")) end })
 
 local group = a.nvim_create_augroup("AutoCommands", { clear = true })
+a.nvim_create_autocmd("VimResized", { group = group,
+	command = "execute 'let &ph=&lines/2'" })
 a.nvim_create_autocmd("Filetype", { pattern = "sh", group = group,
 	command = "setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4" })
 a.nvim_create_autocmd({ "FocusLost", "InsertLeave", "CursorHold" }, { group = group,
@@ -439,9 +443,52 @@ a.nvim_create_autocmd("QuickFixCmdPost", { pattern = "l*", group = group,
 a.nvim_create_autocmd("TextYankPost", { group = group,
 	callback = function() vim.highlight.on_yank({ higroup="IncSearch", timeout=1000 }) end })
 a.nvim_create_autocmd("BufReadPost", { group = group,
-	callback = function() o.formatoptions:remove("r") o.formatoptions:remove("o") end })
+	callback = function() O.formatoptions:remove("r") O.formatoptions:remove("o") end })
+a.nvim_create_autocmd("LspAttach", { group = group,
+	callback = function(args)
+		local client = l.get_client_by_id(args.data.client_id)
+		if client.server_capabilities.documentSymbolProvider then
+			require("nvim-navic").attach(client, args.buf)
+		end
+		map("n", "gD", "", { desc = "Go to declaration",
+			callback = function() l.buf.declaration() end }, 0)
+		map("n", "gd", "", { desc = "Go to definition",
+			callback = function() l.buf.definition() end }, 0)
+		map("n", "K", "", { desc = "Hover symbol",
+			callback = function() l.buf.hover() end }, 0)
+		map("n", "gi", "", { desc = "Go to implementation",
+			callback = function() l.buf.implementation() end }, 0)
+		map("n", "gk", "", { desc = "Hover signature help",
+			callback = function() l.buf.signature_help() end }, 0)
+		map("n", "<leader>wa", "", { desc = "Add workspave folder",
+			callback = function() l.buf.add_workspace_folder() end }, 0)
+		map("n", "<leader>wr", "", { desc = "Remove workspace folder",
+			callback = function() l.buf.remove_workspace_folder() end }, 0)
+		map("n", "<leader>wl", "", { desc = "List workspace folders",
+			callback = function() print(vim.inspect(l.buf.list_workspace_folders())) end }, 0)
+		map("n", "<leader>D", "", { desc = "Go to type definition",
+			callback = function() l.buf.type_definition() end }, 0)
+		map("n", "<leader>rn", "", { desc = "Rename symbol",
+			callback = function() l.buf.rename.float() end }, 0)
+		map("n", "<leader>ca", "", { desc = "Code action",
+			callback = function() l.buf.code_action() end }, 0)
+		map("v", "<leader>ca", "", { desc = "Code action",
+			callback = function() l.buf.range_code_action() end }, 0)
+		map("n", "gr", "<cmd>TroubleToggle lsp_references<CR>", { desc = "References", }, 0)
+		map("n", "<leader>e", "", { desc = "Hover diagnistics",
+			callback = function() d.open_float(0, { scope = 'line' }) end }, 0)
+		map("n", "gx", "", { desc = "Next diagnostic",
+			callback = function() d.goto_prev() end }, 0)
+		map("n", "gz", "", { desc = "Previous diagnostic",
+			callback = function() d.goto_next() end }, 0)
+		map("n", "<leader>q", "", { desc = "Setloclist",
+			callback = function() d.setloclist() end }, 0)
+		map("n", "<leader>f", "", { desc = "Format",
+			callback = function() l.buf.formatting() end }, 0)
+	end })
 
 require("packer").startup({ function(use)
+	use("wbthomason/packer.nvim")
 	use("lewis6991/impatient.nvim")
 	use("kyazdani42/nvim-web-devicons")
 	use({
@@ -722,7 +769,16 @@ require("packer").startup({ function(use)
 			})
 		end,
 	})
-	use("wbthomason/packer.nvim")
+	-- use({
+	-- 	"folke/noice.nvim",
+	-- 	event = "VimEnter",
+	-- 	requires = "MunifTanjim/nui.nvim",
+	-- 	config = function()
+	-- 		require("noice").setup({
+	-- 			cmdline = { view = "cmdline" }
+	-- 		})
+	-- 	end,
+	-- })
 	use({
 		"SmiteshP/nvim-navic",
 		event = { "CursorHold", "CursorMoved" },
@@ -803,51 +859,13 @@ require("packer").startup({ function(use)
 				end
 			}
 			d.config( { virtual_text = false, float = { show_header = false, border = "rounded" } })
-			local function on_attach(client, bufnr)
-				map("n", "gD", "", { desc = "Go to declaration",
-					callback = function() l.buf.declaration() end }, 0)
-				map("n", "gd", "", { desc = "Go to definition",
-					callback = function() l.buf.definition() end }, 0)
-				map("n", "K", "", { desc = "Hover symbol",
-					callback = function() l.buf.hover() end }, 0)
-				map("n", "gi", "", { desc = "Go to implementation",
-					callback = function() l.buf.implementation() end }, 0)
-				map("n", "gk", "", { desc = "Hover signature help",
-					callback = function() l.buf.signature_help() end }, 0)
-				map("n", "<leader>wa", "", { desc = "Add workspave folder",
-					callback = function() l.buf.add_workspace_folder() end }, 0)
-				map("n", "<leader>wr", "", { desc = "Remove workspace folder",
-					callback = function() l.buf.remove_workspace_folder() end }, 0)
-				map("n", "<leader>wl", "", { desc = "List workspace folders",
-					callback = function() print(vim.inspect(l.buf.list_workspace_folders())) end }, 0)
-				map("n", "<leader>D", "", { desc = "Go to type definition",
-					callback = function() l.buf.type_definition() end }, 0)
-				map("n", "<leader>rn", "", { desc = "Rename symbol",
-					callback = function() l.buf.rename.float() end }, 0)
-				map("n", "<leader>ca", "", { desc = "Code action",
-					callback = function() l.buf.code_action() end }, 0)
-				map("v", "<leader>ca", "", { desc = "Code action",
-					callback = function() l.buf.range_code_action() end }, 0)
-				map("n", "gr", "<cmd>TroubleToggle lsp_references<CR>", { desc = "References", }, 0)
-				map("n", "<leader>e", "", { desc = "Hover diagnistics",
-					callback = function() d.open_float(0, { scope = 'line' }) end }, 0)
-				map("n", "gx", "", { desc = "Next diagnostic",
-					callback = function() d.goto_prev() end }, 0)
-				map("n", "gz", "", { desc = "Previous diagnostic",
-					callback = function() d.goto_next() end }, 0)
-				map("n", "<leader>q", "", { desc = "Setloclist",
-					callback = function() d.setloclist() end }, 0)
-				map("n", "<leader>f", "", { desc = "Format",
-					callback = function() l.buf.formatting() end }, 0)
-				require("nvim-navic").attach(client, bufnr)
-			end
 			local lspconfig = require("lspconfig")
 			local capabilities = l.protocol.make_client_capabilities()
 			capabilities = require("cmp_nvim_lsp").update_capabilities(capabilities)
-			lspconfig.bashls.setup({ on_attach = on_attach, capabilities = capabilities })
-			lspconfig.pyright.setup({ on_attach = on_attach, capabilities = capabilities })
-			lspconfig.rust_analyzer.setup({ on_attach = on_attach, capabilities = capabilities })
-			lspconfig.sumneko_lua.setup({ on_attach = on_attach, capabilities = capabilities,
+			lspconfig.bashls.setup({ capabilities = capabilities })
+			lspconfig.pyright.setup({ capabilities = capabilities })
+			lspconfig.rust_analyzer.setup({ capabilities = capabilities })
+			lspconfig.sumneko_lua.setup({ capabilities = capabilities,
 				settings = {
 					Lua = {
 						runtime = { version = "LuaJIT" },
@@ -856,9 +874,9 @@ require("packer").startup({ function(use)
 					}
 				}
 			})
-			lspconfig.texlab.setup( { on_attach = on_attach, capabilities = capabilities })
+			lspconfig.texlab.setup( { capabilities = capabilities })
 			capabilities.offsetEncoding = { "utf-16" }
-			lspconfig.clangd.setup({ on_attach = on_attach, capabilities = capabilities })
+			lspconfig.clangd.setup({ capabilities = capabilities })
 			local win = require("lspconfig.ui.windows")
 			local _default_opts = win.default_opts
 			win.default_opts = function(options)
@@ -875,7 +893,6 @@ require("packer").startup({ function(use)
 			local ls = require("null-ls")
 			local sources = {
 				ls.builtins.formatting.shfmt,
-				ls.builtins.formatting.lua_format,
 				ls.builtins.diagnostics.shellcheck,
 				ls.builtins.diagnostics.vale.with({ args = '--config="$XDG_CONFIG_HOME/vale/vale.ini"' }),
 			}
