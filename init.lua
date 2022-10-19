@@ -35,6 +35,8 @@ o.relativenumber = true
 o.splitbelow = true
 o.splitright = true
 npc(function() o.splitkeep = "screen" end)
+npc(function() o.numbercolumn = "%=%{v:redraw_relnum?v:redraw_relnum:v:redraw_lnum}│" end)
+o.numberwidth = 1
 o.termguicolors = true
 o.timeoutlen = 400
 o.undofile = true
@@ -790,11 +792,11 @@ require("packer").startup({ function(use)
 		end,
 	})
 	use({
-		"folke/lua-dev.nvim",
+		"folke/neodev.nvim",
 		after = "nvim-navic",
-		config = function() require("lua-dev").setup() end
+		config = function() require("neodev").setup() end
 		})
-	use({ "hrsh7th/cmp-nvim-lsp", after = "lua-dev.nvim" })
+	use({ "hrsh7th/cmp-nvim-lsp", after = "neodev.nvim" })
 	use({
 		"neovim/nvim-lspconfig",
 		after = "cmp-nvim-lsp",
@@ -860,8 +862,7 @@ require("packer").startup({ function(use)
 			}
 			d.config( { virtual_text = false, float = { show_header = false, border = "rounded" } })
 			local lspconfig = require("lspconfig")
-			local capabilities = l.protocol.make_client_capabilities()
-			capabilities = require("cmp_nvim_lsp").update_capabilities(capabilities)
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 			lspconfig.bashls.setup({ capabilities = capabilities })
 			lspconfig.pyright.setup({ capabilities = capabilities })
 			lspconfig.rust_analyzer.setup({ capabilities = capabilities })
@@ -908,7 +909,7 @@ require("packer").startup({ function(use)
 		end
 	})
 	use({
-		"bellini666/trouble.nvim",
+		"folke/trouble.nvim",
 		after = "nvim-dd",
 		config = function()
 			require("trouble").setup({
