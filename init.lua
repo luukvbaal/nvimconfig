@@ -35,7 +35,6 @@ o.relativenumber = true
 o.splitbelow = true
 o.splitright = true
 npc(function() o.splitkeep = "screen" end)
-npc(function() o.numbercolumn = "%=%{v:redraw_relnum?v:redraw_relnum:v:redraw_lnum}│" end)
 o.numberwidth = 1
 o.termguicolors = true
 o.timeoutlen = 400
@@ -50,6 +49,13 @@ o.showmode = false
 o.confirm = true
 o.laststatus = 3
 o.pumheight = math.floor(o.lines / 2)
+o.foldmethod = "marker"
+o.foldcolumn = "auto"
+o.mousemodel = "extend"
+o.virtualedit = "all"
+o.cursorline = true
+o.cursorlineopt = "number"
+npc(function() o.statuscolumn = "%@ScFa@%C%T%@ScSa@%s%T%@ScLa@%{%ScLn()%}│%T" end)
 
 g.mapleader = " "
 g.maplocalleader = ","
@@ -759,6 +765,7 @@ require("packer").startup({ function(use)
 				auto_open = { setup = "explorer", tabpage = "explorer", empty = true },
 				auto_close = true,
 				offset = true,
+				quitcd = "tcd",
 				mappings = {
 					{ "<C-t>", nnn.builtin.open_in_tab },      -- open file(s) in tab
 					{ "<C-s>", nnn.builtin.open_in_split },    -- open file(s) in split
@@ -771,6 +778,11 @@ require("packer").startup({ function(use)
 			})
 		end,
 	})
+	use({
+		stat(home.."/dev/statuscol.nvim", "directory") and home.."/dev/statuscol.nvim" or "luukvbaal/statuscol.nvim",
+		config = function() require("statuscol").setup()
+		end
+	})
 	-- use({
 	-- 	"folke/noice.nvim",
 	-- 	event = "VimEnter",
@@ -781,9 +793,10 @@ require("packer").startup({ function(use)
 	-- 		})
 	-- 	end,
 	-- })
+	use({ "hrsh7th/cmp-nvim-lsp", event = { "CursorHold", "CursorMoved" } })
 	use({
 		"SmiteshP/nvim-navic",
-		event = { "CursorHold", "CursorMoved" },
+		after = "cmp-nvim-lsp",
 		config = function()
 			require("nvim-navic").setup({
 				separator = "  ",
@@ -796,10 +809,9 @@ require("packer").startup({ function(use)
 		after = "nvim-navic",
 		config = function() require("neodev").setup() end
 		})
-	use({ "hrsh7th/cmp-nvim-lsp", after = "neodev.nvim" })
 	use({
 		"neovim/nvim-lspconfig",
-		after = "cmp-nvim-lsp",
+		after = "neodev.nvim",
 		config = function()
 			f.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticError" })
 			f.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticHint" })
@@ -817,20 +829,21 @@ require("packer").startup({ function(use)
 						if not tc(allowed, tshl) then return end
 					else return end
 
-					local win = require('plenary.popup').create(currName, {
+					local buf = a.nvim_create_buf(false, true)
+					a.nvim_buf_set_lines(buf, 0, 1, false, { currName })
+					local win = a.nvim_open_win(buf, true, {
 						title = "New Name",
+						title_pos = "center",
 						style = "minimal",
-						borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
+						border = "rounded",
 						relative = "cursor",
-						borderhighlight = "FloatBorder",
-						titlehighlight = "Title",
-						highlight = tshl,
 						focusable = true,
 						width = 25,
 						height = 1,
-						line = "cursor+2",
-						col = "cursor-1"
+						row = 2,
+						col = 1
 					})
+					a.nvim_win_set_option(win, "winhighlight", "Normal:"..tshl)
 
 					local map_opts = { noremap = true, silent = true }
 					map("i", "<Esc>", "<cmd>stopinsert | q!<CR>", map_opts, 0)
