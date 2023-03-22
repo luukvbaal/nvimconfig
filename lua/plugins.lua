@@ -1,8 +1,10 @@
 _G.a   = vim.api
 _G.c   = vim.cmd
 _G.d   = vim.diagnostic
+_G.f   = vim.fn
 _G.g   = vim.g
 _G.l   = vim.lsp
+_G.o   = vim.o
 _G.O   = vim.opt
 _G.S   = vim.schedule
 _G.tc  = vim.tbl_contains
@@ -18,6 +20,7 @@ end)
 
 return {
 	{ "nvim-tree/nvim-web-devicons", lazy = false },
+	{ "nvim-neo-tree/neo-tree.nvim", lazy = false },
 	{ "feline-nvim/feline.nvim", lazy = false,
 		config = function()
 			local lsp = require("feline.providers.lsp")
@@ -199,45 +202,44 @@ return {
 			})
 		end
 	},
-	{ "akinsho/bufferline.nvim", lazy = false,
-		config = {
-			options = {
-				separator_style = "thin",
-				diagnostics = "nvim_lsp",
-				custom_filter = function(buf)
-					local ignored = { "dap-repl" }
-					return not tc(ignored, a.nvim_buf_get_option(buf, "filetype"))
-				end,
-			},
-			highlights = {
-				background = { fg = colors.grey_fg, bg = colors.black2 },
-				buffer_selected = { fg = colors.white, bg = colors.black, bold = true },
-				buffer_visible = { fg = colors.light_grey, bg = colors.black2 },
-				error = { fg = colors.light_grey, bg = colors.black2 },
-				error_diagnostic = { fg = colors.light_grey, bg = colors.black2 },
-				close_button = { fg = colors.light_grey, bg = colors.black2 },
-				close_button_visible = { fg = colors.light_grey, bg = colors.black2 },
-				close_button_selected = { fg = colors.red, bg = colors.black },
-				fill = { fg = colors.grey_fg, bg = colors.black2 },
-				indicator_selected = { fg = colors.black, bg = colors.black },
-				modified = { fg = colors.red, bg = colors.black2 },
-				modified_visible = { fg = colors.red, bg = colors.black2 },
-				modified_selected = { fg = colors.green, bg = colors.black },
-				separator = { fg = colors.black2, bg = colors.black2 },
-				separator_visible = { fg = colors.black2, bg = colors.black2 },
-				separator_selected = { fg = colors.black2, bg = colors.black2 },
-				tab = { fg = colors.light_grey, bg = colors.one_bg3 },
-				tab_selected = { fg = colors.black2, bg = colors.blue },
-				tab_close = { fg = colors.red, bg = colors.black },
-	} } },
+	{ "akinsho/bufferline.nvim", lazy = false, config = true, opts = {
+		options = {
+			separator_style = "thin",
+			diagnostics = "nvim_lsp",
+			custom_filter = function(buf)
+				local ignored = { "dap-repl" }
+				return not tc(ignored, a.nvim_buf_get_option(buf, "filetype"))
+			end,
+		},
+		highlights = {
+			background = { fg = colors.grey_fg, bg = colors.black2 },
+			buffer_selected = { fg = colors.white, bg = colors.black, bold = true },
+			buffer_visible = { fg = colors.light_grey, bg = colors.black2 },
+			error = { fg = colors.light_grey, bg = colors.black2 },
+			error_diagnostic = { fg = colors.light_grey, bg = colors.black2 },
+			close_button = { fg = colors.light_grey, bg = colors.black2 },
+			close_button_visible = { fg = colors.light_grey, bg = colors.black2 },
+			close_button_selected = { fg = colors.red, bg = colors.black },
+			fill = { fg = colors.grey_fg, bg = colors.black2 },
+			indicator_selected = { fg = colors.black, bg = colors.black },
+			modified = { fg = colors.red, bg = colors.black2 },
+			modified_visible = { fg = colors.red, bg = colors.black2 },
+			modified_selected = { fg = colors.green, bg = colors.black },
+			separator = { fg = colors.black2, bg = colors.black2 },
+			separator_visible = { fg = colors.black2, bg = colors.black2 },
+			separator_selected = { fg = colors.black2, bg = colors.black2 },
+			tab = { fg = colors.light_grey, bg = colors.one_bg3 },
+			tab_selected = { fg = colors.black2, bg = colors.blue },
+			tab_close = { fg = colors.red, bg = colors.black },
+	}}},
 		"nvim-lua/plenary.nvim", lazy = false,
-	{ "lewis6991/gitsigns.nvim", lazy = false, config = { trouble = true } },
+	{ "lewis6991/gitsigns.nvim", lazy = false, config = true, opts = { trouble = true } },
 	{ "nvim-treesitter/nvim-treesitter", lazy = false, build = ":TSUpdate",
 			config = function() require("nvim-treesitter.configs").setup({
 				highlight = { enable = true },
 				ensure_installed = "all"
 	}) end },
-	{ "lukas-reineke/indent-blankline.nvim", lazy = false, config = {
+	{ "lukas-reineke/indent-blankline.nvim", lazy = false, config = true, opts = {
 			char = "▏",
 			show_current_context = true,
 			show_trailing_blankline_indent = false,
@@ -245,11 +247,21 @@ return {
 			buftype_exclude = { "terminal" },
 			filetype_exclude = { "help", "terminal", "dashboard", "packer", "lspinfo", "TelescopePrompt", "TelescopeResults" }
 	} },
-	{ "norcalli/nvim-colorizer.lua", lazy = false,
-		config = { ["*"] = { names = false } }
-	},
-	{	"luukvbaal/statuscol.nvim", lazy = false,
-		config = { foldfunc = "builtin", separator = "│", relculright = true, setopt = true }
+	{ "NvChad/nvim-colorizer.lua", lazy = false, config = true, opts = { user_default_options = { names = false }}},
+	{	"luukvbaal/statuscol.nvim", lazy = false, config = function()
+			local builtin = require("statuscol.builtin")
+			require("statuscol").setup({
+				-- ft_ignore = { "neo-tree", "nnn" },
+				bt_ignore = { "terminal", "nofile" },
+				relculright = true,
+			  segments = {
+			    { sign = { name = { "Diagnostic" }, maxwidth = 2, auto = true }, click = "v:lua.ScSa" },
+			    { text = { builtin.lnumfunc }, click = "v:lua.ScLa", },
+			    { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
+			    { sign = { name = { ".*" }, maxwidth = 1, colwidth = 1, auto = true }, click = "v:lua.ScSa" },
+			  }
+			})
+		 end
 	},
 	{ "luukvbaal/nnn.nvim",
 		lazy = false,
@@ -280,17 +292,33 @@ return {
 			})
 		end,
 	},
-	-- { "folke/noice.nvim",
-	-- 	event = "CursorHold",
-	-- 	dependencies = { "MunifTanjim/nui.nvim" },
-	-- 	config = true,
-	-- },
+	{ "folke/noice.nvim",
+		event = "CursorHold",
+		dependencies = { "MunifTanjim/nui.nvim", { "smjonas/inc-rename.nvim", config = true } },
+		config = true,
+		opts = {
+			lsp = {
+				override = {
+					["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+					["vim.lsp.util.stylize_markdown"] = true,
+					["cmp.entry.get_documentation"] = true,
+				}
+			},
+			presets = {
+				bottom_search = true, -- use a classic bottom cmdline for search
+				command_palette = true, -- position the cmdline and popupmenu together
+				long_message_to_split = true, -- long messages will be sent to a split
+				inc_rename = true, -- enables an input dialog for inc-rename.nvim
+				lsp_doc_border = true, -- add a border to hover docs and signature help
+			}
+		}
+	},
 	{ "neovim/nvim-lspconfig", event = "BufReadPost",
 		dependencies = {
 			"hrsh7th/cmp-nvim-lsp",
-			{	"folke/neodev.nvim", ft = "lua", config = { library = { plugins = false, runtime = false } } },
-			{ "SmiteshP/nvim-navic", event = "CursorHold",
-				config = { separator = "  ", icons = { ["container-name"] = " " } }
+			{	"folke/neodev.nvim", ft = "lua", config = true, opts = { library = { plugins = false } } },
+			{ "SmiteshP/nvim-navic", event = "CursorHold", config = true,
+				opts = { separator = "  ", icons = { ["container-name"] = " " } }
 			},
 		},
 		config = function()
@@ -298,8 +326,6 @@ return {
 			f.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticHint" })
 			f.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticInfo" })
 			f.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticWarn" })
-			l.handlers["textDocument/hover"] = l.with(l.handlers.hover, { border = "rounded" })
-			l.handlers["textDocument/signatureHelp"] = l.with(l.handlers.signature_help, { border = "rounded" })
 			l.buf.rename = {
 				float = function()
 					local currName = f.expand("<cword>")
@@ -360,11 +386,14 @@ return {
 			lspconfig.bashls.setup({ capabilities = capabilities })
 			lspconfig.pyright.setup({ capabilities = capabilities })
 			lspconfig.rust_analyzer.setup({ capabilities = capabilities })
-			lspconfig.sumneko_lua.setup({ capabilities = capabilities,
+			lspconfig.lua_ls.setup({ capabilities = capabilities,
 				settings = {
 					Lua = {
 						runtime = { version = "LuaJIT" },
 						diagnostics = { disable = { "missing-parameter", "param-type-mismatch", "cast-local-type" }},
+						workspace = {
+							ignoreDir = { "test/", "!test/functional/helpers.lua", "!test/functional/ui/screen.lua" }
+						},
 						telemetry = { enable = false },
 					}
 				}
@@ -386,15 +415,14 @@ return {
 			local ls = require("null-ls")
 			local sources = {
 				ls.builtins.formatting.shfmt,
-				ls.builtins.diagnostics.shellcheck,
 				ls.builtins.diagnostics.vale.with({ args = '--config="$XDG_CONFIG_HOME/vale/vale.ini"' }),
 			}
 			ls.setup({ sources = sources })
 		end,
 	},
-	{	url = "https://gitlab.com/yorickpeterse/nvim-dd.git", name = "nvim-dd", event = "CursorHold", config = { timeout = 1 }},
-	{	"folke/trouble.nvim", event = "CursorHold",
-		config = {
+	{	url = "https://gitlab.com/yorickpeterse/nvim-dd.git", name = "nvim-dd", event = "CursorHold", config = true, opts = { timeout = 1 }},
+	{	"folke/trouble.nvim", event = "CursorHold", config = true,
+		opts = {
 			auto_open = true,
 			auto_close = true,
 			padding = false,
@@ -402,14 +430,8 @@ return {
 			track_cursor = true,
 		}
 	},
-	{	"ray-x/lsp_signature.nvim", event = "CursorHold", config = { doc_lines = 0, hint_enable = false } },
 	{ "j-hui/fidget.nvim", event = "CursorHold", config = true },
-	{	"rcarriga/nvim-notify", event = "CursorHold",
-		config = function()
-			require("notify").setup({ max_width = 40 })
-			vim.notify = require("notify")
-		end
-	},
+	{	"rcarriga/nvim-notify", event = "CursorHold", config = true, opts = { max_width = 40 } },
 	{ "hrsh7th/nvim-cmp", event = "CursorHold",
 		config = function()
 			local icons = {
@@ -529,7 +551,12 @@ return {
 					name = "Launch",
 					type = "lldb",
 					request = "launch",
-					program = function() return f.input("Path to executable: ", f.getcwd() .. "/", "file") end,
+					program = function()
+						return f.input({
+							prompt = "Path to executable: ",
+							default = f.getcwd() .. "/",
+							completion = "file"
+						}) end,
 					cwd = "${workspaceFolder}",
 					stopOnEntry = false,
 					args = {},
@@ -573,8 +600,8 @@ return {
 			f.sign_define("DapStopped", { text = "", texthl = "DiagnosticInfo", linehl = "", numhl = "" })
 		end
 	},
-	{	"rcarriga/nvim-dap-ui",
-		 config = {
+	{	"rcarriga/nvim-dap-ui", config = true,
+		 opts = {
 		 	layouts = {
 		 		{
 		 			elements = { "scopes", "breakpoints", "stacks", "watches" },
@@ -595,7 +622,8 @@ return {
 	{ "TimUntersberger/neogit",
 		cmd = "NeoGit",
 		dependencies = { "sindrets/diffview.nvim" },
-		config = {
+		config = true,
+		opts = {
 				disable_commit_confirmation = true,
 				signs = { section = { "", "" }, item = { "", "" } },
 				integrations = { diffview = true },
@@ -624,7 +652,7 @@ return {
 	},
 	{	"Pocco81/true-zen.nvim", cmd = "TZAtaraxis", config = true },
 	{ "vimwiki/vimwiki", cmd = "VimwikiIndex",
-		config = function() g.vimwiki_list = { { path = "~/vimwiki/", syntax = "markdown", ext = ".md" } } end
+		init = function() g.vimwiki_list = { { path = "~/vimwiki/", syntax = "markdown", ext = ".md" } } end
 	},
 	{	"michaelb/sniprun", build = "bash ./install.sh", cmd = { "SnipRun", "SnipInfo"} }
 }

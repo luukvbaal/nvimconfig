@@ -1,4 +1,4 @@
-_G.P   = vim.pretty_print
+_G.P = vim.print
 
 function _G.TroubleQuickFixPost(mode)
 	require("trouble.providers").get(a.nvim_get_current_win(),

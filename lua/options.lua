@@ -29,11 +29,12 @@ o.showmode = false
 o.confirm = true
 o.laststatus = 3
 o.pumheight = math.floor(o.lines / 2)
-o.foldcolumn = "auto"
+o.foldcolumn = "1"
 o.mousemodel = "extend"
 o.virtualedit = "all"
 o.cursorline = true
 o.cursorlineopt = "number"
+o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:"
 --o.statuscolumn = "%@ScFa@%C%T%@ScSa@%s%T%@ScLa@%=%{&nu?((v:relnum?v:relnum:v:lnum).'│'):''}%T"
 
 g.mapleader = " "
