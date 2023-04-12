@@ -1,6 +1,6 @@
 o.wrap = false
 o.list = true
-O.listchars = { tab = "  ", extends = "", precedes = "" }
+O.listchars = {tab = "  ", extends = "", precedes = ""}
 o.title = true
 o.clipboard = "unnamedplus"
 o.cmdheight = 0
@@ -35,7 +35,6 @@ o.virtualedit = "all"
 o.cursorline = true
 o.cursorlineopt = "number"
 o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:"
---o.statuscolumn = "%@ScFa@%C%T%@ScSa@%s%T%@ScLa@%=%{&nu?((v:relnum?v:relnum:v:lnum).'│'):''}%T"
 
 g.mapleader = " "
 g.maplocalleader = ","

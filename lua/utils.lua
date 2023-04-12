@@ -1,18 +1,18 @@
 _G.P = vim.print
 
 function _G.TroubleQuickFixPost(mode)
-	require("trouble.providers").get(a.nvim_get_current_win(),
-	a.nvim_get_current_buf(), function(items)
-		if #items > 0 then require("trouble").open({ mode = mode }) end
-	end, { mode = mode })
+  require("trouble.providers").get(a.nvim_get_current_win(),
+    a.nvim_get_current_buf(), function(items)
+      if #items > 0 then require("trouble").open({mode = mode}) end
+    end, {mode = mode})
 end
 
 function _G.vimgrepprompt()
-	local pattern = f.input("vimgrep pattern: ")
-	if pattern and pattern ~= "" then
-		local ok = npc(c.vimgrep("'/"..pattern.."/j %'"))
-		S(function() print(ok and " " or "No results") end)
-	end
+  local pattern = f.input("vimgrep pattern: ")
+  if pattern and pattern ~= "" then
+    local ok = npc(c.vimgrep("'/"..pattern.."/j %'"))
+    S(function() print(ok and " " or "No results") end)
+  end
 end
 
 local home = os.getenv("HOME")
