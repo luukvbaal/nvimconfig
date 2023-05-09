@@ -64,8 +64,6 @@ a.nvim_create_autocmd("LspAttach", {
     bmap("v", "<leader>ca", function() l.buf.range_code_action() end, {desc = "Code action"})
     bmap("n", "gr", "<cmd>TroubleToggle lsp_references<CR>", {desc = "References"})
     bmap("n", "<leader>e", function() d.open_float(0, {scope = "line"}) end, {desc = "Hover diagnistics"})
-    bmap("n", "gx", function() d.goto_prev() end, {desc = "Next diagnostic"})
-    bmap("n", "gz", function() d.goto_next() end, {desc = "Previous diagnostic"})
     bmap("n", "<leader>q", function() d.setloclist() end, {desc = "Setloclist"})
     bmap("n", "<leader>f", function() l.buf.formatting() end, {desc = "Format"})
   end,

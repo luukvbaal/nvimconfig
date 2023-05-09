@@ -213,7 +213,7 @@ return {
     init = function() vim.g.barbar_auto_setup = false end,
   },
   {"nvim-lua/plenary.nvim",       lazy = false},
-  {"lewis6991/gitsigns.nvim",     lazy = false, config = true, opts = {trouble = true}},
+  {"lewis6991/gitsigns.nvim",     lazy = false, config = true, opts = {trouble = true, _extmark_signs = false}},
   {
     "nvim-treesitter/nvim-treesitter",
     lazy = false,
@@ -225,8 +225,8 @@ return {
       })
     end,
   },
-  {"nvim-treesitter/nvim-treesitter-context",     event = "CursorHold", config = true},
-  {"nvim-treesitter/nvim-treesitter-textobjects", event = "CursorHold", main = "nvim-treesitter.configs", config = true},
+  {"nvim-treesitter/nvim-treesitter-context",     event = "VeryLazy", config = true},
+  {"nvim-treesitter/nvim-treesitter-textobjects", event = "VeryLazy", main = "nvim-treesitter.configs", config = true},
   {
     "lukas-reineke/indent-blankline.nvim",
     lazy = false,
@@ -257,9 +257,9 @@ return {
           },
           {text = {builtin.lnumfunc}, click = "v:lua.ScLa"},
           {
-            sign = {name = {".*"}, maxwidth = 2, colwidth = 1, auto = true},
+            sign = {name = {".*"}, maxwidth = 2, colwidth = 1, wrap = true, auto = true},
             click = "v:lua.ScSa"
-          },
+          }, {text = {"│"}}
         },
       })
     end,
@@ -296,7 +296,7 @@ return {
   },
   {
     "folke/noice.nvim",
-    event = "CursorHold",
+    event = "VeryLazy",
     dependencies = {"MunifTanjim/nui.nvim", {"smjonas/inc-rename.nvim", config = true}},
     config = true,
     opts = {
@@ -316,7 +316,7 @@ return {
       },
     },
   },
-  {"folke/todo-comments.nvim",     event = "CursorHold", config = true},
+  {"folke/todo-comments.nvim",     event = "VeryLazy", config = true},
   {
     "neovim/nvim-lspconfig",
     event = "BufReadPost",
@@ -325,7 +325,7 @@ return {
       {"folke/neodev.nvim", ft = "lua", config = true, opts = {library = {plugins = false}}},
       {
         "SmiteshP/nvim-navic",
-        event = "CursorHold",
+        event = "VeryLazy",
         config = true,
         opts = {separator = "  ", icons = {["container-name"] = " "}},
       },
@@ -402,10 +402,17 @@ return {
         settings = {
           Lua = {
             runtime = {version = "LuaJIT"},
-            diagnostics = {disable = {"missing-parameter", "param-type-mismatch", "cast-local-type"}},
+            diagnostics = {
+              disable = {"missing-parameter", "param-type-mismatch", "cast-local-type"},
+              globals = {"vim"}
+            },
             workspace = {
               ignoreDir = {"test/", "!test/functional/helpers.lua", "!test/functional/ui/screen.lua"},
-              checkThirdParty = true,
+              library = {
+                vim.api.nvim_get_runtime_file("", true),
+                "/usr/lib/lua-language-server/meta/3rd/busted/library"
+              },
+              checkThirdParty = false,
             },
             telemetry = {enable = false},
           },
@@ -425,7 +432,7 @@ return {
   },
   {
     "jose-elias-alvarez/null-ls.nvim",
-    event = "CursorHold",
+    event = "VeryLazy",
     config = function()
       local ls = require("null-ls")
       local sources = {
@@ -438,14 +445,14 @@ return {
   {
     url = "https://gitlab.com/yorickpeterse/nvim-dd.git",
     name = "nvim-dd",
-    event = "CursorHold",
+    event = "VeryLazy",
     config = true,
     opts = {
       timeout = 1},
   },
   {
     "folke/trouble.nvim",
-    event = "CursorHold",
+    event = "VeryLazy",
     config = true,
     opts = {
       auto_open = true,
@@ -455,16 +462,10 @@ return {
       track_cursor = true,
     },
   },
-  {"j-hui/fidget.nvim",          event = "CursorHold", config = true},
-  {
-    "rcarriga/nvim-notify",
-    event = "CursorHold",
-    config = false,
-    opts = {max_width = 60, render = "compact", stages = "static"},
-  },
+  {"j-hui/fidget.nvim",          event = "VeryLazy", config = true},
   {
     "hrsh7th/nvim-cmp",
-    event = "CursorHold",
+    event = "VeryLazy",
     config = function()
       local icons = {
         Text = "",
@@ -563,25 +564,25 @@ return {
   },
   {
     "L3MON4D3/LuaSnip",
-    event = "CursorHold",
+    event = "VeryLazy",
     dependencies = {"rafamadriz/friendly-snippets"},
     config = function()
       require("luasnip").config.set_config({history = true, updateevents = "TextChanged,TextChangedI"})
       require("luasnip/loaders/from_vscode").lazy_load()
     end,
   },
-  {"saadparwaiz1/cmp_luasnip",   event = "CursorHold"},
-  {"hrsh7th/cmp-nvim-lua",       event = "CursorHold"},
-  {"hrsh7th/cmp-cmdline",        event = "CursorHold"},
-  {"hrsh7th/cmp-buffer",         event = "CursorHold"},
-  {"hrsh7th/cmp-path",           event = "CursorHold"},
-  {"kdheepak/cmp-latex-symbols", event = "CursorHold"},
-  {"windwp/nvim-autopairs",      event = "CursorHold", config = true},
-  {"kylechui/nvim-surround",     event = "CursorHold", config = true},
-  {"numToStr/Comment.nvim",      event = "CursorHold", config = true},
+  {"saadparwaiz1/cmp_luasnip",   event = "VeryLazy"},
+  {"hrsh7th/cmp-nvim-lua",       event = "VeryLazy"},
+  {"hrsh7th/cmp-cmdline",        event = "VeryLazy"},
+  {"hrsh7th/cmp-buffer",         event = "VeryLazy"},
+  {"hrsh7th/cmp-path",           event = "VeryLazy"},
+  {"kdheepak/cmp-latex-symbols", event = "VeryLazy"},
+  {"windwp/nvim-autopairs",      event = "VeryLazy", config = true},
+  {"kylechui/nvim-surround",     event = "VeryLazy", config = true},
+  {"numToStr/Comment.nvim",      event = "VeryLazy", config = true},
   {
     "folke/which-key.nvim",
-    event = "CursorHold",
+    event = "VeryLazy",
     config = function()
       local wk = require("which-key")
       wk.setup({icons = {separator = "➡"}})
