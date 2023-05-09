@@ -1,4 +1,4 @@
-o.wrap = false
+o.smoothscroll = true
 o.list = true
 O.listchars = {tab = "  ", extends = "", precedes = ""}
 o.title = true
@@ -14,13 +14,12 @@ o.number = true
 o.relativenumber = true
 o.splitbelow = true
 o.splitright = true
-npc(function() o.splitkeep = "screen" end)
+o.splitkeep = "screen"
 o.numberwidth = 1
 o.termguicolors = true
 o.timeoutlen = 400
 o.undofile = true
 o.updatetime = 250
-o.spell = true
 o.spelloptions = "camel"
 o.shell = "/bin/sh"
 o.signcolumn = "auto:2"
@@ -35,6 +34,7 @@ o.virtualedit = "all"
 o.cursorline = true
 o.cursorlineopt = "number"
 o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:"
+S(function() o.spell = true end)
 
 g.mapleader = " "
 g.maplocalleader = ","

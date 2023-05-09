@@ -35,9 +35,11 @@ align_call_args = false
 align_function_params = true
 align_continuous_assign_statement = true
 align_continuous_rect_table_field = true
+align_continuous_line_space = 2
 align_if_branch = false
 align_array_table = true
 align_continuous_inline_comment = true
+align_chain_expr = none
 # [indent]
 never_indent_before_if_condition = false
 never_indent_comment_on_if_branch = false

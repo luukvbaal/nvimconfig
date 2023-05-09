@@ -26,7 +26,7 @@ return {
     config = function()
       local lsp = require("feline.providers.lsp")
       local lsp_severity = d.severity
-      local icons = {left = "", right = " ", main = "  ", vi_mode = " ", position = " "}
+      local icons = {left = "", right = " ", main = "󰀘 ", vi_mode = " ", position = " "}
       local components = {active = {{}, {}, {}}, inactive = {{}, {}, {}}}
       components.active[1][1] = {
         provider = icons.main,
@@ -50,7 +50,7 @@ return {
         },
       }
       components.active[1][3] = {
-        provider = function() return "  "..f.fnamemodify(f.getcwd(), ":t").." " end,
+        provider = function() return " 󰉖 "..f.fnamemodify(f.getcwd(), ":t").." " end,
         enabled = function() return a.nvim_win_get_width(0) > 80 end,
         hl = {fg = colors.grey_fg, bg = colors.lightbg2},
         right_sep = {
@@ -82,13 +82,13 @@ return {
         provider = "diagnostic_hints",
         enabled = function() return lsp.diagnostics_exist(lsp_severity.HINT) end,
         hl = {fg = colors.grey_fg},
-        icon = "  ",
+        icon = " 󰌶 ",
       }
       components.active[1][8] = {
         provider = "diagnostic_info",
         enabled = function() return lsp.diagnostics_exist(lsp_severity.INFO) end,
         hl = {fg = colors.green},
-        icon = "  ",
+        icon = "  ",
       }
       components.active[3][1] = {
         provider = function()
@@ -188,9 +188,9 @@ return {
         provider = function()
           local current_line = f.line(".")
           if current_line == 1 then
-            return " ﬢﬢ"
+            return " 󰘣󰘣"
           elseif current_line == f.line("$") then
-            return "ﬠﬠﬠ"
+            return "󰘡󰘡󰘡"
           end
           local result, _ = math.modf((current_line / f.line("$")) * 100)
           return " "..result.."%%"
@@ -221,7 +221,7 @@ return {
     config = function()
       require("nvim-treesitter.configs").setup({
         highlight = {enable = true},
-        ensure_installed = "all"
+        ensure_installed = "all",
       })
     end,
   },
@@ -240,7 +240,7 @@ return {
       filetype_exclude = {"help", "terminal", "dashboard", "packer", "lspinfo", "TelescopePrompt", "TelescopeResults"},
     },
   },
-  {"lewis6991/nvim-colorizer.lua", lazy = false,         config = true, opts = {"*"}},
+  {"lewis6991/nvim-colorizer.lua", lazy = false,       config = true, opts = {"*"}},
   {
     "luukvbaal/statuscol.nvim",
     lazy = false,
@@ -252,14 +252,15 @@ return {
         segments = {
           {text = {builtin.foldfunc}, click = "v:lua.ScFa"},
           {
-            sign = {name = {"Diagnostic"}, maxwidth = 2, auto = true},
-            click = "v:lua.ScSa"
+            sign = {name = {"Diagnostic"}, maxwidth = 2, colwidth = 2, auto = true},
+            click = "v:lua.ScSa",
           },
           {text = {builtin.lnumfunc}, click = "v:lua.ScLa"},
           {
             sign = {name = {".*"}, maxwidth = 2, colwidth = 1, wrap = true, auto = true},
-            click = "v:lua.ScSa"
-          }, {text = {"│"}}
+            click = "v:lua.ScSa",
+          },
+          {text = {"│"}},
         },
       })
     end,
@@ -327,12 +328,12 @@ return {
         "SmiteshP/nvim-navic",
         event = "VeryLazy",
         config = true,
-        opts = {separator = "  ", icons = {["container-name"] = " "}},
+        opts = {separator = "  ", icons = {["container-name"] = "󰅩 "}},
       },
     },
     config = function()
-      f.sign_define("DiagnosticSignError", {text = "", texthl = "DiagnosticError"})
-      f.sign_define("DiagnosticSignHint", {text = "", texthl = "DiagnosticHint"})
+      f.sign_define("DiagnosticSignError", {text = "󰅙", texthl = "DiagnosticError"})
+      f.sign_define("DiagnosticSignHint", {text = "󰌵", texthl = "DiagnosticHint"})
       f.sign_define("DiagnosticSignInfo", {text = "", texthl = "DiagnosticInfo"})
       f.sign_define("DiagnosticSignWarn", {text = "", texthl = "DiagnosticWarn"})
       l.buf.rename = {
@@ -404,13 +405,13 @@ return {
             runtime = {version = "LuaJIT"},
             diagnostics = {
               disable = {"missing-parameter", "param-type-mismatch", "cast-local-type"},
-              globals = {"vim"}
+              globals = {"vim"},
             },
             workspace = {
               ignoreDir = {"test/", "!test/functional/helpers.lua", "!test/functional/ui/screen.lua"},
               library = {
                 vim.api.nvim_get_runtime_file("", true),
-                "/usr/lib/lua-language-server/meta/3rd/busted/library"
+                "/usr/lib/lua-language-server/meta/3rd/busted/library",
               },
               checkThirdParty = false,
             },
@@ -447,8 +448,7 @@ return {
     name = "nvim-dd",
     event = "VeryLazy",
     config = true,
-    opts = {
-      timeout = 1},
+    opts = {timeout = 1},
   },
   {
     "folke/trouble.nvim",
@@ -458,7 +458,7 @@ return {
       auto_open = true,
       auto_close = true,
       padding = false,
-      signs = {error = "", warning = "", hint = "", information = "", other = ""},
+      signs = {error = "󰅙", warning = "", hint = "󰌵", information = "", other = ""},
       track_cursor = true,
     },
   },
@@ -468,30 +468,30 @@ return {
     event = "VeryLazy",
     config = function()
       local icons = {
-        Text = "",
-        Method = "",
-        Function = "",
+        Text = "󰉿",
+        Method = "󰆧",
+        Function = "󰊕",
         Constructor = "",
-        Field = "ﰠ",
-        Variable = "",
-        Class = "ﴯ",
+        Field = "󰜢",
+        Variable = "󰀫",
+        Class = "󰠱",
         Interface = "",
         Module = "",
-        Property = "ﰠ",
-        Unit = "塞",
-        Value = "",
+        Property = "󰜢",
+        Unit = "󰑭",
+        Value = "󰎠",
         Enum = "",
-        Keyword = "",
+        Keyword = "󰌋",
         Snippet = "",
-        Color = "",
-        File = "",
-        Reference = "",
-        Folder = "",
+        Color = "󰏘",
+        File = "󰈙",
+        Reference = "󰈇",
+        Folder = "󰉋",
         EnumMember = "",
-        Constant = "",
-        Struct = "פּ",
+        Constant = "󰏿",
+        Struct = "󰙅",
         Event = "",
-        Operator = "",
+        Operator = "󰆕",
         TypeParameter = "",
       }
       local cmp = require("cmp")
@@ -606,7 +606,7 @@ return {
       dap.adapters.lldb = {
         type = "executable",
         command = "/usr/bin/lldb-vscode",
-        name = "lldb"
+        name = "lldb",
       }
       dap.configurations.c = {
         {
@@ -617,7 +617,7 @@ return {
             return f.input({
               prompt = "Path to executable: ",
               default = f.getcwd().."/",
-              completion = "file"
+              completion = "file",
             })
           end,
           cwd = "${workspaceFolder}",
@@ -639,7 +639,7 @@ return {
           auto_close = true,
           padding = false,
           height = 5,
-          signs = {error = "", warning = "", hint = "", information = "", other = ""},
+          signs = {error = "󰅙", warning = "", hint = "󰌵", information = "", other = ""},
           track_cursor = true,
         })
         dapui.open()
@@ -650,7 +650,7 @@ return {
           auto_close = true,
           padding = false,
           height = 5,
-          signs = {error = "", warning = "", hint = "", information = "", other = ""},
+          signs = {error = "󰅙", warning = "", hint = "󰌵", information = "", other = ""},
           track_cursor = true,
         })
         dapui.close()
@@ -659,7 +659,7 @@ return {
       f.sign_define("DapBreakpoint", {text = "", texthl = "DiagnosticError", linehl = "", numhl = ""})
       f.sign_define("DapBreakpointCondition", {text = "", texthl = "DiagnosticError", linehl = "", numhl = ""})
       f.sign_define("DapBreakpointRejected", {text = "", texthl = "DiagnosticError", linehl = "", numhl = ""})
-      f.sign_define("DapLogPoint", {text = "", texthl = "DiagnosticHint", linehl = "", numhl = ""})
+      f.sign_define("DapLogPoint", {text = "󰌑", texthl = "DiagnosticHint", linehl = "", numhl = ""})
       f.sign_define("DapStopped", {text = "", texthl = "DiagnosticInfo", linehl = "", numhl = ""})
     end,
   },
@@ -671,12 +671,12 @@ return {
         {
           elements = {"scopes", "breakpoints", "stacks", "watches"},
           size = 40,
-          position = "left"
+          position = "left",
         },
         {
           elements = {"repl", "console"},
           size = 10,
-          position = "bottom"
+          position = "bottom",
         },},
     },
   },

@@ -49,8 +49,9 @@ a.nvim_create_autocmd("LspAttach", {
       opts.buffer = 0
       map(mode, lhs, rhs, opts)
     end
-    bmap("n", "gD", function() l.buf.declaration() end, {desc = "Go to declaration"})
-    bmap("n", "gd", function() l.buf.definition() end, {desc = "Go to definition"})
+    bmap("n", "gd", "<cmd>TroubleToggle lsp_definitions<CR>", {desc = "Definitions"})
+    bmap("n", "gD", "<cmd>TroubleToggle lsp_implementations<CR>", {desc = "Implementations"})
+    bmap("n", "gr", "<cmd>TroubleToggle lsp_references<CR>", {desc = "References"})
     bmap("n", "K", function() l.buf.hover() end, {desc = "Hover symbol"})
     bmap("n", "gi", function() l.buf.implementation() end, {desc = "Go to implementation"})
     bmap("n", "gk", function() l.buf.signature_help() end, {desc = "Hover signature help"})
@@ -62,7 +63,6 @@ a.nvim_create_autocmd("LspAttach", {
     bmap("n", "<leader>rn", function() l.buf.rename.float() end, {desc = "Rename symbol"})
     bmap("n", "<leader>ca", function() l.buf.code_action() end, {desc = "Code action"})
     bmap("v", "<leader>ca", function() l.buf.range_code_action() end, {desc = "Code action"})
-    bmap("n", "gr", "<cmd>TroubleToggle lsp_references<CR>", {desc = "References"})
     bmap("n", "<leader>e", function() d.open_float(0, {scope = "line"}) end, {desc = "Hover diagnistics"})
     bmap("n", "<leader>q", function() d.setloclist() end, {desc = "Setloclist"})
     bmap("n", "<leader>f", function() l.buf.formatting() end, {desc = "Format"})

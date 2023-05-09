@@ -123,13 +123,16 @@ hl(0, "Typedef", {fg = colors.yellow})
 
 -- Diff highlighting
 hl(0, "DiffAdd", {fg = colors.green, bg = colors.lightbg})
+hl(0, "@text.diff.add.diff", {link = "DiffAdd"})
 hl(0, "DiffChange", {fg = colors.one_bg3, bg = colors.lightbg})
 hl(0, "DiffDelete", {fg = colors.pink, bg = colors.lightbg})
+hl(0, "@text.diff.delete", {link = "DiffDelete"})
 hl(0, "DiffText", {fg = colors.blue, bg = colors.lightbg})
 hl(0, "DiffAdded", {fg = colors.green, bg = colors.black})
 hl(0, "DiffFile", {fg = colors.pink, bg = colors.black})
 hl(0, "DiffNewFile", {fg = colors.green, bg = colors.black})
 hl(0, "DiffLine", {fg = colors.blue, bg = colors.black})
+hl(0, "@attribute", {link = "DiffLine"})
 hl(0, "DiffRemoved", {fg = colors.pink, bg = colors.black})
 
 -- Git highlighting
