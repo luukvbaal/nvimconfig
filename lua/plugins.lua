@@ -101,7 +101,7 @@ return {
         hl = {fg = colors.dark_purple, bg = colors.black2},
       }
       components.active[3][2] = {
-        provider = function() return l.get_active_clients() and "  LSP" or "" end,
+        provider = function() return l.get_clients() and "  LSP" or "" end,
         enabled = function() return a.nvim_win_get_width(0) > 70 end,
         hl = {fg = colors.grey_fg, bg = colors.black2},
       }
@@ -213,7 +213,7 @@ return {
     init = function() vim.g.barbar_auto_setup = false end,
   },
   {"nvim-lua/plenary.nvim",       lazy = false},
-  {"lewis6991/gitsigns.nvim",     lazy = false, config = true, opts = {trouble = true, _extmark_signs = false}},
+  {"lewis6991/gitsigns.nvim",     lazy = false, config = true, opts = {trouble = true}},
   {
     "nvim-treesitter/nvim-treesitter",
     lazy = false,
@@ -230,14 +230,14 @@ return {
   {
     "lukas-reineke/indent-blankline.nvim",
     lazy = false,
+    main = "ibl",
     config = true,
     opts = {
-      char = "▏",
-      show_current_context = true,
-      show_trailing_blankline_indent = false,
-      show_first_indent_level = false,
-      buftype_exclude = {"terminal"},
-      filetype_exclude = {"help", "terminal", "dashboard", "packer", "lspinfo", "TelescopePrompt", "TelescopeResults"},
+      indent = {char = "▏"},
+      exclude = {
+        buftypes = {"terminal"},
+        filetypes = {"help", "terminal", "dashboard", "lspinfo", "TelescopePrompt", "TelescopeResults", "noice", "lazy"},
+      }
     },
   },
   {"lewis6991/nvim-colorizer.lua", lazy = false,       config = true, opts = {"*"}},
@@ -252,15 +252,15 @@ return {
         segments = {
           {text = {builtin.foldfunc}, click = "v:lua.ScFa"},
           {
-            sign = {name = {"Diagnostic"}, maxwidth = 2, colwidth = 2, auto = true},
-            click = "v:lua.ScSa",
+            sign = {name = {"Diagnostic"}, maxwidth = 2, colwidth = 1, auto = true},
+            click = "v:lua.ScSa"
           },
           {text = {builtin.lnumfunc}, click = "v:lua.ScLa"},
           {
-            sign = {name = {".*"}, maxwidth = 2, colwidth = 1, wrap = true, auto = true},
+            sign = {name = {".*"}, namespace = {".*"}, maxwidth = 2, colwidth = 1, wrap = true, auto = true},
             click = "v:lua.ScSa",
           },
-          {text = {"│"}},
+          {text = {"│"}, condition = {builtin.not_empty}},
         },
       })
     end,
@@ -275,8 +275,8 @@ return {
     config = function()
       local nnn = require("nnn")
       nnn.setup({
-        explorer = {cmd = "nnn -Go", session = "shared", side = "topleft", tabs = true},
-        picker = {cmd = "tmux new-session nnn -GPp", style = {border = "rounded"}},
+        explorer = {cmd = "nnn -GoH", session = "shared", side = "topleft"},
+        picker = {cmd = "tmux new-session nnn -GPp", style = {border = "rounded"}, tabs =false},
         replace_netrw = "explorer",
         windownav = {left = "<C-h>", right = "<C-l>"},
         auto_open = {setup = "explorer", tabpage = "explorer", empty = true},
@@ -323,7 +323,6 @@ return {
     event = "BufReadPost",
     dependencies = {
       "hrsh7th/cmp-nvim-lsp",
-      {"folke/neodev.nvim", ft = "lua", config = true, opts = {library = {plugins = false}}},
       {
         "SmiteshP/nvim-navic",
         event = "VeryLazy",
@@ -349,6 +348,7 @@ return {
           end
 
           local buf = a.nvim_create_buf(false, true)
+          --- @diagnostic disable-next-line:assign-type-mismatch
           a.nvim_buf_set_lines(buf, 0, 1, false, {currName})
           local win = a.nvim_open_win(buf, true, {
             title = "New Name",
@@ -362,7 +362,7 @@ return {
             row = 2,
             col = 1,
           })
-          a.nvim_win_set_option(win, "winhighlight", "Normal:"..tshl)
+          a.nvim_set_option_value("winhighlight", "Normal:"..tshl, {win = win})
 
           local map_opts = {noremap = true, silent = true, buffer = 0}
           map("i", "<Esc>", "<cmd>stopinsert | q!<CR>", map_opts)
@@ -462,7 +462,7 @@ return {
       track_cursor = true,
     },
   },
-  {"j-hui/fidget.nvim",          event = "VeryLazy", config = true},
+  {"j-hui/fidget.nvim", branch = "legacy",         event = "VeryLazy", config = true},
   {
     "hrsh7th/nvim-cmp",
     event = "VeryLazy",
@@ -685,12 +685,29 @@ return {
     "lervag/vimtex",
     cmd = "VimtexInverseSearch",
     ft = "tex",
-    config = function() g.vimtex_view_method = "zathura" end,
+    config = function()
+      g.vimtex_view_method = "zathura"
+      g.vimtex_compiler_latexmk = {
+         aux_dir = '',
+         out_dir = '',
+         callback = 1,
+         continuous = 1,
+         executable = 'latexmk',
+         hooks = {},
+         options = {
+           "-verbose",
+           "-file-line-error",
+           "-synctex=1",
+           "-interaction=nonstopmode",
+           "-lualatex",
+         },
+        }
+    end,
   },
   {
     "TimUntersberger/neogit",
     cmd = "NeoGit",
-    dependencies = {"sindrets/diffview.nvim"},
+    dependencies = {"sindrets/diffview.nvim", cmd = { "DiffviewFileHistory" }},
     config = true,
     opts = {
       disable_commit_confirmation = true,

@@ -1,4 +1,6 @@
 o.smoothscroll = true
+o.breakindent = true
+o.linebreak = true
 o.list = true
 O.listchars = {tab = "  ", extends = "", precedes = ""}
 o.title = true
@@ -28,8 +30,9 @@ o.showmode = false
 o.confirm = true
 o.laststatus = 3
 o.pumheight = math.floor(o.lines / 2)
-o.foldcolumn = "1"
+o.foldcolumn = "auto"
 o.mousemodel = "extend"
+o.mousescroll = "ver:1"
 o.virtualedit = "all"
 o.cursorline = true
 o.cursorlineopt = "number"
