@@ -230,15 +230,18 @@ return {
   {
     "lukas-reineke/indent-blankline.nvim",
     lazy = false,
-    main = "ibl",
-    config = true,
-    opts = {
-      indent = {char = "▏"},
-      exclude = {
-        buftypes = {"terminal"},
-        filetypes = {"help", "terminal", "dashboard", "lspinfo", "TelescopePrompt", "TelescopeResults", "noice", "lazy"},
-      }
-    },
+    config = function()
+      local hooks = require("ibl.hooks")
+      require("ibl").setup({
+        indent = {char = "▏"},
+        scope = {enabled = false},
+        exclude = {
+          buftypes = {"terminal"},
+          filetypes = {"help", "terminal", "dashboard", "lspinfo", "TelescopePrompt", "TelescopeResults", "noice", "lazy"},
+        }
+      })
+      hooks.register(hooks.type.WHITESPACE, hooks.builtin.hide_first_space_indent_level)
+    end,
   },
   {"lewis6991/nvim-colorizer.lua", lazy = false,       config = true, opts = {"*"}},
   {
