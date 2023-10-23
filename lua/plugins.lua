@@ -338,63 +338,63 @@ return {
       f.sign_define("DiagnosticSignHint", {text = "󰌵", texthl = "DiagnosticHint"})
       f.sign_define("DiagnosticSignInfo", {text = "", texthl = "DiagnosticInfo"})
       f.sign_define("DiagnosticSignWarn", {text = "", texthl = "DiagnosticWarn"})
-      l.buf.rename = {
-        float = function()
-          local currName = f.expand("<cword>")
-          local tshl = vim.treesitter.get_captures_at_cursor(0)
-          if tshl and #tshl > 0 then
-            tshl = "@"..tshl[#tshl]
-            local allowed = {"@variable", "@function.builtin", "@function.call", "@function", "@field", "@property"}
-            if not tc(allowed, tshl) then return end
-          else
-            return
-          end
-
-          local buf = a.nvim_create_buf(false, true)
-          --- @diagnostic disable-next-line:assign-type-mismatch
-          a.nvim_buf_set_lines(buf, 0, 1, false, {currName})
-          local win = a.nvim_open_win(buf, true, {
-            title = "New Name",
-            title_pos = "center",
-            style = "minimal",
-            border = "rounded",
-            relative = "cursor",
-            focusable = true,
-            width = 25,
-            height = 1,
-            row = 2,
-            col = 1,
-          })
-          a.nvim_set_option_value("winhighlight", "Normal:"..tshl, {win = win})
-
-          local map_opts = {noremap = true, silent = true, buffer = 0}
-          map("i", "<Esc>", "<cmd>stopinsert | q!<CR>", map_opts)
-          map("n", "<Esc>", "<cmd>stopinsert | q!<CR>", map_opts)
-          map("i", "<CR>", "<cmd>stopinsert | lua l.buf.rename.apply('"..currName.."',"..win..")<CR>", map_opts)
-          map("n", "<CR>", "<cmd>stopinsert | lua l.buf.rename.apply('"..currName.."',"..win..")<CR>", map_opts)
-        end,
-        apply = function(curr, win)
-          local newName = vim.trim(f.getline("."))
-          a.nvim_win_close(tonumber(win), true)
-          if #newName > 0 and newName ~= curr then
-            local params = l.util.make_position_params()
-            params.newName = newName
-            l.buf_request(0, "textDocument/rename", params, function(err, res, ctx)
-              if err then vim.notify(("Error running lsp query 'rename': "..err), vim.log.levels.ERROR) end
-              if res and res.changes then
-                local msg = ""
-                for file, change in pairs(res.changes) do
-                  local new = change[1].newText
-                  msg = msg..("%d changes -> %s"):format(#change, file:gsub("file://", ""):gsub(f.getcwd(), ".")).."\n"
-                  msg = msg:sub(1, #msg - 1)
-                  vim.notify(msg, vim.log.levels.INFO, {title = ("Rename: %s -> %s"):format(f.expand("<cword>"), new)})
-                end
-              end
-              l.util.apply_workspace_edit(res, l.get_client_by_id(ctx.client_id).offset_encoding)
-            end)
-          end
-        end,
-      }
+      -- l.buf.rename = {
+      --   float = function()
+      --     local currName = f.expand("<cword>")
+      --     local tshl = vim.treesitter.get_captures_at_cursor(0)
+      --     if tshl and #tshl > 0 then
+      --       tshl = "@"..tshl[#tshl]
+      --       local allowed = {"@variable", "@function.builtin", "@function.call", "@function", "@field", "@property"}
+      --       if not tc(allowed, tshl) then return end
+      --     else
+      --       return
+      --     end
+      --
+      --     local buf = a.nvim_create_buf(false, true)
+      --     --- @diagnostic disable-next-line:assign-type-mismatch
+      --     a.nvim_buf_set_lines(buf, 0, 1, false, {currName})
+      --     local win = a.nvim_open_win(buf, true, {
+      --       title = "New Name",
+      --       title_pos = "center",
+      --       style = "minimal",
+      --       border = "rounded",
+      --       relative = "cursor",
+      --       focusable = true,
+      --       width = 25,
+      --       height = 1,
+      --       row = 2,
+      --       col = 1,
+      --     })
+      --     a.nvim_set_option_value("winhighlight", "Normal:"..tshl, {win = win})
+      --
+      --     local map_opts = {noremap = true, silent = true, buffer = 0}
+      --     map("i", "<Esc>", "<cmd>stopinsert | q!<CR>", map_opts)
+      --     map("n", "<Esc>", "<cmd>stopinsert | q!<CR>", map_opts)
+      --     map("i", "<CR>", "<cmd>stopinsert | lua l.buf.rename.apply('"..currName.."',"..win..")<CR>", map_opts)
+      --     map("n", "<CR>", "<cmd>stopinsert | lua l.buf.rename.apply('"..currName.."',"..win..")<CR>", map_opts)
+      --   end,
+      --   apply = function(curr, win)
+      --     local newName = vim.trim(f.getline("."))
+      --     a.nvim_win_close(tonumber(win), true)
+      --     if #newName > 0 and newName ~= curr then
+      --       local params = l.util.make_position_params()
+      --       params.newName = newName
+      --       l.buf_request(0, "textDocument/rename", params, function(err, res, ctx)
+      --         if err then vim.notify(("Error running lsp query 'rename': "..err), vim.log.levels.ERROR) end
+      --         if res and res.changes then
+      --           local msg = ""
+      --           for file, change in pairs(res.changes) do
+      --             local new = change[1].newText
+      --             msg = msg..("%d changes -> %s"):format(#change, file:gsub("file://", ""):gsub(f.getcwd(), ".")).."\n"
+      --             msg = msg:sub(1, #msg - 1)
+      --             vim.notify(msg, vim.log.levels.INFO, {title = ("Rename: %s -> %s"):format(f.expand("<cword>"), new)})
+      --           end
+      --         end
+      --         l.util.apply_workspace_edit(res, l.get_client_by_id(ctx.client_id).offset_encoding)
+      --       end)
+      --     end
+      --   end,
+      -- }
       d.config({virtual_text = false, float = {show_header = false, border = "rounded"}})
       local lspconfig = require("lspconfig")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()

@@ -60,7 +60,7 @@ a.nvim_create_autocmd("LspAttach", {
     bmap("n", "<leader>wl", function() print(vim.inspect(l.buf.list_workspace_folders())) end,
       {desc = "List workspace folders"})
     bmap("n", "<leader>D", function() l.buf.type_definition() end, {desc = "Go to type definition"})
-    bmap("n", "<leader>rn", function() l.buf.rename.float() end, {desc = "Rename symbol"})
+    bmap("n", "<leader>rn", ":IncRename ", {desc = "Rename symbol"})
     bmap("n", "<leader>ca", function() l.buf.code_action() end, {desc = "Code action"})
     bmap("v", "<leader>ca", function() l.buf.range_code_action() end, {desc = "Code action"})
     bmap("n", "<leader>e", function() d.open_float(0, {scope = "line"}) end, {desc = "Hover diagnistics"})
